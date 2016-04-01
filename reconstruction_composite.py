@@ -3,7 +3,7 @@
 ## Reconstruction script that implements math algorithm of B0 mass reconstruction
 #  Uses the composite model for fitting signal and background events simultaneously
 #  Usage: python reconstruction_composite.py -i [INPUT_FILENAME] [-n [MAX_EVENTS]] [-f] [-v]
-#  See python reconstruction_composite.py --help for more details
+#  Run python reconstruction_composite.py --help for more details
 
 import sys
 import os

@@ -2,7 +2,7 @@
 
 ## Script that merges multiple ROOT files containing data suitable for reconstruction algorithm into one file
 #  Usage: python merger.py -i [INPUT_FILENAME_1] [NUMBER_OF_EVENTS_1] -i [INPUT_FILENAME_2] [NUMBER_OF_EVENTS_2] ... [-o [OUTPUT_FILENAME=merged.root]]
-#  See python merger.py --help for more details
+#  Run python merger.py --help for more details
 
 import sys
 import os
