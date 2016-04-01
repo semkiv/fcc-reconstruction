@@ -1,8 +1,4 @@
 #!/usr/bin/env python
-#
-# Andrii Semkiv
-# 30.03.2016
-#
 
 import sys
 import os
