@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+## Reconstruction script that implements math algorithm of B0 mass reconstruction
+#  Uses different models for fitting signal and background events
+#  Usage: python reconstruction.py -i [INPUT_FILENAME] [-n [MAX_EVENTS]] [-B] [-f] [-v]
+
 import sys
 import os
 import argparse
@@ -24,18 +28,19 @@ from ROOT import RooDataSet
 from ROOT import RooCBShape
 from ROOT import RooGaussian
 
+# few constants
 NBINS = 100 # Number of bins in the histogram
 XMIN = 4.5 # Left bound of the histogram
 XMAX = 6.5 # Right bound of the histogram
 PEAK_MIN = 4.7 # Minimum value of the peak
 PEAK_MAX = 5.5 # Maximum value of the peak
 
-def process(file_name, max_events, n_bins, x_min, x_max, fit, background, peak_x_min, peak_x_max, verbose):
-    # Masses of the particles
-    m_pi = 0.13957018
-    m_K = 0.493677
-    m_tau = 1.77684
+# Masses of the particles
+m_pi = 0.13957018
+m_K = 0.493677
+m_tau = 1.77684
 
+def process(file_name, max_events, n_bins, x_min, x_max, fit, background, peak_x_min, peak_x_max, verbose):
     start_time = time.time()
     last_timestamp = time.time()
 
@@ -354,7 +359,7 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, background, peak_x
 
 def main(argv):
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--ifile', required = True, help = 'name of the file to process')
+    parser.add_argument('-i', '--input-file', required = True, help = 'name of the file to process')
     parser.add_argument('-n', '--nevents', type = int, help = 'maximum number of events to process')
     parser.add_argument('-f', '--fit', action = 'store_true', help = 'fit the histogram')
     parser.add_argument('-B', '--background', action = 'store_true', help = 'use fit model for background events')
@@ -363,7 +368,7 @@ def main(argv):
     args = parser.parse_args()
     max_events = args.nevents if args.nevents else None
 
-    process(args.ifile, max_events, NBINS, XMIN, XMAX, args.fit, args.background, PEAK_MIN, PEAK_MAX, args.verbose)
+    process(args.input_file, max_events, NBINS, XMIN, XMAX, args.fit, args.background, PEAK_MIN, PEAK_MAX, args.verbose)
 
 if __name__ == '__main__':
     main(sys.argv)

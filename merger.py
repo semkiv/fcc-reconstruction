@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+## Script that merges multiple ROOT files containing data suitable for reconstruction algorithm into one file
+#  Usage: python merger.py -i [INPUT_FILENAME_1] [NUMBER_OF_EVENTS_1] -i [INPUT_FILENAME_2] [NUMBER_OF_EVENTS_2] ... [-o [OUTPUT_FILENAME=merged.root]]
+
 import sys
 import os
 import argparse
