@@ -2,7 +2,8 @@
 
 ## Reconstruction script that implements math algorithm of B0 mass reconstruction
 #  Uses the composite model for fitting signal and background events simultaneously
-#  Usage: python reconstruction.py -i [INPUT_FILENAME] [-n [MAX_EVENTS]] [-B] [-f] [-v]
+#  Usage: python reconstruction_composite.py -i [INPUT_FILENAME] [-n [MAX_EVENTS]] [-f] [-v]
+#  See python reconstruction_composite.py --help for more details
 
 import sys
 import os
@@ -12,6 +13,8 @@ import time
 import numpy
 
 import ROOT
+ROOT.PyConfig.IgnoreCommandLineOptions = True # to prevent TApplication from capturing command line options and breaking argparse
+
 from ROOT import gROOT
 from ROOT import gStyle
 from ROOT import TFile

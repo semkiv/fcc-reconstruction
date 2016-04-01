@@ -2,11 +2,15 @@
 
 ## Script that merges multiple ROOT files containing data suitable for reconstruction algorithm into one file
 #  Usage: python merger.py -i [INPUT_FILENAME_1] [NUMBER_OF_EVENTS_1] -i [INPUT_FILENAME_2] [NUMBER_OF_EVENTS_2] ... [-o [OUTPUT_FILENAME=merged.root]]
+#  See python merger.py --help for more details
 
 import sys
 import os
 import argparse
 from array import array
+
+import ROOT
+ROOT.PyConfig.IgnoreCommandLineOptions = True # to prevent TApplication from capturing command line options and breaking argparse
 
 from ROOT import TFile
 from ROOT import TTree
@@ -146,7 +150,7 @@ def merge(files_and_numbers, output_file_name, verbose):
 
 def main(argv):
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input-file', nargs = 2, action = 'append', required = True, help = 'input file name followed by number of events for that file')
+    parser.add_argument('-i', '--input-file', nargs = 2, action = 'append', required = True, metavar = 'INPUT_FILE NUMBER_OF_EVENTS', help = 'input file name followed by number of events for that file')
     parser.add_argument('-o', '--output-file', type = str, default = 'merged.root', help = 'output file name')
     parser.add_argument('-v', '--verbose', action = 'store_true', default = False, help = 'run with increased verbosity')
 

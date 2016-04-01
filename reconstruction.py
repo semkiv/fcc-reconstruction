@@ -2,7 +2,8 @@
 
 ## Reconstruction script that implements math algorithm of B0 mass reconstruction
 #  Uses different models for fitting signal and background events
-#  Usage: python reconstruction.py -i [INPUT_FILENAME] [-n [MAX_EVENTS]] [-B] [-f] [-v]
+#  Usage: python reconstruction.py -i [INPUT_FILENAME] [-n [MAX_EVENTS]] [-b] [-f] [-v]
+#  See python reconstruction.py --help for more details
 
 import sys
 import os
@@ -12,6 +13,8 @@ import time
 import numpy
 
 import ROOT
+ROOT.PyConfig.IgnoreCommandLineOptions = True # to prevent TApplication from capturing command line options and breaking argparse
+
 from ROOT import gROOT
 from ROOT import gStyle
 from ROOT import TFile
@@ -362,7 +365,7 @@ def main(argv):
     parser.add_argument('-i', '--input-file', required = True, help = 'name of the file to process')
     parser.add_argument('-n', '--nevents', type = int, help = 'maximum number of events to process')
     parser.add_argument('-f', '--fit', action = 'store_true', help = 'fit the histogram')
-    parser.add_argument('-B', '--background', action = 'store_true', help = 'use fit model for background events')
+    parser.add_argument('-b', '--background', action = 'store_true', help = 'use fit model for background events')
     parser.add_argument('-v', '--verbose', action = 'store_true', help = 'run with increased verbosity')
 
     args = parser.parse_args()
