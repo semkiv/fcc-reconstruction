@@ -9,7 +9,7 @@ from ROOT import TFile
 from ROOT import TTree
 
 def merge(files_and_numbers, output_file_name, verbose):
-    output_file = TFile(os.path.abspath(output_file_name), 'recreate')
+    output_file = TFile(output_file_name, 'recreate')
     output_tree = TTree('Events', 'Events')
 
     # booking vars that the data from input files to be read in. Arrays are used due to some internal ROOT structure
@@ -77,9 +77,8 @@ def merge(files_and_numbers, output_file_name, verbose):
 
     # iterating through files
     for f, n in files_and_numbers.iteritems():
-        filepath = os.path.abspath(f)
-        print('Processing file {}'.format(filepath))
-        input_file = TFile(filepath, 'read')
+        print('Processing file {}'.format(os.path.abs(f)))
+        input_file = TFile(f, 'read')
         input_tree = input_file.Get('Events')
 
         # iterating through events

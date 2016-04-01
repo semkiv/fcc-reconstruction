@@ -7,6 +7,7 @@
 import sys
 import os
 import argparse
+import time
 
 import numpy
 
@@ -39,9 +40,11 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, background, peak_x
     m_K = 0.493677
     m_tau = 1.77684
 
+    start_time = time.time()
+    last_timestamp = time.time()
+
     # Nice looking plots
-    stylepath = 'lhcbstyle.C'
-    gROOT.ProcessLine('.x ' + stylepath)
+    gROOT.ProcessLine('.x ' + os.environ.get('FCC') + 'lhcbstyle.C')
     gStyle.SetOptStat(0)
 
     # Opening the file and getting the branch
@@ -65,7 +68,8 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, background, peak_x
         if max_events == None or counter < max_events:
             processed_events += 1
             if (counter + 1) % 100 == 0: # print status message every 100 events
-                print('Processing event {}'.format(counter + 1))
+                print('Processing event {} ({} events / s)'.format(counter + 1, 100. / (time.time() - last_timestamp)))
+                last_timestamp = time.time()
 
             # Reading data necessary for reconstruction
             p_pi1_tauplus_x = event.pi1_tauplus_px
@@ -346,7 +350,8 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, background, peak_x
 
     # printing some useful statistics
     print('{} events have been processed'.format(processed_events))
-    print 'Reconstruction efficiency: {} / {} = {}'.format(reconstructable_events, processed_events, float(reconstructable_events) / processed_events)
+    print('Elapsed time: {} ({} events / s)'.format(time.time() - start_time, float(processed_events) / (time.time() - start_time)))
+    print('Reconstruction efficiency: {} / {} = {}'.format(reconstructable_events, processed_events, float(reconstructable_events) / processed_events))
 
     raw_input('Press ENTER when finished')
 
