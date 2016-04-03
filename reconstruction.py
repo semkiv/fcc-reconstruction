@@ -354,7 +354,7 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
 
     # printing some useful statistics
     print('{} events have been processed'.format(processed_events))
-    print('Elapsed time: {:.1f} ({:.1f} events / s)'.format(time.time() - start_time, float(processed_events) / (time.time() - start_time)))
+    print('Elapsed time: {:.1f} s ({:.1f} events / s)'.format(time.time() - start_time, float(processed_events) / (time.time() - start_time)))
     print('Reconstruction efficiency: {} / {} = {:.3f}'.format(reconstructable_events, processed_events, float(reconstructable_events) / processed_events))
 
     raw_input('Press ENTER when finished')
@@ -363,7 +363,7 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
 def main(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input-file', required = True, help = 'name of the file to process')
-    parser.add_argument('-t', '--tree', type = str, default = 'Events' help = 'name of the tree to process')
+    parser.add_argument('-t', '--tree', type = str, default = 'Events', help = 'name of the tree to process')
     parser.add_argument('-n', '--nevents', type = int, help = 'maximum number of events to process')
     parser.add_argument('-f', '--fit', action = 'store_true', help = 'fit the histogram')
     parser.add_argument('-b', '--background', action = 'store_true', help = 'use fit model for background events')
