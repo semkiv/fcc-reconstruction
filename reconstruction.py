@@ -2,7 +2,7 @@
 
 ## Reconstruction script that implements math algorithm of B0 mass reconstruction
 #  Uses different models for fitting signal and background events
-#  Usage: python reconstruction.py -i [INPUT_FILENAME] [-n [MAX_EVENTS]] [-b] [-f] [-v]
+#  Usage: python reconstruction.py -i [INPUT_FILENAME] [-t [TREE_NAME]] [-n [MAX_EVENTS]] [-b] [-f] [-v]
 #  Run python reconstruction.py --help for more details
 
 import sys
@@ -43,7 +43,7 @@ m_pi = 0.13957018
 m_K = 0.493677
 m_tau = 1.77684
 
-def process(file_name, max_events, n_bins, x_min, x_max, fit, background, peak_x_min, peak_x_max, verbose):
+def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, background, peak_x_min, peak_x_max, verbose):
     start_time = time.time()
     last_timestamp = time.time()
 
@@ -53,7 +53,7 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, background, peak_x
 
     # Opening the file and getting the branch
     input_file = TFile(file_name, 'read')
-    input_tree = input_file.Get('Events')
+    input_tree = input_file.Get(tree_name)
 
     # Event countes
     processed_events = 0 # Number of processed events
@@ -72,7 +72,7 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, background, peak_x
         if max_events == None or counter < max_events:
             processed_events += 1
             if (counter + 1) % 100 == 0: # print status message every 100 events
-                print('Processing event {} ({} events / s)'.format(counter + 1, 100. / (time.time() - last_timestamp)))
+                print('Processing event {} ({:.1f} events / s)'.format(counter + 1, 100. / (time.time() - last_timestamp)))
                 last_timestamp = time.time()
 
             # Reading data necessary for reconstruction
@@ -354,8 +354,8 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, background, peak_x
 
     # printing some useful statistics
     print('{} events have been processed'.format(processed_events))
-    print('Elapsed time: {} ({} events / s)'.format(time.time() - start_time, float(processed_events) / (time.time() - start_time)))
-    print('Reconstruction efficiency: {} / {} = {}'.format(reconstructable_events, processed_events, float(reconstructable_events) / processed_events))
+    print('Elapsed time: {:.1f} ({:.1f} events / s)'.format(time.time() - start_time, float(processed_events) / (time.time() - start_time)))
+    print('Reconstruction efficiency: {} / {} = {:.3f}'.format(reconstructable_events, processed_events, float(reconstructable_events) / processed_events))
 
     raw_input('Press ENTER when finished')
 
@@ -363,6 +363,7 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, background, peak_x
 def main(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input-file', required = True, help = 'name of the file to process')
+    parser.add_argument('-t', '--tree', type = str, default = 'Events' help = 'name of the tree to process')
     parser.add_argument('-n', '--nevents', type = int, help = 'maximum number of events to process')
     parser.add_argument('-f', '--fit', action = 'store_true', help = 'fit the histogram')
     parser.add_argument('-b', '--background', action = 'store_true', help = 'use fit model for background events')
@@ -371,7 +372,7 @@ def main(argv):
     args = parser.parse_args()
     max_events = args.nevents if args.nevents else None
 
-    process(args.input_file, max_events, NBINS, XMIN, XMAX, args.fit, args.background, PEAK_MIN, PEAK_MAX, args.verbose)
+    process(args.input_file, args.tree, max_events, NBINS, XMIN, XMAX, args.fit, args.background, PEAK_MIN, PEAK_MAX, args.verbose)
 
 if __name__ == '__main__':
     main(sys.argv)
