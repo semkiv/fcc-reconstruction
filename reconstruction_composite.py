@@ -74,7 +74,7 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
         if max_events == None or counter < max_events:
             processed_events += 1
             if (counter + 1) % 100 == 0: # print status message every 100 events
-                print('Processing event {} ({} events / s)'.format(counter + 1, 100. / (time.time() - last_timestamp)))
+                print('Processing event {:.1f} ({:.1f} events / s)'.format(counter + 1, 100. / (time.time() - last_timestamp)))
                 last_timestamp = time.time()
 
             # Reading data necessary for reconstruction
@@ -287,6 +287,9 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
         width_wide_gauss = RooRealVar('width_wide_gauss', '#sigma_{wide}', 0.167)
         alpha_signal = RooRealVar('alpha_signal', '#alpha_{signal}', -0.218)
         n_signal = RooRealVar('n_signal', 'n_{signal}', 1.826)
+        # width_wide_gauss = RooRealVar('width_wide_gauss', '#sigma_{wide}', 0.161)
+        # alpha_signal = RooRealVar('alpha_signal', '#alpha_{signal}', -0.1)
+        # n_signal = RooRealVar('n_signal', 'n_{signal}', 7.366)
 
         narrow_gauss = RooGaussian('narrow_gauss', 'Narrow Gaussian part of signal', b_mass, mean_signal, width_signal)
         wide_gauss = RooGaussian('wide_gauss', 'Wide Gaussian part of signal', b_mass, mean_signal, width_wide_gauss)
@@ -294,6 +297,8 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
 
         narrow_gauss_fraction = RooRealVar('narrow_gauss_fraction', 'Fraction of narrow Gaussian in signal', 0.109)
         signal_cb_fraction = RooRealVar('signal_cb_fraction', 'Fraction of CB in signal', 0.512)
+        # narrow_gauss_fraction = RooRealVar('narrow_gauss_fraction', 'Fraction of narrow Gaussian in signal', 0.298)
+        # signal_cb_fraction = RooRealVar('signal_cb_fraction', 'Fraction of CB in signal', 0.328)
 
         signal_model = RooAddPdf('signal_model', 'Signal model', RooArgList(narrow_gauss, signal_cb, wide_gauss), RooArgList(narrow_gauss_fraction, signal_cb_fraction))
 
@@ -303,11 +308,17 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
         width_bs_cb = RooRealVar('width_bs_cb', '#sigma_{Bs CB}', 0.149)
         alpha_bs = RooRealVar('alpha_bs', '#alpha_{Bs}', -0.643)
         n_bs = RooRealVar('n_bs', 'n_{Bs}', 5.020)
+        mean_bs = RooRealVar('mean_bs', '#mu_{Bd}', 4.959)
+        width_bs_gauss = RooRealVar('width_bs_gauss', '#sigma_{Bs Gauss}', 0.1)
+        width_bs_cb = RooRealVar('width_bs_cb', '#sigma_{Bs CB}', 0.08)
+        alpha_bs = RooRealVar('alpha_bs', '#alpha_{Bs}', -1.049)
+        n_bs = RooRealVar('n_bs', 'n_{Bs}', 2.019)
 
         bs_gauss = RooGaussian('bs_gauss', 'Bs Gaussian', b_mass, mean_bs, width_bs_gauss)
         bs_cb = RooCBShape('bs_cb', 'Bs CB', b_mass, mean_bs, width_bs_cb, alpha_bs, n_bs)
 
         bs_gauss_fraction = RooRealVar('bs_gauss_fraction', 'Fraction of Gaussian in Bs background', 0.286)
+        # bs_gauss_fraction = RooRealVar('bs_gauss_fraction', 'Fraction of Gaussian in Bs background', 0.01)
 
         bs_model = RooAddPdf('bs_model', 'Bs background model', RooArgList(bs_gauss, bs_cb), RooArgList(bs_gauss_fraction))
 
@@ -317,11 +328,17 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
         width_bd_cb = RooRealVar('width_bd_cb', '#sigma_{Bd CB}', 0.168)
         alpha_bd = RooRealVar('alpha_bd', '#alpha_{Bd}', -0.885)
         n_bd = RooRealVar('n_bd', 'n_{Bd}', 3.852)
+        # mean_bd = RooRealVar('mean_bd', '#mu_{Bd}', 4.947)
+        # width_bd_gauss = RooRealVar('width_bd_gauss', '#sigma_{Bd Gauss}', 0.214)
+        # width_bd_cb = RooRealVar('width_bd_cb', '#sigma_{Bd CB}', 0.219)
+        # alpha_bd = RooRealVar('alpha_bd', '#alpha_{Bd}', -2.005)
+        # n_bd = RooRealVar('n_bd', 'n_{Bd}', 0.1)
 
         bd_gauss = RooGaussian('bd_gauss', 'Bd Gaussian', b_mass, mean_bd, width_bd_gauss)
         bd_cb = RooCBShape('bd_cb', 'Bd CB', b_mass, mean_bd, width_bd_cb, alpha_bd, n_bd)
 
         bd_gauss_fraction = RooRealVar('bd_gauss_fraction', 'Fraction of Gaussian in Bd background', 0.011)
+        # bd_gauss_fraction = RooRealVar('bd_gauss_fraction', 'Fraction of Gaussian in Bd background', 0.638)
 
         bd_model = RooAddPdf('bd_model', 'Bd background model', RooArgList(bd_gauss, bd_cb), RooArgList(bd_gauss_fraction))
 
@@ -376,8 +393,8 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
 
     # printing some useful statistics
     print('{} events have been processed'.format(processed_events))
-    print('Elapsed time: {} ({} events / s)'.format(time.time() - start_time, float(processed_events) / (time.time() - start_time)))
-    print('Reconstruction efficiency: {} / {} = {}'.format(reconstructable_events, processed_events, float(reconstructable_events) / processed_events))
+    print('Elapsed time: {:.1f} ({:.1f} events / s)'.format(time.time() - start_time, float(processed_events) / (time.time() - start_time)))
+    print('Reconstruction efficiency: {} / {} = {:.3f}'.format(reconstructable_events, processed_events, float(reconstructable_events) / processed_events))
 
     raw_input('Press ENTER when finished')
 

@@ -84,7 +84,7 @@ def merge(files_and_numbers, output_file_name, verbose):
 
     # iterating through files
     for f, n in files_and_numbers.iteritems():
-        print('Processing file {}'.format(os.path.abs(f)))
+        print('Processing file {}'.format(os.path.abspath(f)))
         input_file = TFile(f, 'read')
         input_tree = input_file.Get('Events')
 

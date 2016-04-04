@@ -281,8 +281,8 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
 
             # defining parameters
             mean = RooRealVar('mean', '#mu', 5.279, peak_x_min, peak_x_max)
-            width_right_cb = RooRealVar('width_right_cb', '#sigma_{right CB}', 0.04, 0.01, 1.)
-            width_gauss = RooRealVar('width_gauss', '#sigma_{Gauss}', 0.03, 0.01, 1.)
+            width_right_cb = RooRealVar('width_right_cb', '#sigma_{right CB}', 0.06, 0.02, 1.)
+            width_gauss = RooRealVar('width_gauss', '#sigma_{Gauss}', 0.06, 0.02, 1.)
             alpha_right_cb = RooRealVar('alpha_right_cb', '#alpha_{right CB}', -1, -10., -0.1)
             n_right_cb = RooRealVar('n_right_cb', 'n_{right CB}', 2., 0.1, 10.)
 
