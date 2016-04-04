@@ -284,7 +284,7 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
             width_right_cb = RooRealVar('width_right_cb', '#sigma_{right CB}', 0.06, 0.02, 1.)
             width_gauss = RooRealVar('width_gauss', '#sigma_{Gauss}', 0.06, 0.02, 1.)
             alpha_right_cb = RooRealVar('alpha_right_cb', '#alpha_{right CB}', -1, -10., -0.1)
-            n_right_cb = RooRealVar('n_right_cb', 'n_{right CB}', 2., 0.1, 10.)
+            n_right_cb = RooRealVar('n_right_cb', 'n_{right CB}', 5., 0., 10.)
 
             cb_right = RooCBShape('cb_right','Right CB', b_mass, mean, width_right_cb, alpha_right_cb, n_right_cb)
             gauss = RooGaussian('gauss', 'Gauss', b_mass, mean, width_gauss)
