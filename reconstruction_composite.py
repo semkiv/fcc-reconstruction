@@ -302,13 +302,13 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
 
         signal_model = RooAddPdf('signal_model', 'Signal model', RooArgList(narrow_gauss, signal_cb, wide_gauss), RooArgList(narrow_gauss_fraction, signal_cb_fraction))
 
-        # Bs background model: Gaussian + Crystal Ball shape
-        mean_bs = RooRealVar('mean_bs', '#mu_{Bd}', 4.970)
+        # Bs (Dstaunu) background model: Gaussian + Crystal Ball shape
+        mean_bs = RooRealVar('mean_bs', '#mu_{Bs}', 4.970)
         width_bs_gauss = RooRealVar('width_bs_gauss', '#sigma_{Bs Gauss}', 0.196)
         width_bs_cb = RooRealVar('width_bs_cb', '#sigma_{Bs CB}', 0.078)
         alpha_bs = RooRealVar('alpha_bs', '#alpha_{Bs}', -0.746)
         n_bs = RooRealVar('n_bs', 'n_{Bs}', 1.983)
-        # mean_bs = RooRealVar('mean_bs', '#mu_{Bd}', 4.967)
+        # mean_bs = RooRealVar('mean_bs', '#mu_{Bs}', 4.967)
         # width_bs_gauss = RooRealVar('width_bs_gauss', '#sigma_{Bs Gauss}', 0.191)
         # width_bs_cb = RooRealVar('width_bs_cb', '#sigma_{Bs CB}', 0.068)
         # alpha_bs = RooRealVar('alpha_bs', '#alpha_{Bs}', -1.073)
@@ -321,6 +321,26 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
         # bs_gauss_fraction = RooRealVar('bs_gauss_fraction', 'Fraction of Gaussian in Bs background', 0.228)
 
         bs_model = RooAddPdf('bs_model', 'Bs background model', RooArgList(bs_gauss, bs_cb), RooArgList(bs_gauss_fraction))
+
+        # # Bs (Ds2pipipipi) background model: Gaussian + Crystal Ball shape
+        # mean_bs_2 = RooRealVar('mean_bs_2', '#mu_{Bs}', 5.003)
+        # width_bs_2_gauss = RooRealVar('width_bs_2_gauss', '#sigma_{Bs 2 Gauss}', 0.051)
+        # width_bs_2_cb = RooRealVar('width_bs_2_cb', '#sigma_{Bs 2 CB}', 0.181)
+        # alpha_bs_2 = RooRealVar('alpha_bs_2', '#alpha_{Bs 2}', -0.5)
+        # n_bs_2 = RooRealVar('n_bs', 'n_{Bs}', 1.)
+        # # mean_bs_2 = RooRealVar('mean_bs_2', '#mu_{Bs 2}', 4.992)
+        # # width_bs_2_gauss = RooRealVar('width_bs_2_gauss', '#sigma_{Bs 2 Gauss}', 0.091)
+        # # width_bs_2_cb = RooRealVar('width_bs_2_cb', '#sigma_{Bs 2 CB}', 0.188)
+        # # alpha_bs_2 = RooRealVar('alpha_bs 2', '#alpha_{Bs 2}', -0.5)
+        # # n_bs_2 = RooRealVar('n_bs_2', 'n_{Bs 2}', 1.)
+        #
+        # bs_2_gauss = RooGaussian('bs_2_gauss', 'Bs 2 Gaussian', b_mass, mean_bs_2, width_bs_2_gauss)
+        # bs_2_cb = RooCBShape('bs_2_cb', 'Bs 2 CB', b_mass, mean_bs_2, width_bs_2_cb, alpha_bs_2, n_bs_2)
+        #
+        # bs_2_gauss_fraction = RooRealVar('bs_2_gauss_fraction', 'Fraction of Gaussian in Bs 2 background', 0.02)
+        # # bs_2_gauss_fraction = RooRealVar('bs_2_gauss_fraction', 'Fraction of Gaussian in Bs 2 background', 0.132)
+        #
+        # bs_2_model = RooAddPdf('bs_2_model', 'Bs 2 background model', RooArgList(bs_2_gauss, bs_cb), RooArgList(bs_2_gauss_fraction))
 
         # Bd background model: Gaussian + Crystal Ball shape
         mean_bd = RooRealVar('mean_bd', '#mu_{Bd}', 4.894)
@@ -344,13 +364,15 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
 
         signal_yield = RooRealVar('signal_yield', 'Yield of signal', reconstructable_events / 3., 0, reconstructable_events)
         bs_yield = RooRealVar('bs_yield', 'Yield of Bs background', reconstructable_events / 3., 0, reconstructable_events)
+        bs_2_yield = RooRealVar('bs_2_yield', 'Yield of Bs 2 background', reconstructable_events / 3., 0, reconstructable_events)
         bd_yield = RooRealVar('bd_yield', 'Yield of Bd background', reconstructable_events / 3., 0, reconstructable_events)
 
         # composite model
-        model = RooAddPdf('model', 'Model to fit', RooArgList(signal_model, bs_model, bd_model), RooArgList(signal_yield, bs_yield, bd_yield))
+        model = RooAddPdf('model', 'Model to fit', RooArgList(signal_model, bs_model, bs_2_model, bd_model), RooArgList(signal_yield, bs_yield, bs_2_yield, bd_yield))
 
         model.fitTo(data, RooFit.Extended(True))
         model.plotOn(plot_frame, RooFit.Components('bs_model'), RooFit.LineColor(2), RooFit.LineStyle(ROOT.kDashed))
+        model.plotOn(plot_frame, RooFit.Components('bs_2_model'), RooFit.LineColor(4), RooFit.LineStyle(ROOT.kDashed))
         model.plotOn(plot_frame, RooFit.Components('bd_model'), RooFit.LineColor(6), RooFit.LineStyle(ROOT.kDashed))
         model.plotOn(plot_frame, RooFit.Components('signal_model'), RooFit.LineColor(3), RooFit.LineStyle(ROOT.kDashed))
         model.plotOn(plot_frame)

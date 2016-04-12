@@ -258,6 +258,8 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
                     b_mass.setVal(m_B)
                     data.add(RooArgSet(b_mass))
 
+    end_time = time.time()
+
     # creating canvas the plots to be drawn in
     canvas_m_B = TCanvas('mB_canvas', 'Reconstructed B0 mass distribution', 640, 640 if fit else 480)
     canvas_m_B.cd()
@@ -281,10 +283,10 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
 
             # defining parameters
             mean = RooRealVar('mean', '#mu', 5.279, peak_x_min, peak_x_max)
-            width_right_cb = RooRealVar('width_right_cb', '#sigma_{right CB}', 0.06, 0.02, 1.)
-            width_gauss = RooRealVar('width_gauss', '#sigma_{Gauss}', 0.06, 0.02, 1.)
-            alpha_right_cb = RooRealVar('alpha_right_cb', '#alpha_{right CB}', -1, -10., -0.1)
-            n_right_cb = RooRealVar('n_right_cb', 'n_{right CB}', 5., 0., 10.)
+            width_right_cb = RooRealVar('width_right_cb', '#sigma_{right CB}', 0.2, 0.02, 1.)
+            width_gauss = RooRealVar('width_gauss', '#sigma_{Gauss}', 0.2, 0.02, 1.)
+            alpha_right_cb = RooRealVar('alpha_right_cb', '#alpha_{right CB}', -1., -10., -0.1)
+            n_right_cb = RooRealVar('n_right_cb', 'n_{right CB}', 1., 0., 10.)
 
             cb_right = RooCBShape('cb_right','Right CB', b_mass, mean, width_right_cb, alpha_right_cb, n_right_cb)
             gauss = RooGaussian('gauss', 'Gauss', b_mass, mean, width_gauss)
@@ -354,7 +356,7 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
 
     # printing some useful statistics
     print('{} events have been processed'.format(processed_events))
-    print('Elapsed time: {:.1f} s ({:.1f} events / s)'.format(time.time() - start_time, float(processed_events) / (time.time() - start_time)))
+    print('Elapsed time: {:.1f} s ({:.1f} events / s)'.format(end_time - start_time, float(processed_events) / (end_time - start_time)))
     print('Reconstruction efficiency: {} / {} = {:.3f}'.format(reconstructable_events, processed_events, float(reconstructable_events) / processed_events))
 
     raw_input('Press ENTER when finished')
