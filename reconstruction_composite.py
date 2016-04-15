@@ -277,7 +277,7 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
 
     plot_frame = b_mass.frame(RooFit.Name('B mass'), RooFit.Title('Reconstructed B^{0}_{d} mass'), RooFit.Bins(n_bins))
     plot_frame.GetXaxis().SetTitle('m_{B_{d}^{0}}, GeV/#it{c}^{2}')
-    plot_frame.GetYaxis().SetTitle('Events / ({} GeV/#it{{c}}^{{2}})'.format(float(x_max - x_min) / n_bins))
+    plot_frame.GetYaxis().SetTitle('Events / ({:g} GeV/#it{{c}}^{{2}})'.format(float(x_max - x_min) / n_bins))
     data.plotOn(plot_frame)
 
     if fit:
