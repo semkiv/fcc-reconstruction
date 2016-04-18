@@ -362,13 +362,13 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
 
         bd_model = RooAddPdf('bd_model', 'Bd background model', RooArgList(bd_gauss, bd_cb), RooArgList(bd_gauss_fraction))
 
-        signal_yield = RooRealVar('signal_yield', 'Yield of signal', reconstructable_events / 3., 0, reconstructable_events)
-        bs_yield = RooRealVar('bs_yield', 'Yield of Bs background', reconstructable_events / 3., 0, reconstructable_events)
-        bs_2_yield = RooRealVar('bs_2_yield', 'Yield of Bs 2 background', reconstructable_events / 3., 0, reconstructable_events)
-        bd_yield = RooRealVar('bd_yield', 'Yield of Bd background', reconstructable_events / 3., 0, reconstructable_events)
+        signal_yield = RooRealVar('signal_yield', 'Yield of signal', 4 * reconstructable_events / 5., 0, reconstructable_events)
+        bs_yield = RooRealVar('bs_yield', 'Yield of Bs background', reconstructable_events / 20., 0, reconstructable_events)
+        # bs_2_yield = RooRealVar('bs_2_yield', 'Yield of Bs 2 background', reconstructable_events / 3., 0, reconstructable_events)
+        bd_yield = RooRealVar('bd_yield', 'Yield of Bd background', reconstructable_events / 5., 0, reconstructable_events)
 
         # composite model
-        model = RooAddPdf('model', 'Model to fit', RooArgList(signal_model, bs_model, bs_2_model, bd_model), RooArgList(signal_yield, bs_yield, bs_2_yield, bd_yield))
+        model = RooAddPdf('model', 'Model to fit', RooArgList(signal_model, bs_model, bd_model), RooArgList(signal_yield, bs_yield, bd_yield))
 
         model.fitTo(data, RooFit.Extended(True))
         model.plotOn(plot_frame, RooFit.Components('bs_model'), RooFit.LineColor(2), RooFit.LineStyle(ROOT.kDashed))

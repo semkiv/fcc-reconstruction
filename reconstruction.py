@@ -33,8 +33,8 @@ from ROOT import RooGaussian
 
 # few constants
 NBINS = 100 # Number of bins in the histogram
-XMIN = 5.2795 # Left bound of the histogram
-XMAX = 5.2796 # Right bound of the histogram
+XMIN = 4.5 # Left bound of the histogram
+XMAX = 6.5 # Right bound of the histogram
 PEAK_MIN = 4.7 # Minimum value of the peak
 PEAK_MAX = 5.5 # Maximum value of the peak
 
@@ -254,9 +254,6 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
 
                     m_B = numpy.sqrt(E_tauplus ** 2 + E_tauminus ** 2 + E_piK ** 2 + 2 * (E_tauplus * E_tauminus + E_tauplus * E_piK + E_tauminus * E_piK) - p_B ** 2)
                     if verbose: print('B mass: {:.12f}'.format(m_B))
-
-                    if m_B < 5.2795 or m_B > 5.2796:
-                        print 'ALLERT !!!', m_B
 
                     b_mass.setVal(m_B)
                     data.add(RooArgSet(b_mass))
