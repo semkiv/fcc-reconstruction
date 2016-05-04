@@ -310,64 +310,90 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
 
         signal_model = RooAddPdf('signal_model', 'Signal model', RooArgList(narrow_gauss, signal_cb, wide_gauss), RooArgList(narrow_gauss_fraction, signal_cb_fraction))
 
-        # Bs (Dstaunu) background model: Gaussian + Crystal Ball shape
+        # Bs -> Ds Ds K* (with Ds -> tau nu) background model: Gaussian + Crystal Ball shape
         # ILD-like
-        mean_bs = RooRealVar('mean_bs', '#mu_{Bs}', 4.970)
-        width_bs_gauss = RooRealVar('width_bs_gauss', '#sigma_{Bs Gauss}', 0.196)
-        width_bs_cb = RooRealVar('width_bs_cb', '#sigma_{Bs CB}', 0.078)
-        alpha_bs = RooRealVar('alpha_bs', '#alpha_{Bs}', -0.746)
-        n_bs = RooRealVar('n_bs', 'n_{Bs}', 1.983)
+        mean_bs_ds2taunu = RooRealVar('mean_bs_ds2taunu', '#mu_{Bs (with Ds -> #tau #nu)}', 4.970)
+        width_bs_ds2taunu_gauss = RooRealVar('width_bs_ds2taunu_gauss', '#sigma_{Bs (with Ds -> #tau #nu) Gauss}', 0.196)
+        width_bs_ds2taunu_cb = RooRealVar('width_bs_ds2taunu_cb', '#sigma_{Bs (with Ds -> #tau #nu) CB}', 0.078)
+        alpha_bs_ds2taunu = RooRealVar('alpha_bs_ds2taunu', '#alpha_{Bs (with Ds -> #tau #nu)}', -0.746)
+        n_bs_ds2taunu = RooRealVar('n_bs_ds2taunu', 'n_{Bs (with Ds -> #tau #nu)}', 1.983)
         # progressive
-        # mean_bs = RooRealVar('mean_bs', '#mu_{Bs}', 4.967)
-        # width_bs_gauss = RooRealVar('width_bs_gauss', '#sigma_{Bs Gauss}', 0.191)
-        # width_bs_cb = RooRealVar('width_bs_cb', '#sigma_{Bs CB}', 0.068)
-        # alpha_bs = RooRealVar('alpha_bs', '#alpha_{Bs}', -1.073)
-        # n_bs = RooRealVar('n_bs', 'n_{Bs}', 1.731)
+        # mean_bs_ds2taunu = RooRealVar('mean_bs_ds2taunu', '#mu_{Bs (with Ds -> #tau #nu)}', 4.967)
+        # width_bs_ds2taunu_gauss = RooRealVar('width_bs_ds2taunu_gauss', '#sigma_{Bs (with Ds -> #tau #nu) Gauss}', 0.191)
+        # width_bs_ds2taunu_cb = RooRealVar('width_bs_ds2taunu_cb', '#sigma_{Bs (with Ds -> #tau #nu) CB}', 0.068)
+        # alpha_bs_ds2taunu = RooRealVar('alpha_bs_ds2taunu', '#alpha_{Bs (with Ds -> #tau #nu)}', -1.073)
+        # n_bs_ds2taunu = RooRealVar('n_bs_ds2taunu', 'n_{Bs (with Ds -> #tau #nu)}', 1.731)
 
-        bs_gauss = RooGaussian('bs_gauss', 'Bs Gaussian', b_mass, mean_bs, width_bs_gauss)
-        bs_cb = RooCBShape('bs_cb', 'Bs CB', b_mass, mean_bs, width_bs_cb, alpha_bs, n_bs)
-
-        # ILD-like
-        bs_gauss_fraction = RooRealVar('bs_gauss_fraction', 'Fraction of Gaussian in Bs background', 0.243)
-        # progressive
-        # bs_gauss_fraction = RooRealVar('bs_gauss_fraction', 'Fraction of Gaussian in Bs background', 0.228)
-
-        bs_model = RooAddPdf('bs_model', 'Bs background model', RooArgList(bs_gauss, bs_cb), RooArgList(bs_gauss_fraction))
-
-        # Bd background model: Gaussian + Crystal Ball shape
-        # ILD-like
-        mean_bd = RooRealVar('mean_bd', '#mu_{Bd}', 4.894)
-        width_bd_gauss = RooRealVar('width_bd_gauss', '#sigma_{Bd Gauss}', 0.331)
-        width_bd_cb = RooRealVar('width_bd_cb', '#sigma_{Bd CB}', 0.169)
-        alpha_bd = RooRealVar('alpha_bd', '#alpha_{Bd}', -0.904)
-        n_bd = RooRealVar('n_bd', 'n_{Bd}', 3.57)
-        # progressive
-        # mean_bd = RooRealVar('mean_bd', '#mu_{Bd}', 4.891)
-        # width_bd_gauss = RooRealVar('width_bd_gauss', '#sigma_{Bd Gauss}', 0.565)
-        # width_bd_cb = RooRealVar('width_bd_cb', '#sigma_{Bd CB}', 0.148)
-        # alpha_bd = RooRealVar('alpha_bd', '#alpha_{Bd}', -5.23)
-        # n_bd = RooRealVar('n_bd', 'n_{Bd}', 1.497)
-
-        bd_gauss = RooGaussian('bd_gauss', 'Bd Gaussian', b_mass, mean_bd, width_bd_gauss)
-        bd_cb = RooCBShape('bd_cb', 'Bd CB', b_mass, mean_bd, width_bd_cb, alpha_bd, n_bd)
+        bs_ds2taunu_gauss = RooGaussian('bs_ds2taunu_gauss', 'Bs (with Ds -> #tau #nu) Gaussian', b_mass, mean_bs_ds2taunu, width_bs_ds2taunu_gauss)
+        bs_ds2taunu_cb = RooCBShape('bs_ds2taunu_cb', 'Bs (with Ds -> #tau #nu) CB', b_mass, mean_bs_ds2taunu, width_bs_ds2taunu_cb, alpha_bs_ds2taunu, n_bs_ds2taunu)
 
         # ILD-like
-        bd_gauss_fraction = RooRealVar('bd_gauss_fraction', 'Fraction of Gaussian in Bd background', 0.01)
+        bs_ds2taunu_gauss_fraction = RooRealVar('bs_ds2taunu_gauss_fraction', 'Fraction of Gaussian in Bs (with Ds -> #tau #nu) background', 0.243)
         # progressive
-        # bd_gauss_fraction = RooRealVar('bd_gauss_fraction', 'Fraction of Gaussian in Bd background', 0.29)
+        # bs_ds2taunu_gauss_fraction = RooRealVar('bs_ds2taunu_gauss_fraction', 'Fraction of Gaussian in Bs (with Ds -> #tau #nu) background', 0.228)
 
-        bd_model = RooAddPdf('bd_model', 'Bd background model', RooArgList(bd_gauss, bd_cb), RooArgList(bd_gauss_fraction))
+        bs_ds2taunu_model = RooAddPdf('bs_ds2taunu_model', 'Bs (with Ds -> #tau #nu) background model', RooArgList(bs_ds2taunu_gauss, bs_ds2taunu_cb), RooArgList(bs_ds2taunu_gauss_fraction))
 
-        signal_yield = RooRealVar('signal_yield', 'Yield of signal', reconstructable_events / 3., 0, reconstructable_events)
-        bs_yield = RooRealVar('bs_yield', 'Yield of Bs background', reconstructable_events / 3., 0, reconstructable_events)
-        bd_yield = RooRealVar('bd_yield', 'Yield of Bd background', reconstructable_events / 3., 0, reconstructable_events)
+        # Bs -> Ds Ds K* (with one Ds -> tau nu and other Ds -> pi pi pi pi) background model: Gaussian + Crystal Ball shape
+        # ILD-like
+        mean_bs_ds2pipipipi = RooRealVar('mean_bs_ds2pipipipi', '#mu_{Bs (with Ds -> #pi #pi #pi #pi)}', 4.990)
+        width_bs_ds2pipipipi_gauss = RooRealVar('width_bs_ds2pipipipi_gauss', '#sigma_{Bs (with Ds -> #pi #pi #pi #pi) Gauss}', 0.068)
+        width_bs_ds2pipipipi_cb = RooRealVar('width_bs_ds2pipipipi_cb', '#sigma_{Bs (with Ds -> #pi #pi #pi #pi) CB}', 0.190)
+        alpha_bs_ds2pipipipi = RooRealVar('alpha_bs_ds2pipipipi', '#alpha_{Bs (with Ds -> #pi #pi #pi #pi)}', -0.726)
+        n_bs_ds2pipipipi = RooRealVar('n_bs_ds2pipipipi', 'n_{Bs (with Ds -> #pi #pi #pi #pi)}', 3.171)
+        # progressive
+        # mean_bs_ds2pipipipi = RooRealVar('mean_bs_ds2pipipipi', '#mu_{Bs (with Ds -> #pi #pi #pi #pi)}', 4.979)
+        # width_bs_ds2pipipipi_gauss = RooRealVar('width_bs_ds2pipipipi_gauss', '#sigma_{Bs (with Ds -> #pi #pi #pi #pi) Gauss}', 0.073)
+        # width_bs_ds2pipipipi_cb = RooRealVar('width_bs_ds2pipipipi_cb', '#sigma_{Bs (with Ds -> #pi #pi #pi #pi) CB}', 0.146)
+        # alpha_bs_ds2pipipipi = RooRealVar('alpha_bs_ds2pipipipi', '#alpha_{Bs (with Ds -> #pi #pi #pi #pi)}', -0.725)
+        # n_bs_ds2pipipipi = RooRealVar('n_bs_ds2pipipipi', 'n_{Bs (with Ds -> #pi #pi #pi #pi)}', 3.752)
+
+        bs_ds2pipipipi_gauss = RooGaussian('bs_ds2pipipipi_gauss', 'Bs (with Ds -> #pi #pi #pi #pi) Gaussian', b_mass, mean_bs_ds2pipipipi, width_bs_ds2pipipipi_gauss)
+        bs_ds2pipipipi_cb = RooCBShape('bs_ds2pipipipi_cb', 'Bs (with Ds -> #pi #pi #pi #pi) CB', b_mass, mean_bs_ds2pipipipi, width_bs_ds2pipipipi_cb, alpha_bs_ds2pipipipi, n_bs_ds2pipipipi)
+
+        # ILD-like
+        bs_ds2pipipipi_gauss_fraction = RooRealVar('bs_ds2pipipipi_gauss_fraction', 'Fraction of Gaussian in Bs (with Ds -> #pi #pi #pi #pi) background', 0.222)
+        # progressive
+        # bs_ds2pipipipi_gauss_fraction = RooRealVar('bs_ds2pipipipi_gauss_fraction', 'Fraction of Gaussian in Bs(with Ds -> #pi #pi #pi #pi) background', 0.417)
+
+        bs_ds2pipipipi_model = RooAddPdf('bs_ds2pipipipi_model', 'Bs (with Ds -> #tau #nu) background model', RooArgList(bs_ds2pipipipi_gauss, bs_ds2pipipipi_cb), RooArgList(bs_ds2pipipipi_gauss_fraction))
+
+        # Bd -> Ds K* tau nu (with Ds -> tau nu) background model: Gaussian + Crystal Ball shape
+        # ILD-like
+        mean_bd_ds2taunu_ds2taunu = RooRealVar('mean_bd_ds2taunu_ds2taunu', '#mu_{Bd (with Ds -> #tau #nu)}', 4.894)
+        width_bd_ds2taunu_gauss = RooRealVar('width_bd_ds2taunu_gauss', '#sigma_{Bd (with Ds -> #tau #nu) Gauss}', 0.331)
+        width_bd_ds2taunu_cb = RooRealVar('width_bd_ds2taunu_cb', '#sigma_{Bd (with Ds -> #tau #nu) CB}', 0.169)
+        alpha_bd_ds2taunu = RooRealVar('alpha_bd_ds2taunu', '#alpha_{Bd (with Ds -> #tau #nu)}', -0.904)
+        n_bd_ds2taunu = RooRealVar('n_bd_ds2taunu', 'n_{Bd (with Ds -> #tau #nu)}', 3.57)
+        # progressive
+        # mean_bd_ds2taunu_ds2taunu = RooRealVar('mean_bd_ds2taunu_ds2taunu', '#mu_{Bd (with Ds -> #tau #nu)}', 4.891)
+        # width_bd_ds2taunu_gauss = RooRealVar('width_bd_ds2taunu_gauss', '#sigma_{Bd (with Ds -> #tau #nu) Gauss}', 0.565)
+        # width_bd_ds2taunu_cb = RooRealVar('width_bd_ds2taunu_cb', '#sigma_{Bd (with Ds -> #tau #nu) CB}', 0.148)
+        # alpha_bd_ds2taunu = RooRealVar('alpha_bd_ds2taunu', '#alpha_{Bd (with Ds -> #tau #nu)}', -5.23)
+        # n_bd_ds2taunu = RooRealVar('n_bd_ds2taunu', 'n_{Bd (with Ds -> #tau #nu)}', 1.497)
+
+        bd_ds2taunu_gauss = RooGaussian('bd_ds2taunu_gauss', 'Bd (with Ds -> #tau #nu) Gaussian', b_mass, mean_bd_ds2taunu_ds2taunu, width_bd_ds2taunu_gauss)
+        bd_ds2taunu_cb = RooCBShape('bd_ds2taunu_cb', 'Bd (with Ds -> #tau #nu) CB', b_mass, mean_bd_ds2taunu_ds2taunu, width_bd_ds2taunu_cb, alpha_bd_ds2taunu, n_bd_ds2taunu)
+
+        # ILD-like
+        bd_ds2taunu_gauss_fraction = RooRealVar('bd_ds2taunu_gauss_fraction', 'Fraction of Gaussian in Bd (with Ds -> #tau #nu) background', 0.01)
+        # progressive
+        # bd_ds2taunu_gauss_fraction = RooRealVar('bd_ds2taunu_gauss_fraction', 'Fraction of Gaussian in Bd (with Ds -> #tau #nu) background', 0.29)
+
+        bd_ds2taunu_model = RooAddPdf('bd_ds2taunu_model', 'Bd (with Ds -> #tau #nu) background model', RooArgList(bd_ds2taunu_gauss, bd_ds2taunu_cb), RooArgList(bd_ds2taunu_gauss_fraction))
+
+        signal_yield = RooRealVar('signal_yield', 'Yield of signal', reconstructable_events / 4., 0, reconstructable_events)
+        bs_ds2taunu_yield = RooRealVar('bs_ds2taunu_yield', 'Yield of Bs (with Ds -> #tau #nu) background', reconstructable_events / 4., 0, reconstructable_events)
+        bs_ds2pipipipi_yield = RooRealVar('bs_ds2pipipipi_yield', 'Yield of Bs (with Ds -> #pi #pi #pi #pi) background', reconstructable_events / 4., 0, reconstructable_events)
+        bd_ds2taunu_yield = RooRealVar('bd_ds2taunu_yield', 'Yield of Bd (with Ds -> #tau #nu) background', reconstructable_events / 4., 0, reconstructable_events)
 
         # composite model
-        model = RooAddPdf('model', 'Model to fit', RooArgList(signal_model, bs_model, bd_model), RooArgList(signal_yield, bs_yield, bd_yield))
+        model = RooAddPdf('model', 'Model to fit', RooArgList(signal_model, bs_ds2taunu_model, bs_ds2pipipipi_model, bd_ds2taunu_model), RooArgList(signal_yield, bs_ds2taunu_yield, bs_ds2pipipipi_yield, bd_ds2taunu_yield))
 
         model.fitTo(data, RooFit.Extended(True))
-        model.plotOn(plot_frame, RooFit.Components('bs_model'), RooFit.LineColor(2), RooFit.LineStyle(ROOT.kDashed))
-        model.plotOn(plot_frame, RooFit.Components('bd_model'), RooFit.LineColor(6), RooFit.LineStyle(ROOT.kDashed))
+        model.plotOn(plot_frame, RooFit.Components('bs_ds2taunu_model'), RooFit.LineColor(2), RooFit.LineStyle(ROOT.kDashed))
+        model.plotOn(plot_frame, RooFit.Components('bs_ds2pipipipi_model'), RooFit.LineColor(9), RooFit.LineStyle(ROOT.kDashed))
+        model.plotOn(plot_frame, RooFit.Components('bd_ds2taunu_model'), RooFit.LineColor(6), RooFit.LineStyle(ROOT.kDashed))
         model.plotOn(plot_frame, RooFit.Components('signal_model'), RooFit.LineColor(3), RooFit.LineStyle(ROOT.kDashed))
         model.plotOn(plot_frame)
         params = model.getVariables()
