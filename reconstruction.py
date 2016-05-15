@@ -56,10 +56,6 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
     processed_events = 0 # Number of processed events
     reconstructable_events = 0 # Events with valid tau+ and tau- decay vertex
 
-    # Setting numpy precision
-    if verbose:
-        numpy.set_printoptions(12)
-
     # Variables for RooFit
     b_mass = RooRealVar('mB', 'm_{B}', x_min, x_max)
     data = RooDataSet('mB', 'Reconstaructed B mass', RooArgSet(b_mass)) # Storage for reconstructed B mass values

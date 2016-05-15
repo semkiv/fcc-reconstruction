@@ -39,6 +39,10 @@ def calculate_reconstructed_mass(event, verbose = False):
         UnreconstructableEventError: if the event cannot be reconstructed because of poor smeared values
     """
 
+    # Setting numpy precision
+    if verbose:
+        numpy.set_printoptions(12)
+
     # Reading data necessary for reconstruction
     p_pi1_tauplus_x = event.pi1_tauplus_px
     p_pi1_tauplus_y = event.pi1_tauplus_py
@@ -84,6 +88,7 @@ def calculate_reconstructed_mass(event, verbose = False):
     tv_tauminus_x = event.tv_tauminus_x
     tv_tauminus_y = event.tv_tauminus_y
     tv_tauminus_z = event.tv_tauminus_z
+
     if verbose:
         print('Primary vertex: ({:.12f}, {:.12f}, {:.12f})'.format(pv_x, pv_y, pv_z))
         print('Secondary vertex: ({:.12f}, {:.12f}, {:.12f})'.format(sv_x, sv_y, sv_z))
@@ -94,41 +99,41 @@ def calculate_reconstructed_mass(event, verbose = False):
     p_pi2_tauplus = numpy.array([p_pi2_tauplus_x, p_pi2_tauplus_y, p_pi2_tauplus_z])
     p_pi3_tauplus = numpy.array([p_pi3_tauplus_x, p_pi3_tauplus_y, p_pi3_tauplus_z])
     if verbose:
-        print('pi1_tau+ momentum:', p_pi1_tauplus)
-        print('pi2_tau+ momentum:', p_pi2_tauplus)
-        print('pi3_tau+ momentum:', p_pi3_tauplus)
+        print('pi1_tau+ momentum: {}'.format(p_pi1_tauplus))
+        print('pi2_tau+ momentum: {}'.format(p_pi2_tauplus))
+        print('pi3_tau+ momentum: {}'.format(p_pi3_tauplus))
 
     p_pi1_tauminus = numpy.array([p_pi1_tauminus_x, p_pi1_tauminus_y, p_pi1_tauminus_z])
     p_pi2_tauminus = numpy.array([p_pi2_tauminus_x, p_pi2_tauminus_y, p_pi2_tauminus_z])
     p_pi3_tauminus = numpy.array([p_pi3_tauminus_x, p_pi3_tauminus_y, p_pi3_tauminus_z])
     if verbose:
-        print('pi1_tau- momentum:', p_pi1_tauminus)
-        print('pi2_tau- momentum:', p_pi2_tauminus)
-        print('pi3_tau- momentum:', p_pi3_tauminus)
+        print('pi1_tau- momentum: {}'.format(p_pi1_tauminus))
+        print('pi2_tau- momentum: {}'.format(p_pi2_tauminus))
+        print('pi3_tau- momentum: {}'.format(p_pi3_tauminus))
 
     p_pi_K = numpy.array([p_pi_K_x, p_pi_K_y, p_pi_K_z])
     p_K = numpy.array([p_K_x, p_K_y, p_K_z])
     if verbose:
-        print('pi_k momentum:', p_pi_K)
-        print('k momentum:', p_K)
+        print('pi_k momentum: {}'.format(p_pi_K))
+        print('k momentum: {}'.format(p_K))
 
     # here comes just the implementation of kinematic equation
     e_tauplus = numpy.array([tv_tauplus_x - sv_x, tv_tauplus_y - sv_y, tv_tauplus_z - sv_z]) / numpy.linalg.norm(numpy.array([tv_tauplus_x - sv_x, tv_tauplus_y - sv_y, tv_tauplus_z - sv_z]))
     e_tauminus = numpy.array([tv_tauminus_x - sv_x, tv_tauminus_y - sv_y, tv_tauminus_z - sv_z]) / numpy.linalg.norm(numpy.array([tv_tauminus_x - sv_x, tv_tauminus_y - sv_y, tv_tauminus_z - sv_z]))
     e_B = numpy.array([sv_x - pv_x, sv_y - pv_y, sv_z - pv_z]) / numpy.linalg.norm(numpy.array([sv_x - pv_x, sv_y - pv_y, sv_z - pv_z]))
     if verbose:
-        print('e_tau+:', e_tauplus)
-        print('e_tau-:', e_tauminus)
-        print('e_B:', e_B)
+        print('e_tau+: {}'.format(e_tauplus))
+        print('e_tau-: {}'.format(e_tauminus))
+        print('e_B: {}'.format(e_B))
 
     p_pis_tauplus = p_pi1_tauplus + p_pi2_tauplus + p_pi3_tauplus
-    if verbose: print('p_pis_tau+:', p_pis_tauplus)
+    if verbose: print('p_pis_tau+: {}'.format(p_pis_tauplus))
 
     p_pis_tauplus_par = numpy.dot(p_pis_tauplus, e_tauplus)
-    if verbose: print('p_pis_tau+_par:', p_pis_tauplus_par)
+    if verbose: print('p_pis_tau+_par: {}'.format(p_pis_tauplus_par))
 
     p_pis_tauplus_perp_sqr = numpy.linalg.norm(p_pis_tauplus) ** 2 - p_pis_tauplus_par ** 2
-    if verbose: print('p_pis_tau+_perp^2:', p_pis_tauplus_perp_sqr)
+    if verbose: print('p_pis_tau+_perp^2: {}'.format(p_pis_tauplus_perp_sqr))
 
     E_pis_tauplus = numpy.sqrt(m_pi ** 2 + numpy.linalg.norm(p_pi1_tauplus) ** 2) + numpy.sqrt(m_pi ** 2 + numpy.linalg.norm(p_pi2_tauplus) ** 2) + numpy.sqrt(m_pi ** 2 + numpy.linalg.norm(p_pi3_tauplus) ** 2)
     if verbose: print('E_pis_tau+: {:.12f}'.format(E_pis_tauplus))
@@ -153,13 +158,13 @@ def calculate_reconstructed_mass(event, verbose = False):
         if verbose: print('p_tau+_2: {:.12f}'.format(p_tauplus_2))
 
         p_pis_tauminus = p_pi1_tauminus + p_pi2_tauminus + p_pi3_tauminus
-        if verbose: print('p_pis_tau-:', p_pis_tauminus)
+        if verbose: print('p_pis_tau-: {}'.format(p_pis_tauminus))
 
         p_pis_tauminus_par = numpy.dot(p_pis_tauminus, e_tauminus)
-        if verbose: print('p_pis_tau-_par:', p_pis_tauminus_par)
+        if verbose: print('p_pis_tau-_par: {}'.format(p_pis_tauminus_par))
 
         p_pis_tauminus_perp_sqr = numpy.linalg.norm(p_pis_tauminus) ** 2 - p_pis_tauminus_par ** 2
-        if verbose: print('p_pis_tau-_perp^2:', p_pis_tauminus_perp_sqr)
+        if verbose: print('p_pis_tau-_perp^2: {}'.format(p_pis_tauminus_perp_sqr))
 
         E_pis_tauminus = numpy.sqrt(m_pi ** 2 + numpy.linalg.norm(p_pi1_tauminus) ** 2) + numpy.sqrt(m_pi ** 2 + numpy.linalg.norm(p_pi2_tauminus) ** 2) + numpy.sqrt(m_pi ** 2 + numpy.linalg.norm(p_pi3_tauminus) ** 2)
         if verbose: print('E_pis_tau-: {:.12f}'.format(E_pis_tauminus))
