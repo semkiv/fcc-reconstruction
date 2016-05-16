@@ -15,7 +15,7 @@ import numpy
 import ROOT
 
 from ROOT import gROOT, gStyle, TCanvas, TPaveText, TPad, TLine, TLegend
-from ROOT import RooFit
+from ROOT import RooFit, RooRealVar, RooArgList, RooGaussian, RooCBShape, RooAddPdf
 
 from UnreconstructableEventError import UnreconstructableEventError
 
@@ -226,11 +226,11 @@ def calculate_reconstructed_mass(event, verbose = False):
             return m_B
 
         else:
-            raise UnreconstructableEventError('Event #{} cannot be reconstructed'.format(int(event.event_number)))
+            raise UnreconstructableEventError()
     else:
-        raise UnreconstructableEventError('Event #{} cannot be reconstructed'.format(int(event.event_number)))
+        raise UnreconstructableEventError()
 
-def show_mass_plot(var, data, n_bins = 100, fit = False, model = None, draw_legend = False):
+def show_mass_plot(var, data, n_bins = 100, fit = False, model = None, extended = False, components_to_plot = [], draw_legend = False):
     """
         A function that visualizes the results of the reconstruction by showing plots
 
@@ -240,6 +240,8 @@ def show_mass_plot(var, data, n_bins = 100, fit = False, model = None, draw_lege
         n_bins (optional, [int]): the number of bins in the histogram. Defaults to 100
         fit (optional, [bool]): the flag that determines if the data will be fitted. Defaults to False
         model (optional, required if fit is True, [ROOT.RooAddPdf]): the model to be used for fitting. Defaults to None
+        extended (optional, [bool]): determines whether RooFit extended fit will be used. Defaults to False
+        components_to_plot (optional, [list]): the components of the model to plot. Defaults to []
         draw_legend (optional, [bool]): the flag that determines whether the fit legend will be drawn. Defaults to False
     """
 
@@ -264,22 +266,17 @@ def show_mass_plot(var, data, n_bins = 100, fit = False, model = None, draw_lege
     data.plotOn(plot_frame)
 
     if fit:
-        model.fitTo(data)
+        model.fitTo(data, RooFit.Extended(extended))
 
         if draw_legend:
             legend = TLegend(0.175, 0.65, 0.4, 0.9)
 
-        component_itr = model.getComponents().createIterator()
         color_index = 2
-
-        component_itr.Next() # skip first component (that is, the composite model)
-        component = component_itr.Next()
-        while component:
+        for component in components_to_plot:
             model.plotOn(plot_frame, RooFit.Components(component.GetName()), RooFit.LineColor(color_index), RooFit.LineStyle(ROOT.kDashed), RooFit.Name(component.GetName() + '_curve'))
             if draw_legend:
                 legend.AddEntry(plot_frame.findObject(component.GetName() + '_curve'), component.GetTitle(), 'l')
-            color_index += 1 if color_index != 3 else 2 # skip blue color used for composite model
-            component = component_itr.Next()
+            color_index += 2 if color_index == 3 or color_index == 9 else 1 # skip the blue color (4) used for composite model and the white color (10)
 
         model.plotOn(plot_frame) # this makes the composite model to be drawn twice - first as the first component and now; it is sort of a dirty hack but it is necessary to make pulls work properly (pullHist draws pulls hist for the last plotted component)
         params = model.getVariables()
@@ -318,3 +315,39 @@ def show_mass_plot(var, data, n_bins = 100, fit = False, model = None, draw_lege
     canvas_m_B.Update()
 
     raw_input('Press ENTER to close the plot window')
+
+# cannot be implemented because elements in RooArgList dangle after the function returns
+# def make_signal_model(name, title, x, mean, width, width_wide, alpha, n):
+#     """
+#         A factory function that produces a signal model with given parameters
+#
+#         The signal model consists of a 'narrow' Gaussian, a Crystal Ball shape and a 'wide' Gaussian. All three share the same mean value and a 'narrow' Gaussian and a Crystal Ball shape share also width
+#
+#         Args:
+#         name (str): the name of the PDF
+#         title (str): the title of the PDF
+#         x (ROOT.RooRealVar): the PDF variable
+#         mean (ROOT.RooRealVar): the mean value
+#         width (ROOT.RooRealVar): the width shared by a 'narrow' Gaussian and a Crystal Ball shape
+#         width_wide (ROOT.RooRealVar): the width of a 'wide' Gaussian
+#         alpha (ROOT.RooRealVar): the alpha parameter of the Crystal Ball shape
+#         n (ROOT.RooRealVar): the n parameter of the Crystal Ball shape
+#     """
+#
+#     narrow_gauss = RooGaussian(name + '_narrow_gauss', title + ' Narrow Gaussian', x, mean, width)
+#     wide_gauss = RooGaussian(name + '_wide_gauss', title + ' Wide Gaussian', x, mean, width_wide)
+#     cb = RooCBShape(name + '_cb', title + ' Crystal Ball shape', x, mean, width, alpha, n)
+#
+#     narrow_gauss_fraction = RooRealVar(name + '_narrow_gaus_fraction', 'Fraction of Narrow Gaussian in ' + title, 0.3, 0.01, 1.)
+#     cb_fraction = RooRealVar(name + '_cb_fraction', 'Fraction of Crystal Ball Shape in ' + title, 0.3, 0.01, 1.)
+#
+#     pdfs = RooArgList(narrow_gauss, cb, wide_gauss)
+#     fractions = RooArgList(narrow_gauss_fraction, cb_fraction)
+#
+#     # x =  RooRealVar("x","",0)
+#     # lst = RooArgList("list")
+#     # lst.addOwned(x)
+#     # print lst[0]
+#     # return lst
+#
+#     return RooAddPdf(name, title, pdfs, fractions)

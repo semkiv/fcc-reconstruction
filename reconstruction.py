@@ -20,6 +20,7 @@ from ROOT import RooRealVar, RooArgList, RooArgSet, RooDataSet, RooAddPdf, RooCB
 
 from utility.common import calculate_reconstructed_mass, show_mass_plot
 from utility.UnreconstructableEventError import UnreconstructableEventError
+from utility.SignalModel import SignalModel
 
 # few constants
 NBINS = 100 # Number of bins in the histogram
@@ -28,7 +29,7 @@ XMAX = 6.5 # Right bound of the histogram
 PEAK_MIN = 4.7 # Minimum value of the peak
 PEAK_MAX = 5.5 # Maximum value of the peak
 
-def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, background, peak_x_min, peak_x_max, verbose):
+def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, background, peak_x_min, peak_x_max, draw_legend, verbose):
     """
         A function that forms the main logic of the script
 
@@ -43,6 +44,8 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
         background (bool): the flag that determines whether signal or background data is processed
         peak_x_min (float): the left bound of the peak
         peak_x_max (float): the right bound of the peak
+        draw_legend (bool): the flag that determines whether the histogram legend will be drawn
+        verbose (bool): the flag that switches inreased verbosity
     """
 
     start_time = time.time()
@@ -52,7 +55,7 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
     input_file = TFile(file_name, 'read')
     input_tree = input_file.Get(tree_name)
 
-    # Event countes
+    # Event counters
     processed_events = 0 # Number of processed events
     reconstructable_events = 0 # Events with valid tau+ and tau- decay vertex
 
@@ -87,23 +90,21 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
         if background:
             # background model is Gaussian + Crystal Ball function
 
-            # defining parameters
             mean = RooRealVar('mean', '#mu', 5.279, peak_x_min, peak_x_max)
-            width_right_cb = RooRealVar('width_right_cb', '#sigma_{right CB}', 0.2, 0.02, 1.)
+            width_cb = RooRealVar('width_cb', '#sigma_{CB}', 0.2, 0.02, 1.)
             width_gauss = RooRealVar('width_gauss', '#sigma_{Gauss}', 0.2, 0.02, 1.)
-            alpha_right_cb = RooRealVar('alpha_right_cb', '#alpha_{right CB}', -1., -10., -0.1)
-            n_right_cb = RooRealVar('n_right_cb', 'n_{right CB}', 1., 0., 10.)
+            alpha_cb = RooRealVar('alpha_cb', '#alpha_{CB}', -1., -10., -0.1)
+            n_cb = RooRealVar('n_cb', 'n_{CB}', 1., 0., 10.)
 
-            cb_right = RooCBShape('cb_right','Right CB', b_mass, mean, width_right_cb, alpha_right_cb, n_right_cb)
+            cb_right = RooCBShape('cb','Crystal Ball shape', b_mass, mean, width_cb, alpha_cb, n_cb)
             gauss = RooGaussian('gauss', 'Gauss', b_mass, mean, width_gauss)
 
-            gauss_fraction = RooRealVar('gauss_fraction', 'Gauss fraction', 0.5, 0.01, 1.)
+            gauss_fraction = RooRealVar('gauss_fraction', 'Gaussian fraction', 0.5, 0.01, 1.)
 
             model = RooAddPdf('model', 'Model to fit', RooArgList(gauss, cb_right), RooArgList(gauss_fraction))
         else:
             # signal model is narrow Gaussian + wide Gaussian + Crystal Ball shape
 
-            # parameters of the model
             mean = RooRealVar('mean', '#mu', 5.279, peak_x_min, peak_x_max)
             width = RooRealVar('width_narrow_gauss', '#sigma', 0.03, 0.01, 0.1)
             width_wide_gauss = RooRealVar('width_wide_gauss', '#sigma_{wide}', 0.3, 0.1, 1.)
@@ -112,14 +113,14 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
 
             narrow_gauss = RooGaussian('narrow_gauss', 'Narrow Gaussian', b_mass, mean, width)
             wide_gauss = RooGaussian('wide_gauss', 'Wide Gaussian', b_mass, mean, width_wide_gauss)
-            cb = RooCBShape('cb','CB', b_mass, mean, width, alpha, n)
+            cb = RooCBShape('cb', 'Crystal Ball shape', b_mass, mean, width, alpha, n)
 
             narrow_gauss_fraction = RooRealVar('narrow_gaus_fraction', 'Fraction of narrow Gaussian', 0.3, 0.01, 1.)
-            cb_fraction = RooRealVar('cb_fraction', 'Fraction of CB', 0.3, 0.01, 1.)
+            cb_fraction = RooRealVar('cb_fraction', 'Fraction of Crystal Ball shape', 0.3, 0.01, 1.)
 
             model = RooAddPdf('model', 'Model to fit', RooArgList(narrow_gauss, cb, wide_gauss), RooArgList(narrow_gauss_fraction, cb_fraction))
 
-        show_mass_plot(b_mass, data, n_bins, fit, model, True)
+        show_mass_plot(b_mass, data, n_bins, fit, model, extended = False, components_to_plot = [narrow_gauss, cb, wide_gauss], draw_legend = draw_legend)
 
     else:
         show_mass_plot(b_mass, data, n_bins)
@@ -133,12 +134,13 @@ def main(argv):
     parser.add_argument('-n', '--nevents', type = int, help = 'maximum number of events to process')
     parser.add_argument('-f', '--fit', action = 'store_true', help = 'fit the histogram')
     parser.add_argument('-b', '--background', action = 'store_true', help = 'use fit model for background events')
+    parser.add_argument('-l', '--with-legend', action = 'store_true', help = 'draw legend')
     parser.add_argument('-v', '--verbose', action = 'store_true', help = 'run with increased verbosity')
 
     args = parser.parse_args()
     max_events = args.nevents if args.nevents else sys.maxint
 
-    process(args.input_file, args.tree, max_events, NBINS, XMIN, XMAX, args.fit, args.background, PEAK_MIN, PEAK_MAX, args.verbose)
+    process(args.input_file, args.tree, max_events, NBINS, XMIN, XMAX, args.fit, args.background, PEAK_MIN, PEAK_MAX, args.with_legend, args.verbose)
 
 if __name__ == '__main__':
     main(sys.argv)
