@@ -4,7 +4,7 @@
     Reconstruction script that implements math algorithm of B0 mass reconstruction
 
     Uses different models for fitting signal and background events
-    Usage: python reconstruction.py -i [INPUT_FILENAME] [-t [TREE_NAME]] [-n [MAX_EVENTS]] [-b] [-f] [-v]
+    Usage: python reconstruction.py -i [INPUT_FILENAME] [-t [TREE_NAME]] [-n [MAX_EVENTS]] [-b] [-f] [-l] [-v]
     Run python reconstruction.py --help for more details
 """
 
