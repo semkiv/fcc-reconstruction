@@ -16,11 +16,12 @@ import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True # to prevent TApplication from capturing command line options and breaking argparse
 
 from ROOT import TFile
-from ROOT import RooRealVar, RooArgList, RooArgSet, RooDataSet, RooAddPdf, RooCBShape, RooGaussian
+from ROOT import RooRealVar, RooArgSet, RooDataSet
 
 from utility.common import calculate_reconstructed_mass, show_mass_plot
 from utility.UnreconstructableEventError import UnreconstructableEventError
 from utility.SignalModel import SignalModel
+from utility.BackgroundModel import BackgroundModel
 
 # few constants
 NBINS = 100 # Number of bins in the histogram
@@ -88,39 +89,30 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
 
     if fit:
         if background:
-            # background model is Gaussian + Crystal Ball function
-
-            mean = RooRealVar('mean', '#mu', 5.279, peak_x_min, peak_x_max)
-            width_cb = RooRealVar('width_cb', '#sigma_{CB}', 0.2, 0.02, 1.)
-            width_gauss = RooRealVar('width_gauss', '#sigma_{Gauss}', 0.2, 0.02, 1.)
-            alpha_cb = RooRealVar('alpha_cb', '#alpha_{CB}', -1., -10., -0.1)
-            n_cb = RooRealVar('n_cb', 'n_{CB}', 1., 0., 10.)
-
-            cb_right = RooCBShape('cb','Crystal Ball shape', b_mass, mean, width_cb, alpha_cb, n_cb)
-            gauss = RooGaussian('gauss', 'Gauss', b_mass, mean, width_gauss)
-
-            gauss_fraction = RooRealVar('gauss_fraction', 'Gaussian fraction', 0.5, 0.01, 1.)
-
-            model = RooAddPdf('model', 'Model to fit', RooArgList(gauss, cb_right), RooArgList(gauss_fraction))
+            model = BackgroundModel(name = 'background_model',
+                                    title = 'Background Model',
+                                    x = b_mass,
+                                    mean = RooRealVar('mean', '#mu', 5.279, peak_x_min, peak_x_max),
+                                    width_cb = RooRealVar('width_cb', '#sigma_{CB}', 0.2, 0.02, 1.),
+                                    width_gauss = RooRealVar('width_gauss', '#sigma_{Gauss}', 0.2, 0.02, 1.),
+                                    alpha = RooRealVar('alpha_cb', '#alpha_{CB}', -1., -10., -0.1),
+                                    n = RooRealVar('n_cb', 'n_{CB}', 1., 0., 10.),
+                                    gauss_fraction = RooRealVar('background_model_gauss_fraction', 'Fraction of Gaussian in Background Model', 0.3, 0.01, 1.)
+                                    )
         else:
-            # signal model is narrow Gaussian + wide Gaussian + Crystal Ball shape
+            model = SignalModel(name = 'signal_model',
+                                title = 'Signal Model',
+                                x = b_mass,
+                                mean = RooRealVar('mean', '#mu', 5.279, peak_x_min, peak_x_max),
+                                width = RooRealVar('width_narrow_gauss', '#sigma', 0.03, 0.01, 0.1),
+                                width_wide = RooRealVar('width_wide_gauss', '#sigma_{wide}', 0.3, 0.1, 1.),
+                                alpha = RooRealVar('alpha', '#alpha', -1, -10., -0.1),
+                                n = RooRealVar('n', 'n', 2., 0.1, 10.),
+                                narrow_gauss_fraction = RooRealVar('signal_model_narrow_gauss_fraction', 'Fraction of Narrow Gaussian in Signal Model', 0.3, 0.01, 1.),
+                                cb_fraction = RooRealVar('signal_model_cb_fraction', 'Fraction of Crystal Ball Shape in Signal Model', 0.3, 0.01, 1.)
+                                )
 
-            mean = RooRealVar('mean', '#mu', 5.279, peak_x_min, peak_x_max)
-            width = RooRealVar('width_narrow_gauss', '#sigma', 0.03, 0.01, 0.1)
-            width_wide_gauss = RooRealVar('width_wide_gauss', '#sigma_{wide}', 0.3, 0.1, 1.)
-            alpha = RooRealVar('alpha', '#alpha', -1, -10., -0.1)
-            n = RooRealVar('n', 'n', 2., 0.1, 10.)
-
-            narrow_gauss = RooGaussian('narrow_gauss', 'Narrow Gaussian', b_mass, mean, width)
-            wide_gauss = RooGaussian('wide_gauss', 'Wide Gaussian', b_mass, mean, width_wide_gauss)
-            cb = RooCBShape('cb', 'Crystal Ball shape', b_mass, mean, width, alpha, n)
-
-            narrow_gauss_fraction = RooRealVar('narrow_gaus_fraction', 'Fraction of narrow Gaussian', 0.3, 0.01, 1.)
-            cb_fraction = RooRealVar('cb_fraction', 'Fraction of Crystal Ball shape', 0.3, 0.01, 1.)
-
-            model = RooAddPdf('model', 'Model to fit', RooArgList(narrow_gauss, cb, wide_gauss), RooArgList(narrow_gauss_fraction, cb_fraction))
-
-        show_mass_plot(b_mass, data, n_bins, fit, model, extended = False, components_to_plot = [narrow_gauss, cb, wide_gauss], draw_legend = draw_legend)
+        show_mass_plot(b_mass, data, n_bins, fit, model.pdf, extended = False, components_to_plot = model.components, draw_legend = draw_legend)
 
     else:
         show_mass_plot(b_mass, data, n_bins)

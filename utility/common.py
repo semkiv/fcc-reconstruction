@@ -230,7 +230,7 @@ def calculate_reconstructed_mass(event, verbose = False):
     else:
         raise UnreconstructableEventError()
 
-def show_mass_plot(var, data, n_bins = 100, fit = False, model = None, extended = False, components_to_plot = [], draw_legend = False):
+def show_mass_plot(var, data, n_bins = 100, fit = False, model = None, extended = False, components_to_plot = RooArgList(), draw_legend = False):
     """
         A function that visualizes the results of the reconstruction by showing plots
 
@@ -241,7 +241,7 @@ def show_mass_plot(var, data, n_bins = 100, fit = False, model = None, extended 
         fit (optional, [bool]): the flag that determines if the data will be fitted. Defaults to False
         model (optional, required if fit is True, [ROOT.RooAddPdf]): the model to be used for fitting. Defaults to None
         extended (optional, [bool]): determines whether RooFit extended fit will be used. Defaults to False
-        components_to_plot (optional, [list]): the components of the model to plot. Defaults to []
+        components_to_plot (optional, [ROOT.RooArgList]): the components of the model to plot. Defaults to ROOT.RooArgList()
         draw_legend (optional, [bool]): the flag that determines whether the fit legend will be drawn. Defaults to False
     """
 
@@ -272,7 +272,8 @@ def show_mass_plot(var, data, n_bins = 100, fit = False, model = None, extended 
             legend = TLegend(0.175, 0.65, 0.4, 0.9)
 
         color_index = 2
-        for component in components_to_plot:
+        for index in xrange(0, components_to_plot.getSize()):
+            component = components_to_plot[index]
             model.plotOn(plot_frame, RooFit.Components(component.GetName()), RooFit.LineColor(color_index), RooFit.LineStyle(ROOT.kDashed), RooFit.Name(component.GetName() + '_curve'))
             if draw_legend:
                 legend.AddEntry(plot_frame.findObject(component.GetName() + '_curve'), component.GetTitle(), 'l')
