@@ -18,7 +18,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True # to prevent TApplication from cap
 from ROOT import TFile
 from ROOT import RooRealVar, RooArgSet, RooDataSet
 
-from utility.common import calculate_reconstructed_mass, show_mass_plot
+from utility.common import reconstruct, show_plot
 from utility.UnreconstructableEventError import UnreconstructableEventError
 from utility.SignalModel import SignalModel
 from utility.BackgroundModel import BackgroundModel
@@ -30,7 +30,7 @@ XMAX = 6.5 # Right bound of the histogram
 PEAK_MIN = 4.7 # Minimum value of the peak
 PEAK_MAX = 5.5 # Maximum value of the peak
 
-def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, background, peak_x_min, peak_x_max, draw_legend, verbose):
+def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max, fit, background, peak_x_min, peak_x_max, draw_legend, verbose):
     """
         A function that forms the main logic of the script
 
@@ -42,7 +42,7 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
         x_min (float): the left bound of the histogram
         x_max (float): the right bound of the histogram
         fit (bool): the flag that determines whether the data will be fitted
-        background (bool): the flag that determines whether signal or background data is processed
+        background (bool): the flag that determines whether signal or background b_mass_data is processed
         peak_x_min (float): the left bound of the peak
         peak_x_max (float): the right bound of the peak
         draw_legend (bool): the flag that determines whether the histogram legend will be drawn
@@ -54,7 +54,8 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
 
     # Opening the file and getting the branch
     input_file = TFile(file_name, 'read')
-    input_tree = input_file.Get(tree_name)
+    event_tree = input_file.Get(tree_name)
+    mc_event_tree = input_file.Get(mc_tree_name)
 
     # Event counters
     processed_events = 0 # Number of processed events
@@ -62,10 +63,12 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
 
     # Variables for RooFit
     b_mass = RooRealVar('mB', 'm_{B}', x_min, x_max)
-    data = RooDataSet('mB', 'Reconstaructed B mass', RooArgSet(b_mass)) # Storage for reconstructed B mass values
+    b_mass_data = RooDataSet('mB', 'm_{B} data', RooArgSet(b_mass)) # Storage for reconstructed B mass values
+    q_square = RooRealVar('q2', 'q^{2}', 12.5, 17.5)
+    q_square_data = RooDataSet('q2_data', 'q^{2} data', RooArgSet(q_square)) # q^2 values container
 
     # Loop through the events
-    for counter, event in enumerate(input_tree):
+    for counter, event in enumerate(event_tree):
         if counter < max_events:
             processed_events += 1
             if (counter + 1) % 100 == 0: # print status message every 100 events
@@ -73,10 +76,14 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
                 last_timestamp = time.time()
 
             try:
-                m_B = calculate_reconstructed_mass(event, verbose)
+                rec_ev = reconstruct(event, verbose)
                 reconstructable_events += 1
-                b_mass.setVal(m_B)
-                data.add(RooArgSet(b_mass))
+
+                b_mass.setVal(rec_ev.m_b)
+                b_mass_data.add(RooArgSet(b_mass))
+
+                q_square.setVal(rec_ev.q_square())
+                q_square_data.add(RooArgSet(q_square))
             except UnreconstructableEventError:
                 pass
 
@@ -112,17 +119,20 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
                                 cb_fraction = RooRealVar('signal_model_cb_fraction', 'Fraction of Crystal Ball Shape in Signal Model', 0.3, 0.01, 1.)
                                 )
 
-        show_mass_plot(b_mass, data, n_bins, fit, model.pdf, extended = False, components_to_plot = model.components, draw_legend = draw_legend)
+        show_plot(b_mass, b_mass_data, 'GeV/#it{c}^{2}', n_bins, fit, model.pdf, extended = False, components_to_plot = model.components, draw_legend = draw_legend)
 
     else:
-        show_mass_plot(b_mass, data, n_bins)
+        show_plot(b_mass, b_mass_data, 'GeV/#it{c}^{2}', n_bins)
+
+    show_plot(q_square, q_square_data, 'GeV^{2}/#it{c}^{2}', n_bins)
 
 def main(argv):
     """The main function. Parses the command line arguments passed to the script and then runs the process function"""
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input-file', required = True, help = 'name of the file to process')
-    parser.add_argument('-t', '--tree', type = str, default = 'Events', help = 'name of the tree to process')
+    parser.add_argument('-t', '--tree', type = str, default = 'Events', help = 'name of the event tree')
+    parser.add_argument('-m', '--mctree', type = str, default = 'MCTruth', help = 'name of the tree with Monte-Carlo truth events')
     parser.add_argument('-n', '--nevents', type = int, help = 'maximum number of events to process')
     parser.add_argument('-f', '--fit', action = 'store_true', help = 'fit the histogram')
     parser.add_argument('-b', '--background', action = 'store_true', help = 'use fit model for background events')
@@ -132,7 +142,7 @@ def main(argv):
     args = parser.parse_args()
     max_events = args.nevents if args.nevents else sys.maxint
 
-    process(args.input_file, args.tree, max_events, NBINS, XMIN, XMAX, args.fit, args.background, PEAK_MIN, PEAK_MAX, args.with_legend, args.verbose)
+    process(args.input_file, args.tree, args.mctree, max_events, NBINS, XMIN, XMAX, args.fit, args.background, PEAK_MIN, PEAK_MAX, args.with_legend, args.verbose)
 
 if __name__ == '__main__':
     main(sys.argv)

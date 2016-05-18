@@ -18,13 +18,18 @@ from ROOT import gROOT, gStyle, TCanvas, TPaveText, TPad, TLine, TLegend
 from ROOT import RooFit, RooRealVar, RooArgList, RooGaussian, RooCBShape, RooAddPdf
 
 from UnreconstructableEventError import UnreconstructableEventError
+from ReconstructedEvent import ReconstructedEvent
 
 # Masses of the particles
 m_pi = 0.13957018
 m_K = 0.493677
 m_tau = 1.77684
 
-def calculate_reconstructed_mass(event, verbose = False):
+# Nice looking plots
+gROOT.ProcessLine('.x ' + os.environ.get('FCC') + 'lhcbstyle.C')
+gStyle.SetOptStat(0)
+
+def reconstruct(event, verbose = False):
     """
         A function that implements the reconstruction algorithm for a given event
 
@@ -39,88 +44,48 @@ def calculate_reconstructed_mass(event, verbose = False):
         UnreconstructableEventError: if the event cannot be reconstructed because of poor smeared values
     """
 
+    rec_ev = ReconstructedEvent()
+
     # Setting numpy precision
     if verbose:
         numpy.set_printoptions(12)
 
-    # Reading data necessary for reconstruction
-    p_pi1_tauplus_x = event.pi1_tauplus_px
-    p_pi1_tauplus_y = event.pi1_tauplus_py
-    p_pi1_tauplus_z = event.pi1_tauplus_pz
-
-    p_pi2_tauplus_x = event.pi2_tauplus_px
-    p_pi2_tauplus_y = event.pi2_tauplus_py
-    p_pi2_tauplus_z = event.pi2_tauplus_pz
-
-    p_pi3_tauplus_x = event.pi3_tauplus_px
-    p_pi3_tauplus_y = event.pi3_tauplus_py
-    p_pi3_tauplus_z = event.pi3_tauplus_pz
-
-    p_pi1_tauminus_x = event.pi1_tauminus_px
-    p_pi1_tauminus_y = event.pi1_tauminus_py
-    p_pi1_tauminus_z = event.pi1_tauminus_pz
-
-    p_pi2_tauminus_x = event.pi2_tauminus_px
-    p_pi2_tauminus_y = event.pi2_tauminus_py
-    p_pi2_tauminus_z = event.pi2_tauminus_pz
-
-    p_pi3_tauminus_x = event.pi3_tauminus_px
-    p_pi3_tauminus_y = event.pi3_tauminus_py
-    p_pi3_tauminus_z = event.pi3_tauminus_pz
-
-    p_pi_K_x = event.pi_k_px
-    p_pi_K_y = event.pi_k_py
-    p_pi_K_z = event.pi_k_pz
-
-    p_K_x = event.k_px
-    p_K_y = event.k_py
-    p_K_z = event.k_pz
-
-    pv_x = event.pv_x
-    pv_y = event.pv_y
-    pv_z = event.pv_z
-    sv_x = event.sv_x
-    sv_y = event.sv_y
-    sv_z = event.sv_z
-    tv_tauplus_x = event.tv_tauplus_x
-    tv_tauplus_y = event.tv_tauplus_y
-    tv_tauplus_z = event.tv_tauplus_z
-    tv_tauminus_x = event.tv_tauminus_x
-    tv_tauminus_y = event.tv_tauminus_y
-    tv_tauminus_z = event.tv_tauminus_z
-
+    pv = numpy.array([event.pv_x, event.pv_y, event.pv_z])
+    sv = numpy.array([event.sv_x, event.sv_y, event.sv_z])
+    tv_tauplus = numpy.array([event.tv_tauplus_x, event.tv_tauplus_y, event.tv_tauplus_z])
+    tv_tauminus = numpy.array([event.tv_tauminus_x, event.tv_tauminus_y, event.tv_tauminus_z])
     if verbose:
-        print('Primary vertex: ({:.12f}, {:.12f}, {:.12f})'.format(pv_x, pv_y, pv_z))
-        print('Secondary vertex: ({:.12f}, {:.12f}, {:.12f})'.format(sv_x, sv_y, sv_z))
-        print('Tertiary vertex (tau+): ({:.12f}, {:.12f}, {:.12f})'.format(tv_tauplus_x, tv_tauplus_y, tv_tauplus_z))
-        print('Tertiary vertex (tau-): ({:.12f}, {:.12f}, {:.12f})'.format(tv_tauminus_x, tv_tauminus_y, tv_tauminus_z))
+        print('Primary vertex: {}'.format(pv))
+        print('Secondary vertex: {}'.format(sv))
+        print('Tertiary vertex (tau+): {}'.format(tv_tauplus))
+        print('Tertiary vertex (tau-): {}'.format(tv_tauminus))
 
-    p_pi1_tauplus = numpy.array([p_pi1_tauplus_x, p_pi1_tauplus_y, p_pi1_tauplus_z])
-    p_pi2_tauplus = numpy.array([p_pi2_tauplus_x, p_pi2_tauplus_y, p_pi2_tauplus_z])
-    p_pi3_tauplus = numpy.array([p_pi3_tauplus_x, p_pi3_tauplus_y, p_pi3_tauplus_z])
+    p_pi1_tauplus = numpy.array([event.pi1_tauplus_px, event.pi1_tauplus_py, event.pi1_tauplus_pz])
+    p_pi2_tauplus = numpy.array([event.pi2_tauplus_px, event.pi2_tauplus_py, event.pi2_tauplus_pz])
+    p_pi3_tauplus = numpy.array([event.pi3_tauplus_px, event.pi3_tauplus_py, event.pi3_tauplus_pz])
     if verbose:
         print('pi1_tau+ momentum: {}'.format(p_pi1_tauplus))
         print('pi2_tau+ momentum: {}'.format(p_pi2_tauplus))
         print('pi3_tau+ momentum: {}'.format(p_pi3_tauplus))
 
-    p_pi1_tauminus = numpy.array([p_pi1_tauminus_x, p_pi1_tauminus_y, p_pi1_tauminus_z])
-    p_pi2_tauminus = numpy.array([p_pi2_tauminus_x, p_pi2_tauminus_y, p_pi2_tauminus_z])
-    p_pi3_tauminus = numpy.array([p_pi3_tauminus_x, p_pi3_tauminus_y, p_pi3_tauminus_z])
+    p_pi1_tauminus = numpy.array([event.pi1_tauminus_px, event.pi1_tauminus_py, event.pi1_tauminus_pz])
+    p_pi2_tauminus = numpy.array([event.pi2_tauminus_px, event.pi2_tauminus_py, event.pi2_tauminus_pz])
+    p_pi3_tauminus = numpy.array([event.pi3_tauminus_px, event.pi3_tauminus_py, event.pi3_tauminus_pz])
     if verbose:
         print('pi1_tau- momentum: {}'.format(p_pi1_tauminus))
         print('pi2_tau- momentum: {}'.format(p_pi2_tauminus))
         print('pi3_tau- momentum: {}'.format(p_pi3_tauminus))
 
-    p_pi_K = numpy.array([p_pi_K_x, p_pi_K_y, p_pi_K_z])
-    p_K = numpy.array([p_K_x, p_K_y, p_K_z])
+    p_pi_K = numpy.array([event.pi_k_px, event.pi_k_py, event.pi_k_pz])
+    p_K = numpy.array([event.k_px, event.k_py, event.k_pz])
     if verbose:
         print('pi_k momentum: {}'.format(p_pi_K))
         print('k momentum: {}'.format(p_K))
 
     # here comes just the implementation of kinematic equation
-    e_tauplus = numpy.array([tv_tauplus_x - sv_x, tv_tauplus_y - sv_y, tv_tauplus_z - sv_z]) / numpy.linalg.norm(numpy.array([tv_tauplus_x - sv_x, tv_tauplus_y - sv_y, tv_tauplus_z - sv_z]))
-    e_tauminus = numpy.array([tv_tauminus_x - sv_x, tv_tauminus_y - sv_y, tv_tauminus_z - sv_z]) / numpy.linalg.norm(numpy.array([tv_tauminus_x - sv_x, tv_tauminus_y - sv_y, tv_tauminus_z - sv_z]))
-    e_B = numpy.array([sv_x - pv_x, sv_y - pv_y, sv_z - pv_z]) / numpy.linalg.norm(numpy.array([sv_x - pv_x, sv_y - pv_y, sv_z - pv_z]))
+    e_tauplus = (tv_tauplus - sv) / numpy.linalg.norm(tv_tauplus - sv)
+    e_tauminus = (tv_tauminus - sv) / numpy.linalg.norm(tv_tauminus - sv)
+    e_B = (sv - pv) / numpy.linalg.norm(sv - pv)
     if verbose:
         print('e_tau+: {}'.format(e_tauplus))
         print('e_tau-: {}'.format(e_tauminus))
@@ -213,7 +178,13 @@ def calculate_reconstructed_mass(event, verbose = False):
                 p_tauplus = p_tauplus_2
                 p_tauminus = p_tauminus_2
 
+            rec_ev.p_tauplus = p_tauplus * e_tauplus
+            rec_ev.p_nu_tauplus = rec_ev.p_tauplus - p_pis_tauplus
+            rec_ev.p_tauminus = p_tauminus * e_tauminus
+            rec_ev.p_nu_tauminus = rec_ev.p_tauminus - p_pis_tauminus
+
             p_B = p_tauplus * numpy.dot(e_tauplus, e_B) + p_tauminus * numpy.dot(e_tauminus, e_B) + p_piK_par
+            rec_ev.p_b = p_B * e_B
             if verbose: print('B momentum: {:.12f}'.format(p_B))
 
             E_piK = numpy.sqrt(m_pi ** 2 + numpy.linalg.norm(p_pi_K) ** 2) + numpy.sqrt(m_K ** 2 + numpy.linalg.norm(p_K) ** 2)
@@ -221,22 +192,24 @@ def calculate_reconstructed_mass(event, verbose = False):
             E_tauminus = numpy.sqrt(m_tau ** 2 + p_tauminus ** 2)
 
             m_B = numpy.sqrt(E_tauplus ** 2 + E_tauminus ** 2 + E_piK ** 2 + 2 * (E_tauplus * E_tauminus + E_tauplus * E_piK + E_tauminus * E_piK) - p_B ** 2)
+            rec_ev.m_b = m_B
             if verbose: print('B mass: {:.12f}'.format(m_B))
 
-            return m_B
+            return rec_ev
 
         else:
             raise UnreconstructableEventError()
     else:
         raise UnreconstructableEventError()
 
-def show_mass_plot(var, data, n_bins = 100, fit = False, model = None, extended = False, components_to_plot = RooArgList(), draw_legend = False):
+def show_plot(var, data, units, n_bins = 100, fit = False, model = None, extended = False, components_to_plot = RooArgList(), draw_legend = False):
     """
         A function that visualizes the results of the reconstruction by showing plots
 
         Args:
         var (ROOT.RooRealVar): the variable the histogram of the diatribution of which will be plotted
         data (ROOT.RooDataSet): the data to be fitted
+        units (str): X-axis units
         n_bins (optional, [int]): the number of bins in the histogram. Defaults to 100
         fit (optional, [bool]): the flag that determines if the data will be fitted. Defaults to False
         model (optional, required if fit is True, [ROOT.RooAddPdf]): the model to be used for fitting. Defaults to None
@@ -245,12 +218,8 @@ def show_mass_plot(var, data, n_bins = 100, fit = False, model = None, extended 
         draw_legend (optional, [bool]): the flag that determines whether the fit legend will be drawn. Defaults to False
     """
 
-    # Nice looking plots
-    gROOT.ProcessLine('.x ' + os.environ.get('FCC') + 'lhcbstyle.C')
-    gStyle.SetOptStat(0)
-
     # creating canvas the plots to be drawn in
-    canvas_m_B = TCanvas('mB_canvas', 'Reconstructed B0 mass distribution', 640, 640 if fit else 480) # creating bigger canvas if we're going to fit the data (and thus to plot pulls hist)
+    canvas = TCanvas(var.GetName() + '_canvas', var.GetTitle() + ' distribution', 640, 640 if fit else 480) # creating bigger canvas if we're going to fit the data (and thus to plot pulls hist)
 
     # creating the pad for the reconstructed B mass distribution histogram
     upper_pad = TPad('upper_pad', 'Upper Pad', 0., 0.25 if  fit else 0., 1., 1.) # creating a pad that will occupy the top 75% of the canvas (the count starts from the bottom) if we're gooing to fit the data (and thus to plot pulls hist) and the whole canvas otherwise
@@ -260,9 +229,9 @@ def show_mass_plot(var, data, n_bins = 100, fit = False, model = None, extended 
     label = TPaveText(0.75, 0.8, .9, .9, 'NDC') # placing a label; the "NDC" option sets the units to mother container's fraction
     label.AddText('FCC-#it{ee}')
 
-    plot_frame = var.frame(RooFit.Name('B mass'), RooFit.Title('Reconstructed B^{0}_{d} mass'), RooFit.Bins(n_bins))
-    plot_frame.GetXaxis().SetTitle('m_{B_{d}^{0}}, GeV/#it{c}^{2}')
-    plot_frame.GetYaxis().SetTitle('Events / ({:g} GeV/#it{{c}}^{{2}})'.format(float(var.getMax() - var.getMin()) / n_bins))
+    plot_frame = var.frame(RooFit.Name(var.GetName() + '_frame'), RooFit.Title(var.GetTitle() + ' frame'), RooFit.Bins(n_bins))
+    plot_frame.GetXaxis().SetTitle(var.GetTitle() + ', ' + units)
+    plot_frame.GetYaxis().SetTitle('Events / ({:g} {})'.format(float(var.getMax() - var.getMin()) / n_bins, units))
     data.plotOn(plot_frame)
 
     if fit:
@@ -279,7 +248,7 @@ def show_mass_plot(var, data, n_bins = 100, fit = False, model = None, extended 
                 legend.AddEntry(plot_frame.findObject(component.GetName() + '_curve'), component.GetTitle(), 'l')
             color_index += 2 if color_index == 3 or color_index == 9 else 1 # skip the blue color (4) used for composite model and the white color (10)
 
-        model.plotOn(plot_frame) # this makes the composite model to be drawn twice - first as the first component and now; it is sort of a dirty hack but it is necessary to make pulls work properly (pullHist draws pulls hist for the last plotted component)
+        model.plotOn(plot_frame)
         params = model.getVariables()
         params.Print('v')
 
@@ -313,9 +282,9 @@ def show_mass_plot(var, data, n_bins = 100, fit = False, model = None, extended 
 
     label.Draw()
 
-    canvas_m_B.Update()
+    canvas.Update()
 
-    raw_input('Press ENTER to close the plot window')
+    raw_input('Press ENTER to continue')
 
 # cannot be implemented because elements in RooArgList dangle after the function returns
 # def make_signal_model(name, title, x, mean, width, width_wide, alpha, n):

@@ -18,7 +18,7 @@ ROOT.PyConfig.IgnoreCommandLineOptions = True # to prevent TApplication from cap
 from ROOT import TFile
 from ROOT import RooRealVar, RooArgList, RooArgSet, RooDataSet, RooAddPdf, RooCBShape, RooGaussian
 
-from utility.common import calculate_reconstructed_mass, show_mass_plot
+from utility.common import reconstruct, show_plot
 from utility.UnreconstructableEventError import UnreconstructableEventError
 from utility.SignalModel import SignalModel
 from utility.BackgroundModel import BackgroundModel
@@ -60,9 +60,9 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
 
     # Variables for RooFit
     b_mass = RooRealVar('mB', 'm_{B}', x_min, x_max)
-    data = RooDataSet('mB', 'Reconstaructed B mass', RooArgSet(b_mass)) # reconstructed B mass values container
-    # q_square = RooRealVar('q_square', 'q^{2}', 12.5, 17.5)
-    # q_square_data = RooDataSet('q_square_data', 'q square data', RooArgSet(q_square)) # q^2 values container
+    b_mass_data = RooDataSet('mB', 'm_{B} data', RooArgSet(b_mass)) # reconstructed B mass values container
+    q_square = RooRealVar('q2', 'q^{2}', 12.5, 17.5)
+    q_square_data = RooDataSet('q2_data', 'q^{2} data', RooArgSet(q_square)) # q^2 values container
 
     # Loop through the events
     for counter, event in enumerate(input_tree):
@@ -73,15 +73,16 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
                 last_timestamp = time.time()
 
             try:
-                m_B = calculate_reconstructed_mass(event, verbose)
+                rec_ev = reconstruct(event, verbose)
                 reconstructable_events += 1
-                b_mass.setVal(m_B)
-                data.add(RooArgSet(b_mass))
+
+                b_mass.setVal(rec_ev.m_b)
+                b_mass_data.add(RooArgSet(b_mass))
+
+                q_square.setVal(rec_ev.q_square())
+                q_square_data.add(RooArgSet(q_square))
             except UnreconstructableEventError:
                 pass
-
-                    # q_square.setVal(2 * (m_tau ** 2 - numpy.dot(p_tauplus, p_tauminus) + numpy.sqrt((m_tau ** 2 + p_tauplus ** 2) * (m_tau ** 2 + p_tauminus ** 2))))
-                    # q_square_data.add(RooArgSet(q_square))
 
     end_time = time.time()
 
@@ -119,13 +120,6 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
 
         # Bs -> Ds Ds K* (with Ds -> tau nu) background model
         # ILD-like
-        bs_ds2taunu_gauss_fraction = RooRealVar('bs_ds2taunu_gauss_fraction', 'Fraction of Gaussian in Bs (with Ds -> #tau #nu) background', 0.243)
-        # progressive
-        # bs_ds2taunu_gauss_fraction = RooRealVar('bs_ds2taunu_gauss_fraction', 'Fraction of Gaussian in Bs (with Ds -> #tau #nu) background', 0.228)
-
-        bs_ds2taunu_model = RooAddPdf('bs_ds2taunu_model', 'Bs (with Ds -> #tau #nu) background model', RooArgList(bs_ds2taunu_gauss, bs_ds2taunu_cb), RooArgList(bs_ds2taunu_gauss_fraction))
-
-        ILD-like
         bs_ds2taunu_model = BackgroundModel(name = 'bs_ds2taunu_model',
                                             title = 'Bs (with Ds -> #tau #nu) background model',
                                             x = b_mass,
@@ -204,21 +198,12 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
         # composite model
         model = RooAddPdf('model', 'Model to fit', RooArgList(signal_model.pdf, bs_ds2taunu_model.pdf, bs_ds2taunu_ds2pipipipi_model.pdf, bd_ds2taunu_model.pdf), RooArgList(signal_yield, bs_ds2taunu_yield, bs_ds2pipipipi_yield, bd_ds2taunu_yield))
 
-        show_mass_plot(b_mass, data, n_bins, fit, model, extended = True, components_to_plot = RooArgList(signal_model.pdf, bs_ds2taunu_model.pdf, bs_ds2taunu_ds2pipipipi_model.pdf, bd_ds2taunu_model.pdf), draw_legend = draw_legend)
+        show_plot(b_mass, b_mass_data, 'GeV/#it{c}^{2}', n_bins, fit, model, extended = True, components_to_plot = RooArgList(signal_model.pdf, bs_ds2taunu_model.pdf, bs_ds2taunu_ds2pipipipi_model.pdf, bd_ds2taunu_model.pdf), draw_legend = draw_legend)
 
     else:
-        show_mass_plot(b_mass, data, n_bins)
+        show_plot(b_mass, b_mass_data, 'GeV/#it{c}^{2}', n_bins)
 
-    # q_square_canvas = TCanvas('q_square_canvas', 'q square', 640, 480)
-    # q_square_canvas.cd()
-    # q_square_frame = q_square.frame(RooFit.Name('q_square'), RooFit.Title('q^{2}'), RooFit.Bins(10))
-    # q_square_frame.GetXaxis().SetTitle('q^{2}, GeV^{2}')
-    # q_square_frame.GetYaxis().SetTitle('Events / (0.5 GeV^{2})')
-    # q_square_data.plotOn(q_square_frame)
-    #
-    # q_square_frame.Draw()
-    # q_square_canvas.Update()
-
+    show_plot(q_square, q_square_data, 'GeV^{2}/#it{c}^{2}', n_bins)
 
 def main(argv):
     """The main function. Parses the command line arguments passed to the script and then runs the process function"""
