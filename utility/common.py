@@ -6,8 +6,8 @@
     m_pi - the mass of a pi meson
     m_K - the mass of a K meson
     m_tau - the mass of a tau lepton
-    reconstruct - a function that reconstructs the event
-    show_plot - a function that visualizes reconstruction results by making plots
+    calculate_reconstructed_mass - a function that calculates a reconstructed mass value
+    show_mass_plot - a function that visualizes reconstruction results by making plots
 """
 
 import os
@@ -180,9 +180,9 @@ def reconstruct(event, verbose = False):
                 p_tauminus = p_tauminus_2
 
             rec_ev.p_tauplus = Momentum.fromlist(p_tauplus * e_tauplus)
-            rec_ev.p_nu_tauplus = Momentum.fromlist(p_tauplus * e_tauplus - p_pis_tauplus)
+            rec_ev.p_nu_tauplus = Momentum.fromlist(p_tauplus - p_pis_tauplus)
             rec_ev.p_tauminus = Momentum.fromlist(p_tauminus * e_tauminus)
-            rec_ev.p_nu_tauminus = Momentum.fromlist(p_tauminus * e_tauminus - p_pis_tauminus)
+            rec_ev.p_nu_tauminus = Momentum.fromlist(p_tauminus - p_pis_tauminus)
 
             p_B = p_tauplus * numpy.dot(e_tauplus, e_B) + p_tauminus * numpy.dot(e_tauminus, e_B) + p_piK_par
             rec_ev.p_b = Momentum.fromlist(p_B * e_B)
@@ -210,7 +210,7 @@ def show_plot(var, data, units, n_bins = 100, fit = False, model = None, extende
         Args:
         var (ROOT.RooRealVar): the variable the histogram of the diatribution of which will be plotted
         data (ROOT.RooDataSet): the data to be fitted
-        units (str or None): X-axis units
+        units (str): X-axis units
         n_bins (optional, [int]): the number of bins in the histogram. Defaults to 100
         fit (optional, [bool]): the flag that determines if the data will be fitted. Defaults to False
         model (optional, required if fit is True, [ROOT.RooAddPdf]): the model to be used for fitting. Defaults to None
@@ -231,8 +231,8 @@ def show_plot(var, data, units, n_bins = 100, fit = False, model = None, extende
     label.AddText('FCC-#it{ee}')
 
     plot_frame = var.frame(RooFit.Name(var.GetName() + '_frame'), RooFit.Title(var.GetTitle() + ' frame'), RooFit.Bins(n_bins))
-    plot_frame.GetXaxis().SetTitle((var.GetTitle() + ', {}'.format(units)) if units else var.GetTitle())
-    plot_frame.GetYaxis().SetTitle('Events / ({:g} {})'.format(float(var.getMax() - var.getMin()) / n_bins, units) if units else 'Events / {:g}'.format(float(var.getMax() - var.getMin()) / n_bins))
+    plot_frame.GetXaxis().SetTitle(var.GetTitle() + ', ' + units)
+    plot_frame.GetYaxis().SetTitle('Events / ({:g} {})'.format(float(var.getMax() - var.getMin()) / n_bins, units))
     data.plotOn(plot_frame)
 
     if fit:
