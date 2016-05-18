@@ -15,10 +15,11 @@ import numpy
 import ROOT
 
 from ROOT import gROOT, gStyle, TCanvas, TPaveText, TPad, TLine, TLegend
-from ROOT import RooFit, RooRealVar, RooArgList, RooGaussian, RooCBShape, RooAddPdf
+from ROOT import RooFit, RooRealVar, RooArgList, RooGaussian, RooAddPdf
 
 from UnreconstructableEventError import UnreconstructableEventError
 from ReconstructedEvent import ReconstructedEvent
+from heppy_fcc.utility.Momentum import Momentum
 
 # Masses of the particles
 m_pi = 0.13957018
@@ -38,7 +39,7 @@ def reconstruct(event, verbose = False):
         verbose (optional, [bool]): the flag that determines whether the function will be run with increased verbosity. Defaults to False
 
         Returns:
-        float: the reconstructed mass value
+        ReconstructedEvent: reconstructed event information
 
         Raises:
         UnreconstructableEventError: if the event cannot be reconstructed because of poor smeared values
@@ -178,13 +179,13 @@ def reconstruct(event, verbose = False):
                 p_tauplus = p_tauplus_2
                 p_tauminus = p_tauminus_2
 
-            rec_ev.p_tauplus = p_tauplus * e_tauplus
-            rec_ev.p_nu_tauplus = rec_ev.p_tauplus - p_pis_tauplus
-            rec_ev.p_tauminus = p_tauminus * e_tauminus
-            rec_ev.p_nu_tauminus = rec_ev.p_tauminus - p_pis_tauminus
+            rec_ev.p_tauplus = Momentum.fromlist(p_tauplus * e_tauplus)
+            rec_ev.p_nu_tauplus = Momentum.fromlist(p_tauplus - p_pis_tauplus)
+            rec_ev.p_tauminus = Momentum.fromlist(p_tauminus * e_tauminus)
+            rec_ev.p_nu_tauminus = Momentum.fromlist(p_tauminus - p_pis_tauminus)
 
             p_B = p_tauplus * numpy.dot(e_tauplus, e_B) + p_tauminus * numpy.dot(e_tauminus, e_B) + p_piK_par
-            rec_ev.p_b = p_B * e_B
+            rec_ev.p_b = Momentum.fromlist(p_B * e_B)
             if verbose: print('B momentum: {:.12f}'.format(p_B))
 
             E_piK = numpy.sqrt(m_pi ** 2 + numpy.linalg.norm(p_pi_K) ** 2) + numpy.sqrt(m_K ** 2 + numpy.linalg.norm(p_K) ** 2)
@@ -285,39 +286,3 @@ def show_plot(var, data, units, n_bins = 100, fit = False, model = None, extende
     canvas.Update()
 
     raw_input('Press ENTER to continue')
-
-# cannot be implemented because elements in RooArgList dangle after the function returns
-# def make_signal_model(name, title, x, mean, width, width_wide, alpha, n):
-#     """
-#         A factory function that produces a signal model with given parameters
-#
-#         The signal model consists of a 'narrow' Gaussian, a Crystal Ball shape and a 'wide' Gaussian. All three share the same mean value and a 'narrow' Gaussian and a Crystal Ball shape share also width
-#
-#         Args:
-#         name (str): the name of the PDF
-#         title (str): the title of the PDF
-#         x (ROOT.RooRealVar): the PDF variable
-#         mean (ROOT.RooRealVar): the mean value
-#         width (ROOT.RooRealVar): the width shared by a 'narrow' Gaussian and a Crystal Ball shape
-#         width_wide (ROOT.RooRealVar): the width of a 'wide' Gaussian
-#         alpha (ROOT.RooRealVar): the alpha parameter of the Crystal Ball shape
-#         n (ROOT.RooRealVar): the n parameter of the Crystal Ball shape
-#     """
-#
-#     narrow_gauss = RooGaussian(name + '_narrow_gauss', title + ' Narrow Gaussian', x, mean, width)
-#     wide_gauss = RooGaussian(name + '_wide_gauss', title + ' Wide Gaussian', x, mean, width_wide)
-#     cb = RooCBShape(name + '_cb', title + ' Crystal Ball shape', x, mean, width, alpha, n)
-#
-#     narrow_gauss_fraction = RooRealVar(name + '_narrow_gaus_fraction', 'Fraction of Narrow Gaussian in ' + title, 0.3, 0.01, 1.)
-#     cb_fraction = RooRealVar(name + '_cb_fraction', 'Fraction of Crystal Ball Shape in ' + title, 0.3, 0.01, 1.)
-#
-#     pdfs = RooArgList(narrow_gauss, cb, wide_gauss)
-#     fractions = RooArgList(narrow_gauss_fraction, cb_fraction)
-#
-#     # x =  RooRealVar("x","",0)
-#     # lst = RooArgList("list")
-#     # lst.addOwned(x)
-#     # print lst[0]
-#     # return lst
-#
-#     return RooAddPdf(name, title, pdfs, fractions)

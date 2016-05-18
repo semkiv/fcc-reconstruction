@@ -1,11 +1,21 @@
 #!/usr/bin/env python
 
-m_tau = m_tau = 1.77684
+m_tau = 1.77684
 
 import numpy
 
 class ReconstructedEvent(object):
-    """A utility class (more like a C-struct) used to store reconstruction results (i.e. invisible values)"""
+    """
+        A utility class (more like a C-struct) used to store reconstruction results (i.e. invisible values)
+
+        Attributes:
+        m_b (float): reconstructed B0 mass
+        p_b (heppy_fcc.utility.Momentum): reconstructed B0 momentum
+        p_tauplus (heppy_fcc.utility.Momentum): reconstructed tau+ momentum
+        p_nu_tauplus (heppy_fcc.utility.Momentum): reconstructed momentum of the nu from tau+ decay
+        p_tauminus (heppy_fcc.utility.Momentum): reconstructed tau- momentum
+        p_nu_tauminus (heppy_fcc.utility.Momentum): reconstructed momentum of the nu from tau- decay
+    """
 
     def __init__(self, m_b = None, p_b = None, p_tauplus = None, p_nu_tauplus = None, p_tauminus = None, p_nu_tauminus = None):
         super(ReconstructedEvent, self).__init__()
@@ -18,4 +28,4 @@ class ReconstructedEvent(object):
         self.p_nu_tauminus = p_nu_tauminus
 
     def q_square(self):
-        return 2 * (m_tau ** 2 - numpy.dot(self.p_tauplus, self.p_tauminus) + numpy.sqrt((m_tau ** 2 + numpy.dot(self.p_tauplus, self.p_tauplus)) * (m_tau ** 2 + numpy.dot(self.p_tauminus, self.p_tauminus))))
+        return 2 * (m_tau ** 2 - numpy.dot(self.p_tauplus.raw(), self.p_tauminus.raw()) + numpy.sqrt((m_tau ** 2 + numpy.dot(self.p_tauplus.raw(), self.p_tauplus.raw())) * (m_tau ** 2 + numpy.dot(self.p_tauminus.raw(), self.p_tauminus.raw()))))
