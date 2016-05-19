@@ -119,9 +119,10 @@ def reconstruct(event, verbose = False):
         p_nu_tauplus_2 = alpha_tauplus - beta_tauplus
 
         p_tauplus_1 = numpy.sqrt(E_pis_tauplus ** 2 + p_nu_tauplus_1 ** 2 + 2 * E_pis_tauplus * p_nu_tauplus_1 - m_tau ** 2)
-        if verbose: print('p_tau+_1: {:.12f}'.format(p_tauplus_1))
         p_tauplus_2 = numpy.sqrt(E_pis_tauplus ** 2 + p_nu_tauplus_2 ** 2 + 2 * E_pis_tauplus * p_nu_tauplus_2 - m_tau ** 2)
-        if verbose: print('p_tau+_2: {:.12f}'.format(p_tauplus_2))
+        if verbose:
+            print('p_tau+_1: {:.12f}'.format(p_tauplus_1))
+            print('p_tau+_2: {:.12f}'.format(p_tauplus_2))
 
         p_pis_tauminus = p_pi1_tauminus + p_pi2_tauminus + p_pi3_tauminus
         if verbose: print('p_pis_tau-: {}'.format(p_pis_tauminus))
@@ -150,9 +151,10 @@ def reconstruct(event, verbose = False):
             p_nu_tauminus_2 = alpha_tauminus - beta_tauminus
 
             p_tauminus_1 = numpy.sqrt(E_pis_tauminus ** 2 + p_nu_tauminus_1 ** 2 + 2 * E_pis_tauminus * p_nu_tauminus_1 - m_tau ** 2)
-            if verbose: print('p_tauminus_1: {:.12f}'.format(p_tauminus_1))
             p_tauminus_2 = numpy.sqrt(E_pis_tauminus ** 2 + p_nu_tauminus_2 ** 2 + 2 * E_pis_tauminus * p_nu_tauminus_2 - m_tau ** 2)
-            if verbose: print('p_tauminus_2: {:.12f}'.format(p_tauminus_2))
+            if verbose:
+                print('p_tauminus_1: {:.12f}'.format(p_tauminus_1))
+                print('p_tauminus_2: {:.12f}'.format(p_tauminus_2))
 
             A = - (numpy.dot(e_tauplus, e_tauminus) - numpy.dot(e_B, e_tauplus) * numpy.dot(e_B, e_tauminus)) / (1 - numpy.dot(e_B, e_tauminus) ** 2)
 
@@ -163,6 +165,9 @@ def reconstruct(event, verbose = False):
 
             p_tauminus_1_alt = A * p_tauplus_1 + B
             p_tauminus_2_alt = A * p_tauplus_2 + B
+            if verbose:
+                print('p_tauminus_1_alt: {:.12f}'.format(p_tauminus_1_alt))
+                print('p_tauminus_2_alt: {:.12f}'.format(p_tauminus_2_alt))
 
             # resolving ambiguity
             min_diff = min(abs(p_tauminus_1 - p_tauminus_1_alt), abs(p_tauminus_1 - p_tauminus_2_alt), abs(p_tauminus_2 - p_tauminus_1_alt), abs(p_tauminus_2 - p_tauminus_2_alt))
@@ -178,6 +183,10 @@ def reconstruct(event, verbose = False):
             elif min_diff == abs(p_tauminus_2 - p_tauminus_2_alt):
                 p_tauplus = p_tauplus_2
                 p_tauminus = p_tauminus_2
+
+            if verbose:
+                print('p_tauplus: {:.12f}'.format(p_tauplus))
+                print('p_tauminus: {:.12f}'.format(p_tauminus))
 
             rec_ev.p_tauplus = Momentum.fromlist(p_tauplus * e_tauplus)
             rec_ev.p_nu_tauplus = Momentum.fromlist(p_tauplus * e_tauplus - p_pis_tauplus)
