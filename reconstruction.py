@@ -30,7 +30,7 @@ XMAX = 6.5 # Right bound of the histogram
 PEAK_MIN = 4.7 # Minimum value of the peak
 PEAK_MAX = 5.5 # Maximum value of the peak
 
-def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max, fit, background, peak_x_min, peak_x_max, draw_legend, verbose):
+def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, background, peak_x_min, peak_x_max, draw_legend, verbose):
     """
         A function that forms the main logic of the script
 
@@ -55,7 +55,6 @@ def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max
     # Opening the file and getting the branch
     input_file = TFile(file_name, 'read')
     event_tree = input_file.Get(tree_name)
-    mc_event_tree = input_file.Get(mc_tree_name)
 
     # Event counters
     processed_events = 0 # Number of processed events
@@ -124,7 +123,7 @@ def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max
     else:
         show_plot(b_mass, b_mass_data, 'GeV/#it{c}^{2}', n_bins)
 
-    show_plot(q_square, q_square_data, 'GeV^{2}/#it{c}^{2}', n_bins)
+    show_plot(q_square, q_square_data, '(GeV/#it{c})^{2}', n_bins)
 
 def main(argv):
     """The main function. Parses the command line arguments passed to the script and then runs the process function"""
@@ -132,7 +131,6 @@ def main(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input-file', required = True, help = 'name of the file to process')
     parser.add_argument('-t', '--tree', type = str, default = 'Events', help = 'name of the event tree')
-    parser.add_argument('-m', '--mctree', type = str, default = 'MCTruth', help = 'name of the tree with Monte-Carlo truth events')
     parser.add_argument('-n', '--nevents', type = int, help = 'maximum number of events to process')
     parser.add_argument('-f', '--fit', action = 'store_true', help = 'fit the histogram')
     parser.add_argument('-b', '--background', action = 'store_true', help = 'use fit model for background events')
@@ -142,7 +140,7 @@ def main(argv):
     args = parser.parse_args()
     max_events = args.nevents if args.nevents else sys.maxint
 
-    process(args.input_file, args.tree, args.mctree, max_events, NBINS, XMIN, XMAX, args.fit, args.background, PEAK_MIN, PEAK_MAX, args.with_legend, args.verbose)
+    process(args.input_file, args.tree, max_events, NBINS, XMIN, XMAX, args.fit, args.background, PEAK_MIN, PEAK_MAX, args.with_legend, args.verbose)
 
 if __name__ == '__main__':
     main(sys.argv)
