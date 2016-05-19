@@ -62,10 +62,10 @@ def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max
     reconstructable_events = 0 # Events with valid tau+ and tau- decay vertex
 
     # Variables for RooFit
-    b_mass = RooRealVar('mB', 'm_{B}', x_min, x_max)
-    b_mass_data = RooDataSet('mB', 'm_{B} data', RooArgSet(b_mass)) # Storage for reconstructed B mass values
-    q_square = RooRealVar('q2', 'q^{2}', 12.5, 17.5)
-    q_square_data = RooDataSet('q2_data', 'q^{2} data', RooArgSet(q_square)) # q^2 values container
+    # b_mass = RooRealVar('mB', 'm_{B}', x_min, x_max)
+    # b_mass_data = RooDataSet('mB', 'm_{B} data', RooArgSet(b_mass)) # Storage for reconstructed B mass values
+    # q_square = RooRealVar('q2', 'q^{2}', 12.5, 17.5)
+    # q_square_data = RooDataSet('q2_data', 'q^{2} data', RooArgSet(q_square)) # q^2 values container
     error_p_tauplus_x = RooRealVar('error_p_tauplus_x', '#epsilon_{p_{#tau^{+}x}}', -2., 2.)
     error_p_tauplus_x_data = RooDataSet('error_p_tauplus_x_data', '#epsilon_{p_{#tau^{+}x}} data', RooArgSet(error_p_tauplus_x))
     error_p_tauplus_y = RooRealVar('error_p_tauplus_y', '#epsilon_{p_{#tau^{+}y}}', -2., 2.)
@@ -106,25 +106,25 @@ def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max
                 rec_ev = reconstruct(event_tree, verbose)
                 reconstructable_events += 1
 
-                b_mass.setVal(rec_ev.m_b)
-                b_mass_data.add(RooArgSet(b_mass))
-
-                q_square.setVal(rec_ev.q_square())
-                q_square_data.add(RooArgSet(q_square))
-
-                # error_p_tauplus_x.setVal((rec_ev.p_tauplus.px - mc_event_tree.tauplus_px) / mc_event_tree.tauplus_px)
-                # error_p_tauplus_x_data.add(RooArgSet(error_p_tauplus_x))
-                # error_p_tauplus_y.setVal((rec_ev.p_tauplus.py - mc_event_tree.tauplus_py) / mc_event_tree.tauplus_py)
-                # error_p_tauplus_y_data.add(RooArgSet(error_p_tauplus_y))
-                # error_p_tauplus_z.setVal((rec_ev.p_tauplus.pz - mc_event_tree.tauplus_pz) / mc_event_tree.tauplus_pz)
-                # error_p_tauplus_z_data.add(RooArgSet(error_p_tauplus_z))
+                # b_mass.setVal(rec_ev.m_b)
+                # b_mass_data.add(RooArgSet(b_mass))
                 #
-                # error_p_tauminus_x.setVal((rec_ev.p_tauminus.px - mc_event_tree.tauminus_px) / mc_event_tree.tauminus_px)
-                # error_p_tauminus_x_data.add(RooArgSet(error_p_tauminus_x))
-                # error_p_tauminus_y.setVal((rec_ev.p_tauminus.py - mc_event_tree.tauminus_py) / mc_event_tree.tauminus_py)
-                # error_p_tauminus_y_data.add(RooArgSet(error_p_tauminus_y))
-                # error_p_tauminus_z.setVal((rec_ev.p_tauminus.pz - mc_event_tree.tauminus_pz) / mc_event_tree.tauminus_pz)
-                # error_p_tauminus_z_data.add(RooArgSet(error_p_tauminus_z))
+                # q_square.setVal(rec_ev.q_square())
+                # q_square_data.add(RooArgSet(q_square))
+
+                error_p_tauplus_x.setVal((rec_ev.p_tauplus.px - mc_event_tree.tauplus_px) / mc_event_tree.tauplus_px)
+                error_p_tauplus_x_data.add(RooArgSet(error_p_tauplus_x))
+                error_p_tauplus_y.setVal((rec_ev.p_tauplus.py - mc_event_tree.tauplus_py) / mc_event_tree.tauplus_py)
+                error_p_tauplus_y_data.add(RooArgSet(error_p_tauplus_y))
+                error_p_tauplus_z.setVal((rec_ev.p_tauplus.pz - mc_event_tree.tauplus_pz) / mc_event_tree.tauplus_pz)
+                error_p_tauplus_z_data.add(RooArgSet(error_p_tauplus_z))
+
+                error_p_tauminus_x.setVal((rec_ev.p_tauminus.px - mc_event_tree.tauminus_px) / mc_event_tree.tauminus_px)
+                error_p_tauminus_x_data.add(RooArgSet(error_p_tauminus_x))
+                error_p_tauminus_y.setVal((rec_ev.p_tauminus.py - mc_event_tree.tauminus_py) / mc_event_tree.tauminus_py)
+                error_p_tauminus_y_data.add(RooArgSet(error_p_tauminus_y))
+                error_p_tauminus_z.setVal((rec_ev.p_tauminus.pz - mc_event_tree.tauminus_pz) / mc_event_tree.tauminus_pz)
+                error_p_tauminus_z_data.add(RooArgSet(error_p_tauminus_z))
 
                 error_p_nu_tauplus_x.setVal((rec_ev.p_nu_tauplus.px - mc_event_tree.nu_tauplus_px) / mc_event_tree.nu_tauplus_px)
                 error_p_nu_tauplus_x_data.add(RooArgSet(error_p_nu_tauplus_x))
@@ -139,6 +139,7 @@ def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max
                 error_p_nu_tauminus_y_data.add(RooArgSet(error_p_nu_tauminus_y))
                 error_p_nu_tauminus_z.setVal((rec_ev.p_nu_tauminus.pz - mc_event_tree.nu_tauminus_pz) / mc_event_tree.nu_tauminus_pz)
                 error_p_nu_tauminus_z_data.add(RooArgSet(error_p_nu_tauminus_z))
+
             except UnreconstructableEventError:
                 pass
 
@@ -181,13 +182,13 @@ def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max
 
     # show_plot(q_square, q_square_data, 'GeV^{2}/#it{c}^{2}', n_bins)
 
-    # show_plot(error_p_tauplus_x, error_p_tauplus_x_data, None, n_bins)
-    # show_plot(error_p_tauplus_y, error_p_tauplus_y_data, None, n_bins)
-    # show_plot(error_p_tauplus_z, error_p_tauplus_z_data, None, n_bins)
-    #
-    # show_plot(error_p_tauminus_x, error_p_tauminus_x_data, None, n_bins)
-    # show_plot(error_p_tauminus_y, error_p_tauminus_y_data, None, n_bins)
-    # show_plot(error_p_tauminus_z, error_p_tauminus_z_data, None, n_bins)
+    show_plot(error_p_tauplus_x, error_p_tauplus_x_data, None, n_bins)
+    show_plot(error_p_tauplus_y, error_p_tauplus_y_data, None, n_bins)
+    show_plot(error_p_tauplus_z, error_p_tauplus_z_data, None, n_bins)
+
+    show_plot(error_p_tauminus_x, error_p_tauminus_x_data, None, n_bins)
+    show_plot(error_p_tauminus_y, error_p_tauminus_y_data, None, n_bins)
+    show_plot(error_p_tauminus_z, error_p_tauminus_z_data, None, n_bins)
 
     show_plot(error_p_nu_tauplus_x, error_p_nu_tauplus_x_data, None, n_bins)
     show_plot(error_p_nu_tauplus_y, error_p_nu_tauplus_y_data, None, n_bins)
