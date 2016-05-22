@@ -77,10 +77,10 @@ def reconstruct(event, verbose = False):
         print('pi2_tau- momentum: {}'.format(p_pi2_tauminus))
         print('pi3_tau- momentum: {}'.format(p_pi3_tauminus))
 
-    p_pi_K = numpy.array([event.pi_k_px, event.pi_k_py, event.pi_k_pz])
+    p_pi_K = numpy.array([event.pi_kstar_px, event.pi_kstar_py, event.pi_kstar_pz])
     p_K = numpy.array([event.k_px, event.k_py, event.k_pz])
     if verbose:
-        print('pi_k momentum: {}'.format(p_pi_K))
+        print('pi_kstar momentum: {}'.format(p_pi_K))
         print('k momentum: {}'.format(p_K))
 
     # here comes just the implementation of kinematic equation

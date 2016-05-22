@@ -26,7 +26,7 @@ def merge(files_and_numbers, output_file_name, verbose):
     pi1_tauminus_px, pi1_tauminus_py, pi1_tauminus_pz = array('d', [0.]), array('d', [0.]), array('d', [0.])
     pi2_tauminus_px, pi2_tauminus_py, pi2_tauminus_pz = array('d', [0.]), array('d', [0.]), array('d', [0.])
     pi3_tauminus_px, pi3_tauminus_py, pi3_tauminus_pz = array('d', [0.]), array('d', [0.]), array('d', [0.])
-    pi_k_px, pi_k_py, pi_k_pz = array('d', [0.]), array('d', [0.]), array('d', [0.])
+    pi_kstar_px, pi_kstar_py, pi_kstar_pz = array('d', [0.]), array('d', [0.]), array('d', [0.])
     k_px, k_py, k_pz = array('d', [0.]), array('d', [0.]), array('d', [0.])
     pv_x, pv_y, pv_z = array('d', [0.]), array('d', [0.]), array('d', [0.])
     sv_x, sv_y, sv_z = array('d', [0.]), array('d', [0.]), array('d', [0.])
@@ -58,9 +58,9 @@ def merge(files_and_numbers, output_file_name, verbose):
     output_tree.Branch('pi3_tauminus_py', pi3_tauminus_py, 'pi3_tauminus_px/D')
     output_tree.Branch('pi3_tauminus_pz', pi3_tauminus_pz, 'pi3_tauminus_px/D')
 
-    output_tree.Branch('pi_k_px', pi_k_px, 'pi_k_px/D')
-    output_tree.Branch('pi_k_py', pi_k_py, 'pi_k_py/D')
-    output_tree.Branch('pi_k_pz', pi_k_pz, 'pi_k_pz/D')
+    output_tree.Branch('pi_kstar_px', pi_kstar_px, 'pi_kstar_px/D')
+    output_tree.Branch('pi_kstar_py', pi_kstar_py, 'pi_kstar_py/D')
+    output_tree.Branch('pi_kstar_pz', pi_kstar_pz, 'pi_kstar_pz/D')
 
     output_tree.Branch('k_px', k_px, 'k_px/D')
     output_tree.Branch('k_py', k_py, 'k_py/D')
@@ -119,9 +119,9 @@ def merge(files_and_numbers, output_file_name, verbose):
                 pi3_tauminus_py[0] = event.pi3_tauminus_py
                 pi3_tauminus_pz[0] = event.pi3_tauminus_pz
 
-                pi_k_px[0] = event.pi_k_px
-                pi_k_py[0] = event.pi_k_py
-                pi_k_pz[0] = event.pi_k_pz
+                pi_kstar_px[0] = event.pi_kstar_px
+                pi_kstar_py[0] = event.pi_kstar_py
+                pi_kstar_pz[0] = event.pi_kstar_pz
 
                 k_px[0] = event.k_px
                 k_py[0] = event.k_py
