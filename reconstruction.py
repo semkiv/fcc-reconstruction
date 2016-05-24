@@ -16,8 +16,7 @@ import math
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True # to prevent TApplication from capturing command line options and breaking argparse
 
-from ROOT import TFile
-from ROOT import RooRealVar, RooArgSet, RooDataSet
+from ROOT import TFile, RooRealVar, RooArgSet, RooDataSet
 
 from utility.common import reconstruct, show_plot
 from utility.UnreconstructableEventError import UnreconstructableEventError
@@ -93,7 +92,7 @@ def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max
     error_p_nu_tauminus_z_data = RooDataSet('error_p_nu_tauminus_z_data', '#epsilon_{p_{#nu#tau^{-}z}} data', RooArgSet(error_p_nu_tauminus_z))
 
     # Loop through the events
-    # for counter, (event, mc_event) in enumerate(zip(event_tree, mc_event_tree)): # this finest construction doesn't work
+    # for counter, (event, mc_event) in enumerate(zip(event_tree, mc_event_tree)): # this finest construction doesn't work for some reason
     for counter in xrange(event_tree.GetEntries()): # so we have to use an old one
         if counter < max_events:
             event_tree.GetEntry(counter)

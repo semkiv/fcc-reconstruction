@@ -15,8 +15,7 @@ import time
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True # to prevent TApplication from capturing command line options and breaking argparse
 
-from ROOT import TFile
-from ROOT import RooRealVar, RooArgList, RooArgSet, RooDataSet, RooAddPdf, RooCBShape, RooGaussian
+from ROOT import TFile, RooRealVar, RooArgList, RooArgSet, RooDataSet, RooAddPdf, RooCBShape, RooGaussian
 
 from utility.common import reconstruct, show_plot
 from utility.UnreconstructableEventError import UnreconstructableEventError
