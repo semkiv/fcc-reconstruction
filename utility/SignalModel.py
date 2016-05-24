@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+"""
+    Contains the SignalModel class definition
+
+    SignalModel - a class that represents the signal fit model
+"""
+
 from ROOT import RooGaussian, RooCBShape, RooRealVar, RooArgList, RooAddPdf
 
 class SignalModel(object):

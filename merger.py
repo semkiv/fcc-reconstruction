@@ -1,21 +1,34 @@
 #!/usr/bin/env python
 
-## Script that merges multiple ROOT files containing data suitable for reconstruction algorithm into one file
-#  Usage: python merger.py -i [INPUT_FILENAME_1] [NUMBER_OF_EVENTS_1] -i [INPUT_FILENAME_2] [NUMBER_OF_EVENTS_2] ... [-o [OUTPUT_FILENAME=merged.root]]
-#  Run python merger.py --help for more details
+"""
+    Script that merges multiple ROOT files containing data suitable for reconstruction algorithm into one file
+
+    Usage: python merger.py -i [INPUT_FILENAME_1] [NUMBER_OF_EVENTS_1] -i [INPUT_FILENAME_2] [NUMBER_OF_EVENTS_2] ... [-o [OUTPUT_FILENAME=merged.root]]
+    Run python merger.py --help for more details
+"""
 
 import sys
 import os
 import argparse
+
 from array import array
 
 import ROOT
+
+from ROOT import TFile, TTree
+
 ROOT.PyConfig.IgnoreCommandLineOptions = True # to prevent TApplication from capturing command line options and breaking argparse
 
-from ROOT import TFile
-from ROOT import TTree
-
 def merge(files_and_numbers, output_file_name, verbose):
+    """
+        The function that forms the main logic of the script
+
+        Args:
+        files_and_numbers (dict): file names and corresponding numbers of events
+        output_file_name (str): output file name
+        verbose (bool): the flag that switches inreased verbosity
+    """
+
     output_file = TFile(output_file_name, 'recreate')
     output_tree = TTree('Events', 'Events')
 
@@ -26,7 +39,7 @@ def merge(files_and_numbers, output_file_name, verbose):
     pi1_tauminus_px, pi1_tauminus_py, pi1_tauminus_pz = array('d', [0.]), array('d', [0.]), array('d', [0.])
     pi2_tauminus_px, pi2_tauminus_py, pi2_tauminus_pz = array('d', [0.]), array('d', [0.]), array('d', [0.])
     pi3_tauminus_px, pi3_tauminus_py, pi3_tauminus_pz = array('d', [0.]), array('d', [0.]), array('d', [0.])
-    pi_k_px, pi_k_py, pi_k_pz = array('d', [0.]), array('d', [0.]), array('d', [0.])
+    pi_kstar_px, pi_kstar_py, pi_kstar_pz = array('d', [0.]), array('d', [0.]), array('d', [0.])
     k_px, k_py, k_pz = array('d', [0.]), array('d', [0.]), array('d', [0.])
     pv_x, pv_y, pv_z = array('d', [0.]), array('d', [0.]), array('d', [0.])
     sv_x, sv_y, sv_z = array('d', [0.]), array('d', [0.]), array('d', [0.])
@@ -58,9 +71,9 @@ def merge(files_and_numbers, output_file_name, verbose):
     output_tree.Branch('pi3_tauminus_py', pi3_tauminus_py, 'pi3_tauminus_px/D')
     output_tree.Branch('pi3_tauminus_pz', pi3_tauminus_pz, 'pi3_tauminus_px/D')
 
-    output_tree.Branch('pi_k_px', pi_k_px, 'pi_k_px/D')
-    output_tree.Branch('pi_k_py', pi_k_py, 'pi_k_py/D')
-    output_tree.Branch('pi_k_pz', pi_k_pz, 'pi_k_pz/D')
+    output_tree.Branch('pi_kstar_px', pi_kstar_px, 'pi_kstar_px/D')
+    output_tree.Branch('pi_kstar_py', pi_kstar_py, 'pi_kstar_py/D')
+    output_tree.Branch('pi_kstar_pz', pi_kstar_pz, 'pi_kstar_pz/D')
 
     output_tree.Branch('k_px', k_px, 'k_px/D')
     output_tree.Branch('k_py', k_py, 'k_py/D')
@@ -119,9 +132,9 @@ def merge(files_and_numbers, output_file_name, verbose):
                 pi3_tauminus_py[0] = event.pi3_tauminus_py
                 pi3_tauminus_pz[0] = event.pi3_tauminus_pz
 
-                pi_k_px[0] = event.pi_k_px
-                pi_k_py[0] = event.pi_k_py
-                pi_k_pz[0] = event.pi_k_pz
+                pi_kstar_px[0] = event.pi_kstar_px
+                pi_kstar_py[0] = event.pi_kstar_py
+                pi_kstar_pz[0] = event.pi_kstar_pz
 
                 k_px[0] = event.k_px
                 k_py[0] = event.k_py
@@ -149,6 +162,8 @@ def merge(files_and_numbers, output_file_name, verbose):
     output_file.Close()
 
 def main(argv):
+    """The main function. Parses the command line arguments passed to the script and then runs the merge function"""
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input-file', nargs = 2, action = 'append', required = True, metavar = 'INPUT_FILE NUMBER_OF_EVENTS', help = 'input file name followed by number of events for that file')
     parser.add_argument('-o', '--output-file', type = str, default = 'merged.root', help = 'output file name')

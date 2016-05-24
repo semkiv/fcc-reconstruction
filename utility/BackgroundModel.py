@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+"""
+    Contains BackgroundModel class definition
+
+    BackgroundModel - a class that represents the background fit model
+"""
+
 from ROOT import RooGaussian, RooCBShape, RooRealVar, RooArgList, RooAddPdf
 
 class BackgroundModel(object):
