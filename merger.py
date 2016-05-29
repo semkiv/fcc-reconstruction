@@ -14,10 +14,10 @@ import argparse
 from array import array
 
 import ROOT
+ROOT.PyConfig.IgnoreCommandLineOptions = True # to prevent TApplication from capturing command line options and breaking argparse. It must be placed right after module import
 
 from ROOT import TFile, TTree
 
-ROOT.PyConfig.IgnoreCommandLineOptions = True # to prevent TApplication from capturing command line options and breaking argparse
 
 def merge(files_and_numbers, output_file_name, verbose):
     """
