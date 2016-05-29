@@ -65,7 +65,7 @@ def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max
     # Variables for RooFit
     b_mass = RooRealVar('mB', 'm_{B}', x_min, x_max)
     b_mass_data = RooDataSet('mB', 'm_{B} data', RooArgSet(b_mass)) # Storage for reconstructed B mass values
-    q_square = RooRealVar('q2', 'q^{2}', 12.5, 17.5)
+    q_square = RooRealVar('q2', 'q^{2}', 12.5, 22.5)
     q_square_data = RooDataSet('q2_data', 'q^{2} data', RooArgSet(q_square)) # q^2 values container
     error_p_tauplus_x = RooRealVar('error_p_tauplus_x', '#epsilon_{p_{#tau^{+}x}}', -2., 2.)
     error_p_tauplus_x_data = RooDataSet('error_p_tauplus_x_data', '#epsilon_{p_{#tau^{+}x}} data', RooArgSet(error_p_tauplus_x))
