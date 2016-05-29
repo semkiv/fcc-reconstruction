@@ -13,6 +13,7 @@ import argparse
 import time
 
 import ROOT
+ROOT.PyConfig.IgnoreCommandLineOptions = True # to prevent TApplication from capturing command line options and breaking argparse. It must be placed right after module import
 
 from ROOT import TFile, RooRealVar, RooArgList, RooArgSet, RooDataSet, RooAddPdf, RooCBShape, RooGaussian
 
@@ -20,8 +21,6 @@ from utility.common import reconstruct, show_plot
 from utility.UnreconstructableEventError import UnreconstructableEventError
 from utility.SignalModel import SignalModel
 from utility.BackgroundModel import BackgroundModel
-
-ROOT.PyConfig.IgnoreCommandLineOptions = True # to prevent TApplication from capturing command line options and breaking argparse
 
 # few constants
 NBINS = 100 # Number of bins in the histogram
