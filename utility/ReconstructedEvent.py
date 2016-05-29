@@ -21,6 +21,9 @@ class ReconstructedEvent(object):
         p_nu_tauplus (heppy_fcc.utility.Momentum): reconstructed momentum of the nu from tau+ decay
         p_tauminus (heppy_fcc.utility.Momentum): reconstructed tau- momentum
         p_nu_tauminus (heppy_fcc.utility.Momentum): reconstructed momentum of the nu from tau- decay
+
+        Methods:
+        q_square (float): calculates the q^2 of the event
     """
 
     def __init__(self, m_b = None, p_b = None, p_tauplus = None, p_nu_tauplus = None, p_tauminus = None, p_nu_tauminus = None):
