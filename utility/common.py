@@ -30,6 +30,9 @@ m_tau = 1.77684
 gROOT.ProcessLine('.x ' + os.environ.get('FCC') + 'lhcbstyle.C')
 gStyle.SetOptStat(0)
 
+def isclose(a, b, rel_tol = 1e-09, abs_tol = 0.0):
+    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
 def reconstruct(event, verbose = False):
     """
         A function that implements the reconstruction algorithm for a given event
@@ -169,18 +172,53 @@ def reconstruct(event, verbose = False):
                 print('p_tauminus_1_alt: {:.12f}'.format(p_tauminus_1_alt))
                 print('p_tauminus_2_alt: {:.12f}'.format(p_tauminus_2_alt))
 
-            # resolving ambiguity
-            min_diff = min(abs(p_tauminus_1 - p_tauminus_1_alt), abs(p_tauminus_1 - p_tauminus_2_alt), abs(p_tauminus_2 - p_tauminus_1_alt), abs(p_tauminus_2 - p_tauminus_2_alt))
-            if min_diff == abs(p_tauminus_1 - p_tauminus_1_alt):
+
+            rec_ev.p_tauplus_1 = p_tauplus_1
+            rec_ev.p_tauplus_2 = p_tauplus_2
+            rec_ev.p_tauminus_1 = p_tauminus_1
+            rec_ev.p_tauminus_2 = p_tauminus_2
+            rec_ev.p_tauminus_1_alt = p_tauminus_1_alt
+            rec_ev.p_tauminus_2_alt = p_tauminus_2_alt
+            rec_ev.p_nu_tauplus_1 = p_nu_tauplus_1
+            rec_ev.p_nu_tauplus_2 = p_nu_tauplus_2
+            rec_ev.p_nu_tauminus_1 = p_nu_tauminus_1
+            rec_ev.p_nu_tauminus_2 = p_nu_tauminus_2
+
+            p_B_11 = p_tauplus_1 * numpy.dot(e_tauplus, e_B) + p_tauminus_1 * numpy.dot(e_tauminus, e_B) + p_piK_par
+            rec_ev.p_b_11 = Momentum.fromlist(p_B_11 * e_B)
+            p_B_12 = p_tauplus_1 * numpy.dot(e_tauplus, e_B) + p_tauminus_2 * numpy.dot(e_tauminus, e_B) + p_piK_par
+            rec_ev.p_b_12 = Momentum.fromlist(p_B_12 * e_B)
+            p_B_21 = p_tauplus_2 * numpy.dot(e_tauplus, e_B) + p_tauminus_1 * numpy.dot(e_tauminus, e_B) + p_piK_par
+            rec_ev.p_b_21 = Momentum.fromlist(p_B_21 * e_B)
+            p_B_22 = p_tauplus_2 * numpy.dot(e_tauplus, e_B) + p_tauminus_2 * numpy.dot(e_tauminus, e_B) + p_piK_par
+            rec_ev.p_b_22 = Momentum.fromlist(p_B_22 * e_B)
+
+
+            # # resolving ambiguity
+            # min_rel_error = min(abs(p_tauminus_1 - p_tauminus_1_alt) / abs(p_tauminus_1), abs(p_tauminus_1 - p_tauminus_2_alt) / abs(p_tauminus_1), abs(p_tauminus_2 - p_tauminus_1_alt) / abs(p_tauminus_2), abs(p_tauminus_2 - p_tauminus_2_alt) / abs(p_tauminus_2))
+            # if isclose(min_rel_error, abs(p_tauminus_1 - p_tauminus_1_alt) / abs(p_tauminus_1)):
+            #     p_tauplus = p_tauplus_1
+            #     p_tauminus = p_tauminus_1
+            # elif isclose(min_rel_error, abs(p_tauminus_1 - p_tauminus_2_alt) / abs(p_tauminus_1)):
+            #     p_tauplus = p_tauplus_2
+            #     p_tauminus = p_tauminus_1
+            # elif isclose(min_rel_error, abs(p_tauminus_2 - p_tauminus_1_alt) / abs(p_tauminus_2)):
+            #     p_tauplus = p_tauplus_1
+            #     p_tauminus = p_tauminus_2
+            # elif isclose(min_rel_error, abs(p_tauminus_2 - p_tauminus_2_alt) / abs(p_tauminus_2)):
+            #     p_tauplus = p_tauplus_2
+            #     p_tauminus = p_tauminus_2
+
+            if isclose(p_B_11, min(p_B_11, p_B_12, p_B_21, p_B_22)):
                 p_tauplus = p_tauplus_1
                 p_tauminus = p_tauminus_1
-            elif min_diff == abs(p_tauminus_1 - p_tauminus_2_alt):
-                p_tauplus = p_tauplus_2
-                p_tauminus = p_tauminus_1
-            elif min_diff == abs(p_tauminus_2 - p_tauminus_1_alt):
+            elif isclose(p_B_12, min(p_B_11, p_B_12, p_B_21, p_B_22)):
                 p_tauplus = p_tauplus_1
                 p_tauminus = p_tauminus_2
-            elif min_diff == abs(p_tauminus_2 - p_tauminus_2_alt):
+            elif isclose(p_B_21, min(p_B_11, p_B_12, p_B_21, p_B_22)):
+                p_tauplus = p_tauplus_2
+                p_tauminus = p_tauminus_1
+            elif isclose(p_B_22, min(p_B_11, p_B_12, p_B_21, p_B_22)):
                 p_tauplus = p_tauplus_2
                 p_tauminus = p_tauminus_2
 
@@ -188,14 +226,14 @@ def reconstruct(event, verbose = False):
                 print('p_tauplus: {:.12f}'.format(p_tauplus))
                 print('p_tauminus: {:.12f}'.format(p_tauminus))
 
+            p_B = p_tauplus * numpy.dot(e_tauplus, e_B) + p_tauminus * numpy.dot(e_tauminus, e_B) + p_piK_par
+            rec_ev.p_b = Momentum.fromlist(p_B * e_B)
+            if verbose: print('B momentum: {:.12f}'.format(p_B))
+
             rec_ev.p_tauplus = Momentum.fromlist(p_tauplus * e_tauplus)
             rec_ev.p_nu_tauplus = Momentum.fromlist(p_tauplus * e_tauplus - p_pis_tauplus)
             rec_ev.p_tauminus = Momentum.fromlist(p_tauminus * e_tauminus)
             rec_ev.p_nu_tauminus = Momentum.fromlist(p_tauminus * e_tauminus - p_pis_tauminus)
-
-            p_B = p_tauplus * numpy.dot(e_tauplus, e_B) + p_tauminus * numpy.dot(e_tauminus, e_B) + p_piK_par
-            rec_ev.p_b = Momentum.fromlist(p_B * e_B)
-            if verbose: print('B momentum: {:.12f}'.format(p_B))
 
             E_piK = numpy.sqrt(m_pi ** 2 + numpy.linalg.norm(p_pi_K) ** 2) + numpy.sqrt(m_K ** 2 + numpy.linalg.norm(p_K) ** 2)
             E_tauplus = numpy.sqrt(m_tau ** 2 + p_tauplus ** 2)
@@ -204,6 +242,7 @@ def reconstruct(event, verbose = False):
             m_B = numpy.sqrt(E_tauplus ** 2 + E_tauminus ** 2 + E_piK ** 2 + 2 * (E_tauplus * E_tauminus + E_tauplus * E_piK + E_tauminus * E_piK) - p_B ** 2)
             rec_ev.m_b = m_B
             if verbose: print('B mass: {:.12f}'.format(m_B))
+
 
             return rec_ev
 
