@@ -71,45 +71,35 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
     #     q_square = RooRealVar('q2', 'q^{2}', 12.5, 22.5)
     #     q_square_data = RooDataSet('q2_data', 'q^{2} data', RooArgSet(q_square)) # q^2 values container
     #
-    # if plot_momentum_resolution:
-    #     error_p_tauplus_x = RooRealVar('error_p_tauplus_x', '#epsilon_{p_{#tau^{+}x}}', -2., 2.)
-    #     error_p_tauplus_x_data = RooDataSet('error_p_tauplus_x_data', '#epsilon_{p_{#tau^{+}x}} data', RooArgSet(error_p_tauplus_x))
-    #     error_p_tauplus_y = RooRealVar('error_p_tauplus_y', '#epsilon_{p_{#tau^{+}y}}', -2., 2.)
-    #     error_p_tauplus_y_data = RooDataSet('error_p_tauplus_y_data', '#epsilon_{p_{#tau^{+}y}} data', RooArgSet(error_p_tauplus_y))
-    #     error_p_tauplus_z = RooRealVar('error_p_tauplus_z', '#epsilon_{p_{#tau^{+}z}}', -2., 2.)
-    #     error_p_tauplus_z_data = RooDataSet('error_p_tauplus_z_data', '#epsilon_{p_{#tau^{+}z}} data', RooArgSet(error_p_tauplus_z))
-    #     error_p_tauminus_x = RooRealVar('error_p_tauminus_x', '#epsilon_{p_{#tau^{-}x}}', -2., 2.)
-    #     error_p_tauminus_x_data = RooDataSet('error_p_tauminus_x_data', '#epsilon_{p_{#tau^{-}x}} data', RooArgSet(error_p_tauminus_x))
-    #     error_p_tauminus_y = RooRealVar('error_p_tauminus_y', '#epsilon_{p_{#tau^{-}y}}', -2., 2.)
-    #     error_p_tauminus_y_data = RooDataSet('error_p_tauminus_y_data', '#epsilon_{p_{#tau^{-}y}} data', RooArgSet(error_p_tauminus_y))
-    #     error_p_tauminus_z = RooRealVar('error_p_tauminus_z', '#epsilon_{p_{#tau^{-}z}}', -2., 2.)
-    #     error_p_tauminus_z_data = RooDataSet('error_p_tauminus_z_data', '#epsilon_{p_{#tau^{-}z}} data', RooArgSet(error_p_tauminus_z))
-    #     error_p_nu_tauplus_x = RooRealVar('error_p_nu_tauplus_x', '#epsilon_{p_{#nu#tau^{+}x}}', -5., 5.)
-    #     error_p_nu_tauplus_x_data = RooDataSet('error_p_nu_tauplus_x_data', '#epsilon_{p_{#nu#tau^{+}x}} data', RooArgSet(error_p_nu_tauplus_x))
-    #     error_p_nu_tauplus_y = RooRealVar('error_p_nu_tauplus_y', '#epsilon_{p_{#nu#tau^{+}y}}', -5., 5.)
-    #     error_p_nu_tauplus_y_data = RooDataSet('error_p_nu_tauplus_y_data', '#epsilon_{p_{#nu#tau^{+}y}} data', RooArgSet(error_p_nu_tauplus_y))
-    #     error_p_nu_tauplus_z = RooRealVar('error_p_nu_tauplus_z', '#epsilon_{p_{#nu#tau^{+}z}}', -5., 5.)
-    #     error_p_nu_tauplus_z_data = RooDataSet('error_p_nu_tauplus_z_data', '#epsilon_{p_{#nu#tau^{+}z}} data', RooArgSet(error_p_nu_tauplus_z))
-    #     error_p_nu_tauminus_x = RooRealVar('error_p_nu_tauminus_x', '#epsilon_{p_{#nu#tau^{-}x}}', -5., 5.)
-    #     error_p_nu_tauminus_x_data = RooDataSet('error_p_nu_tauminus_x_data', '#epsilon_{p_{#nu#tau^{-}x}} data', RooArgSet(error_p_nu_tauminus_x))
-    #     error_p_nu_tauminus_y = RooRealVar('error_p_nu_tauminus_y', '#epsilon_{p_{#nu#tau^{-}y}}', -5., 5.)
-    #     error_p_nu_tauminus_y_data = RooDataSet('error_p_nu_tauminus_y_data', '#epsilon_{p_{#nu#tau^{-}y}} data', RooArgSet(error_p_nu_tauminus_y))
-    #     error_p_nu_tauminus_z = RooRealVar('error_p_nu_tauminus_z', '#epsilon_{p_{#nu#tau^{-}z}}', -5., 5.)
-    #     error_p_nu_tauminus_z_data = RooDataSet('error_p_nu_tauminus_z_data', '#epsilon_{p_{#nu#tau^{-}z}} data', RooArgSet(error_p_nu_tauminus_z))
-
-    p_tauplus_counter = 0
-    p_nu_tauplus_counter = 0
-    p_tauminus_counter = 0
-    p_nu_tauminus_counter = 0
-    p_tau_counter = 0
-    p_nu_tau_counter = 0
-    p_tauplus_p_nu_tauplus_counter = 0
-    p_tauminus_p_nu_tauminus_counter = 0
-    p_tau_p_nu_tau_counter = 0
+    if plot_momentum_resolution:
+        error_p_tauplus_x = RooRealVar('error_p_tauplus_x', '#epsilon_{p_{#tau^{+}x}}', -2., 2.)
+        error_p_tauplus_x_data = RooDataSet('error_p_tauplus_x_data', '#epsilon_{p_{#tau^{+}x}} data', RooArgSet(error_p_tauplus_x))
+        error_p_tauplus_y = RooRealVar('error_p_tauplus_y', '#epsilon_{p_{#tau^{+}y}}', -2., 2.)
+        error_p_tauplus_y_data = RooDataSet('error_p_tauplus_y_data', '#epsilon_{p_{#tau^{+}y}} data', RooArgSet(error_p_tauplus_y))
+        error_p_tauplus_z = RooRealVar('error_p_tauplus_z', '#epsilon_{p_{#tau^{+}z}}', -2., 2.)
+        error_p_tauplus_z_data = RooDataSet('error_p_tauplus_z_data', '#epsilon_{p_{#tau^{+}z}} data', RooArgSet(error_p_tauplus_z))
+        error_p_tauminus_x = RooRealVar('error_p_tauminus_x', '#epsilon_{p_{#tau^{-}x}}', -2., 2.)
+        error_p_tauminus_x_data = RooDataSet('error_p_tauminus_x_data', '#epsilon_{p_{#tau^{-}x}} data', RooArgSet(error_p_tauminus_x))
+        error_p_tauminus_y = RooRealVar('error_p_tauminus_y', '#epsilon_{p_{#tau^{-}y}}', -2., 2.)
+        error_p_tauminus_y_data = RooDataSet('error_p_tauminus_y_data', '#epsilon_{p_{#tau^{-}y}} data', RooArgSet(error_p_tauminus_y))
+        error_p_tauminus_z = RooRealVar('error_p_tauminus_z', '#epsilon_{p_{#tau^{-}z}}', -2., 2.)
+        error_p_tauminus_z_data = RooDataSet('error_p_tauminus_z_data', '#epsilon_{p_{#tau^{-}z}} data', RooArgSet(error_p_tauminus_z))
+        error_p_nu_tauplus_x = RooRealVar('error_p_nu_tauplus_x', '#epsilon_{p_{#nu#tau^{+}x}}', -5., 5.)
+        error_p_nu_tauplus_x_data = RooDataSet('error_p_nu_tauplus_x_data', '#epsilon_{p_{#nu#tau^{+}x}} data', RooArgSet(error_p_nu_tauplus_x))
+        error_p_nu_tauplus_y = RooRealVar('error_p_nu_tauplus_y', '#epsilon_{p_{#nu#tau^{+}y}}', -5., 5.)
+        error_p_nu_tauplus_y_data = RooDataSet('error_p_nu_tauplus_y_data', '#epsilon_{p_{#nu#tau^{+}y}} data', RooArgSet(error_p_nu_tauplus_y))
+        error_p_nu_tauplus_z = RooRealVar('error_p_nu_tauplus_z', '#epsilon_{p_{#nu#tau^{+}z}}', -5., 5.)
+        error_p_nu_tauplus_z_data = RooDataSet('error_p_nu_tauplus_z_data', '#epsilon_{p_{#nu#tau^{+}z}} data', RooArgSet(error_p_nu_tauplus_z))
+        error_p_nu_tauminus_x = RooRealVar('error_p_nu_tauminus_x', '#epsilon_{p_{#nu#tau^{-}x}}', -5., 5.)
+        error_p_nu_tauminus_x_data = RooDataSet('error_p_nu_tauminus_x_data', '#epsilon_{p_{#nu#tau^{-}x}} data', RooArgSet(error_p_nu_tauminus_x))
+        error_p_nu_tauminus_y = RooRealVar('error_p_nu_tauminus_y', '#epsilon_{p_{#nu#tau^{-}y}}', -5., 5.)
+        error_p_nu_tauminus_y_data = RooDataSet('error_p_nu_tauminus_y_data', '#epsilon_{p_{#nu#tau^{-}y}} data', RooArgSet(error_p_nu_tauminus_y))
+        error_p_nu_tauminus_z = RooRealVar('error_p_nu_tauminus_z', '#epsilon_{p_{#nu#tau^{-}z}}', -5., 5.)
+        error_p_nu_tauminus_z_data = RooDataSet('error_p_nu_tauminus_z_data', '#epsilon_{p_{#nu#tau^{-}z}} data', RooArgSet(error_p_nu_tauminus_z))
 
     # Loop through the events
     # for counter, (event, mc_event) in enumerate(zip(event_tree, mc_event_tree)): # this finest construction doesn't work for some reason
-    for counter in xrange(event_tree.GetEntries()): # so we have to use an old one
+    for counter in xrange(event_tree.GetEntries()): # so we have to use the old one
         if counter < max_events:
             event_tree.GetEntry(counter)
 
@@ -122,108 +112,52 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
                 last_timestamp = time.time()
 
             try:
-                rec_ev = reconstruct(event_tree, verbose)
+                rec_ev = reconstruct(event_tree, mc_event_tree, verbose)
                 reconstructable_events += 1
 
                 b_mass.setVal(rec_ev.m_b)
                 b_mass_data.add(RooArgSet(b_mass))
-
-                p_tauplus_true = math.sqrt(mc_event_tree.tauplus_px ** 2 + mc_event_tree.tauplus_py ** 2 + mc_event_tree.tauplus_pz ** 2)
-                p_tauminus_true = math.sqrt(mc_event_tree.tauminus_px ** 2 + mc_event_tree.tauminus_py ** 2 + mc_event_tree.tauminus_pz ** 2)
-                p_nu_tauplus_true = math.sqrt(mc_event_tree.nu_tauplus_px ** 2 + mc_event_tree.nu_tauplus_py ** 2 + mc_event_tree.nu_tauplus_pz ** 2)
-                p_nu_tauminus_true = math.sqrt(mc_event_tree.nu_tauminus_px ** 2 + mc_event_tree.nu_tauminus_py ** 2 + mc_event_tree.nu_tauminus_pz ** 2)
-                tauplus_ok = False
-                tauminus_ok = False
-                nu_tauplus_ok = False
-                nu_tauminus_ok = False
-
-                if isclose(abs(rec_ev.p_tauplus.absvalue() - p_tauplus_true), min(abs(p_tauplus_true - rec_ev.p_tauplus_1), abs(p_tauplus_true - rec_ev.p_tauplus_2))):
-                    # print('Event #{}. Wrong p_tau+'.format(counter))
-                    # print('tau+. p1: {}; p2: {}; true: {}; selected: {}'.format(rec_ev.p_tauplus_1, rec_ev.p_tauplus_2, p_tauplus_true, rec_ev.p_tauplus.absvalue()))
-                    # print('tau-. p1: {}; p2: {}; alt1: {}; alt2: {}; true: {}; selected: {}'.format(rec_ev.p_tauminus_1, rec_ev.p_tauminus_2, rec_ev.p_tauminus_1_alt, rec_ev.p_tauminus_2_alt, p_tauminus_true, rec_ev.p_tauminus.absvalue()))
-                    # print('11 | {:.3f} | {:.3f}'.format(abs(rec_ev.p_tauminus_1 - rec_ev.p_tauminus_1_alt), abs(rec_ev.p_tauminus_1 - rec_ev.p_tauminus_1_alt) / abs(rec_ev.p_tauminus_1)))
-                    # print('12 | {:.3f} | {:.3f}'.format(abs(rec_ev.p_tauminus_1 - rec_ev.p_tauminus_2_alt), abs(rec_ev.p_tauminus_1 - rec_ev.p_tauminus_2_alt) / abs(rec_ev.p_tauminus_1)))
-                    # print('21 | {:.3f} | {:.3f}'.format(abs(rec_ev.p_tauminus_2 - rec_ev.p_tauminus_1_alt), abs(rec_ev.p_tauminus_2 - rec_ev.p_tauminus_1_alt) / abs(rec_ev.p_tauminus_2)))
-                    # print('22 | {:.3f} | {:.3f}'.format(abs(rec_ev.p_tauminus_2 - rec_ev.p_tauminus_2_alt), abs(rec_ev.p_tauminus_2 - rec_ev.p_tauminus_2_alt) / abs(rec_ev.p_tauminus_2)))
-                    # print('p_B_11: {:5.3f} | p_B_12: {:5.3f}'.format(rec_ev.p_b_11.absvalue(), rec_ev.p_b_12.absvalue()))
-                    # print('p_B_21: {:5.3f} | p_B_22: {:5.3f}'.format(rec_ev.p_b_21.absvalue(), rec_ev.p_b_22.absvalue()))
-                    # print('p_B_true: {:.3f}'.format(math.sqrt(mc_event_tree.b_px ** 2 + mc_event_tree.b_py ** 2 + mc_event_tree.b_pz ** 2)))
-                    p_tauplus_counter += 1
-                    tauplus_ok = True
-                if isclose(abs(rec_ev.p_tauminus.absvalue() - p_tauminus_true), min(abs(p_tauminus_true - rec_ev.p_tauminus_1), abs(p_tauminus_true - rec_ev.p_tauminus_2))):
-                    # print('Event #{}. Wrong p_tau-'.format(counter))
-                    # print('tau-. p1: {}; p2: {}; alt1: {}; alt2: {}; true: {}; selected: {}'.format(rec_ev.p_tauminus_1, rec_ev.p_tauminus_2, rec_ev.p_tauminus_1_alt, rec_ev.p_tauminus_2_alt, p_tauminus_true, rec_ev.p_tauminus.absvalue()))
-                    # print('11 | {:.3f} | {:.3f}'.format(abs(rec_ev.p_tauminus_1 - rec_ev.p_tauminus_1_alt), abs(rec_ev.p_tauminus_1 - rec_ev.p_tauminus_1_alt) / abs(rec_ev.p_tauminus_1)))
-                    # print('12 | {:.3f} | {:.3f}'.format(abs(rec_ev.p_tauminus_1 - rec_ev.p_tauminus_2_alt), abs(rec_ev.p_tauminus_1 - rec_ev.p_tauminus_2_alt) / abs(rec_ev.p_tauminus_1)))
-                    # print('21 | {:.3f} | {:.3f}'.format(abs(rec_ev.p_tauminus_2 - rec_ev.p_tauminus_1_alt), abs(rec_ev.p_tauminus_2 - rec_ev.p_tauminus_1_alt) / abs(rec_ev.p_tauminus_2)))
-                    # print('22 | {:.3f} | {:.3f}'.format(abs(rec_ev.p_tauminus_2 - rec_ev.p_tauminus_2_alt), abs(rec_ev.p_tauminus_2 - rec_ev.p_tauminus_2_alt) / abs(rec_ev.p_tauminus_2)))
-                    # print('p_B_11: {:5.3f} | p_B_12: {:5.3f}'.format(rec_ev.p_b_11.absvalue(), rec_ev.p_b_12.absvalue()))
-                    # print('p_B_21: {:5.3f} | p_B_22: {:5.3f}'.format(rec_ev.p_b_21.absvalue(), rec_ev.p_b_22.absvalue()))
-                    # print('p_B_true: {:.3f}'.format(math.sqrt(mc_event_tree.b_px ** 2 + mc_event_tree.b_py ** 2 + mc_event_tree.b_pz ** 2)))
-                    p_tauminus_counter += 1
-                    tauminus_ok = True
-                if isclose(abs(rec_ev.p_tauplus.absvalue() - p_tauplus_true), min(abs(p_tauplus_true - rec_ev.p_tauplus_1), abs(p_tauplus_true - rec_ev.p_tauplus_2))) and isclose(abs(rec_ev.p_tauminus.absvalue() - p_tauminus_true), min(abs(p_tauminus_true - rec_ev.p_tauminus_1), abs(p_tauminus_true - rec_ev.p_tauminus_2))):
-                    p_tau_counter += 1
-
-                if isclose(abs(rec_ev.p_nu_tauplus.absvalue() - p_nu_tauplus_true), min(abs(p_nu_tauplus_true - rec_ev.p_nu_tauplus_1), abs(p_nu_tauplus_true - rec_ev.p_nu_tauplus_2))):
-                    # print('nu_tau+. p1: {}; p2: {}; true: {}; selected: {}'.format(rec_ev.p_nu_tauplus_1, rec_ev.p_nu_tauplus_2, p_nu_tauplus_true, rec_ev.p_nu_tauplus.absvalue()))
-                    p_nu_tauplus_counter += 1
-                    nu_tauplus_ok = True
-                if isclose(abs(rec_ev.p_nu_tauminus.absvalue() - p_nu_tauminus_true), min(abs(p_nu_tauminus_true - rec_ev.p_nu_tauminus_1), abs(p_nu_tauminus_true - rec_ev.p_nu_tauminus_2))):
-                    p_nu_tauminus_counter += 1
-                    nu_tauminus_ok = True
-                if isclose(abs(rec_ev.p_nu_tauplus.absvalue() - p_nu_tauplus_true), min(abs(p_nu_tauplus_true - rec_ev.p_nu_tauplus_1), abs(p_nu_tauplus_true - rec_ev.p_nu_tauplus_2))) and isclose(abs(rec_ev.p_nu_tauminus.absvalue() - p_nu_tauminus_true), min(abs(p_nu_tauminus_true - rec_ev.p_nu_tauminus_1), abs(p_nu_tauminus_true - rec_ev.p_nu_tauminus_2))):
-                    p_nu_tau_counter += 1
-
-                if tauplus_ok and nu_tauplus_ok:
-                    p_tauplus_p_nu_tauplus_counter += 1
-
-                if tauminus_ok and nu_tauminus_ok:
-                    p_tauminus_p_nu_tauminus_counter += 1
-
-                if tauplus_ok and nu_tauplus_ok and tauminus_ok and nu_tauminus_ok:
-                    p_tau_p_nu_tau_counter += 1
-
-                # if tauplus_ok != nu_tauplus_ok:
-                #     print('tau+. p1: {}; p2: {}; true: {}; selected: {}'.format(rec_ev.p_tauplus_1, rec_ev.p_tauplus_2, p_tauplus_true, rec_ev.p_tauplus.absvalue()))
-                #     print('nu_tau+. p1: {}; p2: {}; true: {}; selected: {}'.format(rec_ev.p_nu_tauplus_1, rec_ev.p_nu_tauplus_2, p_nu_tauplus_true, rec_ev.p_nu_tauplus.absvalue()))
-                #
-                # if tauminus_ok != nu_tauminus_ok:
-                #     print('tau-. p1: {}; p2: {}; true: {}; selected: {}'.format(rec_ev.p_tauminus_1, rec_ev.p_tauminus_2, p_tauminus_true, rec_ev.p_tauminus.absvalue()))
-                #     print('nu_tau-. p1: {}; p2: {}; true: {}; selected: {}'.format(rec_ev.p_nu_tauminus_1, rec_ev.p_nu_tauminus_2, p_nu_tauminus_true, rec_ev.p_nu_tauminus.absvalue()))
+                # b_mass.setVal(rec_ev.m_b_11)
+                # b_mass_data.add(RooArgSet(b_mass))
+                # b_mass.setVal(rec_ev.m_b_12)
+                # b_mass_data.add(RooArgSet(b_mass))
+                # b_mass.setVal(rec_ev.m_b_21)
+                # b_mass_data.add(RooArgSet(b_mass))
+                # b_mass.setVal(rec_ev.m_b_22)
+                # b_mass_data.add(RooArgSet(b_mass))
 
                 # if plot_q_square:
                 #     q_square.setVal(rec_ev.q_square())
                 #     q_square_data.add(RooArgSet(q_square))
                 #
-                # if plot_momentum_resolution:
-                #     error_p_tauplus_x.setVal((rec_ev.p_tauplus.px - mc_event_tree.tauplus_px) / mc_event_tree.tauplus_px)
-                #     error_p_tauplus_x_data.add(RooArgSet(error_p_tauplus_x))
-                #     error_p_tauplus_y.setVal((rec_ev.p_tauplus.py - mc_event_tree.tauplus_py) / mc_event_tree.tauplus_py)
-                #     error_p_tauplus_y_data.add(RooArgSet(error_p_tauplus_y))
-                #     error_p_tauplus_z.setVal((rec_ev.p_tauplus.pz - mc_event_tree.tauplus_pz) / mc_event_tree.tauplus_pz)
-                #     error_p_tauplus_z_data.add(RooArgSet(error_p_tauplus_z))
-                #
-                #     error_p_tauminus_x.setVal((rec_ev.p_tauminus.px - mc_event_tree.tauminus_px) / mc_event_tree.tauminus_px)
-                #     error_p_tauminus_x_data.add(RooArgSet(error_p_tauminus_x))
-                #     error_p_tauminus_y.setVal((rec_ev.p_tauminus.py - mc_event_tree.tauminus_py) / mc_event_tree.tauminus_py)
-                #     error_p_tauminus_y_data.add(RooArgSet(error_p_tauminus_y))
-                #     error_p_tauminus_z.setVal((rec_ev.p_tauminus.pz - mc_event_tree.tauminus_pz) / mc_event_tree.tauminus_pz)
-                #     error_p_tauminus_z_data.add(RooArgSet(error_p_tauminus_z))
-                #
-                #     error_p_nu_tauplus_x.setVal((rec_ev.p_nu_tauplus.px - mc_event_tree.nu_tauplus_px) / mc_event_tree.nu_tauplus_px)
-                #     error_p_nu_tauplus_x_data.add(RooArgSet(error_p_nu_tauplus_x))
-                #     error_p_nu_tauplus_y.setVal((rec_ev.p_nu_tauplus.py - mc_event_tree.nu_tauplus_py) / mc_event_tree.nu_tauplus_py)
-                #     error_p_nu_tauplus_y_data.add(RooArgSet(error_p_nu_tauplus_y))
-                #     error_p_nu_tauplus_z.setVal((rec_ev.p_nu_tauplus.pz - mc_event_tree.nu_tauplus_pz) / mc_event_tree.nu_tauplus_pz)
-                #     error_p_nu_tauplus_z_data.add(RooArgSet(error_p_nu_tauplus_z))
-                #
-                #     error_p_nu_tauminus_x.setVal((rec_ev.p_nu_tauminus.px - mc_event_tree.nu_tauminus_px) / mc_event_tree.nu_tauminus_px)
-                #     error_p_nu_tauminus_x_data.add(RooArgSet(error_p_nu_tauminus_x))
-                #     error_p_nu_tauminus_y.setVal((rec_ev.p_nu_tauminus.py - mc_event_tree.nu_tauminus_py) / mc_event_tree.nu_tauminus_py)
-                #     error_p_nu_tauminus_y_data.add(RooArgSet(error_p_nu_tauminus_y))
-                #     error_p_nu_tauminus_z.setVal((rec_ev.p_nu_tauminus.pz - mc_event_tree.nu_tauminus_pz) / mc_event_tree.nu_tauminus_pz)
-                #     error_p_nu_tauminus_z_data.add(RooArgSet(error_p_nu_tauminus_z))
+                if plot_momentum_resolution:
+                    error_p_tauplus_x.setVal((rec_ev.p_tauplus.px - mc_event_tree.tauplus_px) / mc_event_tree.tauplus_px)
+                    error_p_tauplus_x_data.add(RooArgSet(error_p_tauplus_x))
+                    error_p_tauplus_y.setVal((rec_ev.p_tauplus.py - mc_event_tree.tauplus_py) / mc_event_tree.tauplus_py)
+                    error_p_tauplus_y_data.add(RooArgSet(error_p_tauplus_y))
+                    error_p_tauplus_z.setVal((rec_ev.p_tauplus.pz - mc_event_tree.tauplus_pz) / mc_event_tree.tauplus_pz)
+                    error_p_tauplus_z_data.add(RooArgSet(error_p_tauplus_z))
+
+                    error_p_tauminus_x.setVal((rec_ev.p_tauminus.px - mc_event_tree.tauminus_px) / mc_event_tree.tauminus_px)
+                    error_p_tauminus_x_data.add(RooArgSet(error_p_tauminus_x))
+                    error_p_tauminus_y.setVal((rec_ev.p_tauminus.py - mc_event_tree.tauminus_py) / mc_event_tree.tauminus_py)
+                    error_p_tauminus_y_data.add(RooArgSet(error_p_tauminus_y))
+                    error_p_tauminus_z.setVal((rec_ev.p_tauminus.pz - mc_event_tree.tauminus_pz) / mc_event_tree.tauminus_pz)
+                    error_p_tauminus_z_data.add(RooArgSet(error_p_tauminus_z))
+
+                    error_p_nu_tauplus_x.setVal((rec_ev.p_nu_tauplus.px - mc_event_tree.nu_tauplus_px) / mc_event_tree.nu_tauplus_px)
+                    error_p_nu_tauplus_x_data.add(RooArgSet(error_p_nu_tauplus_x))
+                    error_p_nu_tauplus_y.setVal((rec_ev.p_nu_tauplus.py - mc_event_tree.nu_tauplus_py) / mc_event_tree.nu_tauplus_py)
+                    error_p_nu_tauplus_y_data.add(RooArgSet(error_p_nu_tauplus_y))
+                    error_p_nu_tauplus_z.setVal((rec_ev.p_nu_tauplus.pz - mc_event_tree.nu_tauplus_pz) / mc_event_tree.nu_tauplus_pz)
+                    error_p_nu_tauplus_z_data.add(RooArgSet(error_p_nu_tauplus_z))
+
+                    error_p_nu_tauminus_x.setVal((rec_ev.p_nu_tauminus.px - mc_event_tree.nu_tauminus_px) / mc_event_tree.nu_tauminus_px)
+                    error_p_nu_tauminus_x_data.add(RooArgSet(error_p_nu_tauminus_x))
+                    error_p_nu_tauminus_y.setVal((rec_ev.p_nu_tauminus.py - mc_event_tree.nu_tauminus_py) / mc_event_tree.nu_tauminus_py)
+                    error_p_nu_tauminus_y_data.add(RooArgSet(error_p_nu_tauminus_y))
+                    error_p_nu_tauminus_z.setVal((rec_ev.p_nu_tauminus.pz - mc_event_tree.nu_tauminus_pz) / mc_event_tree.nu_tauminus_pz)
+                    error_p_nu_tauminus_z_data.add(RooArgSet(error_p_nu_tauminus_z))
 
             except UnreconstructableEventError:
                 pass
@@ -236,15 +170,6 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
     print('Elapsed time: {:.1f} s ({:.1f} events / s)'.format(end_time - start_time, float(processed_events) / (end_time - start_time)))
     print('Reconstruction efficiency: {} / {} = {:.3f}'.format(reconstructable_events, processed_events, float(reconstructable_events) / processed_events))
 
-    print('Correctly selected tau+ momentum: {}'.format(p_tauplus_counter))
-    print('Correctly selected nu_tau+ momentum: {}'.format(p_nu_tauplus_counter))
-    print('Correctly selected both tau+ and nu_tau+ momenta: {}'.format(p_tauplus_p_nu_tauplus_counter))
-    print('Correctly selected tau- momentum: {}'.format(p_tauminus_counter))
-    print('Correctly selected nu_tau- momentum: {}'.format(p_nu_tauminus_counter))
-    print('Correctly selected both tau- and nu_tau- momenta: {}'.format(p_tauminus_p_nu_tauminus_counter))
-    print('Correctly selected both tau momenta: {}'.format(p_tau_counter))
-    print('Correctly selected both nu_tau momenta: {}'.format(p_nu_tau_counter))
-    print('Correctly selected all tau+, nu_tau+, tau- and nu_tau- momenta: {}'.format(p_tau_p_nu_tau_counter))
     if fit:
         if background:
             model = BackgroundModel(name = 'background_model',
@@ -278,22 +203,22 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
     # if plot_q_square:
     #     show_plot(q_square, q_square_data, 'GeV^{2}/#it{c}^{2}', n_bins)
     #
-    # if plot_momentum_resolution:
-    #     show_plot(error_p_tauplus_x, error_p_tauplus_x_data, None, n_bins)
-    #     show_plot(error_p_tauplus_y, error_p_tauplus_y_data, None, n_bins)
-    #     show_plot(error_p_tauplus_z, error_p_tauplus_z_data, None, n_bins)
-    #
-    #     show_plot(error_p_tauminus_x, error_p_tauminus_x_data, None, n_bins)
-    #     show_plot(error_p_tauminus_y, error_p_tauminus_y_data, None, n_bins)
-    #     show_plot(error_p_tauminus_z, error_p_tauminus_z_data, None, n_bins)
-    #
-    #     show_plot(error_p_nu_tauplus_x, error_p_nu_tauplus_x_data, None, n_bins)
-    #     show_plot(error_p_nu_tauplus_y, error_p_nu_tauplus_y_data, None, n_bins)
-    #     show_plot(error_p_nu_tauplus_z, error_p_nu_tauplus_z_data, None, n_bins)
-    #
-    #     show_plot(error_p_nu_tauminus_x, error_p_nu_tauminus_x_data, None, n_bins)
-    #     show_plot(error_p_nu_tauminus_y, error_p_nu_tauminus_y_data, None, n_bins)
-    #     show_plot(error_p_nu_tauminus_z, error_p_nu_tauminus_z_data, None, n_bins)
+    if plot_momentum_resolution:
+        show_plot(error_p_tauplus_x, error_p_tauplus_x_data, None, n_bins)
+        show_plot(error_p_tauplus_y, error_p_tauplus_y_data, None, n_bins)
+        show_plot(error_p_tauplus_z, error_p_tauplus_z_data, None, n_bins)
+
+        show_plot(error_p_tauminus_x, error_p_tauminus_x_data, None, n_bins)
+        show_plot(error_p_tauminus_y, error_p_tauminus_y_data, None, n_bins)
+        show_plot(error_p_tauminus_z, error_p_tauminus_z_data, None, n_bins)
+
+        show_plot(error_p_nu_tauplus_x, error_p_nu_tauplus_x_data, None, n_bins)
+        show_plot(error_p_nu_tauplus_y, error_p_nu_tauplus_y_data, None, n_bins)
+        show_plot(error_p_nu_tauplus_z, error_p_nu_tauplus_z_data, None, n_bins)
+
+        show_plot(error_p_nu_tauminus_x, error_p_nu_tauminus_x_data, None, n_bins)
+        show_plot(error_p_nu_tauminus_y, error_p_nu_tauminus_y_data, None, n_bins)
+        show_plot(error_p_nu_tauminus_z, error_p_nu_tauminus_z_data, None, n_bins)
 
 def main(argv):
     """The main function. Parses the command line arguments passed to the script and then runs the process function"""

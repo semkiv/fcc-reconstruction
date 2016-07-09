@@ -47,20 +47,23 @@ class ReconstructedEvent(object):
         self.p_nu_tauplus = p_nu_tauplus
         self.p_tauminus = p_tauminus
         self.p_nu_tauminus = p_nu_tauminus
-        self.p_tauplus_1 = None
-        self.p_tauplus_2 = None
-        self.p_tauminus_1 = None
-        self.p_tauminus_2 = None
-        self.p_tauminus_1_alt = None
-        self.p_tauminus_2_alt = None
-        self.p_nu_tauplus_1 = None
-        self.p_nu_tauplus_2 = None
-        self.p_nu_tauminus_1 = None
-        self.p_nu_tauminus_2 = None
-        self.p_b_11 = None
-        self.p_b_12 = None
-        self.p_b_21 = None
-        self.p_b_22 = None
+
+        self.m_b_11 = 0.
+        self.m_b_12 = 0.
+        self.m_b_21 = 0.
+        self.m_b_22 = 0.
+        self.p_b_11 = 0.
+        self.p_b_12 = 0.
+        self.p_b_21 = 0.
+        self.p_b_22 = 0.
+        self.p_tauplus_1 = 0.
+        self.p_tauplus_2 = 0.
+        self.p_tauminus_1 = 0.
+        self.p_tauminus_2 = 0.
+        self.p_nu_tauplus_1 = 0.
+        self.p_nu_tauplus_2 = 0.
+        self.p_nu_tauminus_1 = 0.
+        self.p_nu_tauminus_2 = 0.
 
     def q_square(self):
         """
