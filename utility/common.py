@@ -206,6 +206,8 @@ def reconstruct(event, mc_truth_event, verbose = False):
             rec_ev.p_nu_tauplus = Momentum.fromlist(p_tauplus * e_tauplus - p_pis_tauplus)
             rec_ev.p_nu_tauplus_1 = Momentum.fromlist(p_tauplus_1 * e_tauplus - p_pis_tauplus)
             rec_ev.p_nu_tauplus_2 = Momentum.fromlist(p_tauplus_2 * e_tauplus - p_pis_tauplus)
+            if ((rec_ev.p_nu_tauplus.px - mc_truth_event.nu_tauplus_px) / mc_truth_event.nu_tauplus_px > -1.1 and (rec_ev.p_nu_tauplus.px - mc_truth_event.nu_tauplus_px) / mc_truth_event.nu_tauplus_px < -0.9) or ((rec_ev.p_nu_tauplus.px - mc_truth_event.nu_tauplus_px) / mc_truth_event.nu_tauplus_px > 0.9 and (rec_ev.p_nu_tauplus.px - mc_truth_event.nu_tauplus_px) / mc_truth_event.nu_tauplus_px < 1.1):
+                print rec_ev.p_nu_tauplus_1.px, rec_ev.p_nu_tauplus_2.px, rec_ev.p_nu_tauplus.px, mc_truth_event.nu_tauplus_px, (rec_ev.p_nu_tauplus.px - mc_truth_event.nu_tauplus_px) / mc_truth_event.nu_tauplus_px
             rec_ev.p_tauminus = Momentum.fromlist(p_tauminus * e_tauminus)
             rec_ev.p_tauminus_1 = Momentum.fromlist(p_tauminus_1 * e_tauminus)
             rec_ev.p_tauminus_2 = Momentum.fromlist(p_tauminus_2 * e_tauminus)
