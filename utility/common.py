@@ -3,37 +3,45 @@
 """
     Contains a set of utility functions used in reconstruction process as well as some particle masses
 
-    m_pi - the mass of a pi meson
-    m_K - the mass of a K meson
-    m_tau - the mass of a tau lepton
+    M_PI - the mass of a pi meson
+    M_K - the mass of a K meson
+    M_TAU - the mass of a tau lepton
     reconstruct - a function that reconstructs the event
     show_plot - a function that visualizes reconstruction results by making plots
 """
 
 import os
+import sys
 import numpy
 import ROOT
 
 from ROOT import gROOT, gStyle, TCanvas, TPaveText, TPad, TLine, TLegend
+
+# This awkward construction serves to suppress the output at RooFit modules import
+devnull = open(os.devnull, 'w')
+old_stdout_fileno = os.dup(sys.stdout.fileno())
+os.dup2(devnull.fileno(), 1)
 from ROOT import RooFit, RooRealVar, RooArgList, RooGaussian, RooAddPdf
+devnull.close()
+os.dup2(old_stdout_fileno, 1)
 
 from UnreconstructableEventError import UnreconstructableEventError
 from ReconstructedEvent import ReconstructedEvent
 from heppy_fcc.utility.Momentum import Momentum
 
 # Masses of the particles
-m_pi = 0.13957018
-m_K = 0.493677
-m_tau = 1.77684
+M_PI = 0.13957018
+M_K = 0.493677
+M_TAU = 1.77684
 
 # Nice looking plots
 gROOT.ProcessLine('.x ' + os.environ.get('FCC') + 'lhcbstyle.C')
 gStyle.SetOptStat(0)
 
 def isclose(a, b, rel_tol = 1e-09, abs_tol = 0.0):
-    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+    return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
-def reconstruct(event, mc_truth_event, verbose = False):
+def reconstruct(event, mc_truth_event, verbose):
     """
         A function that implements the reconstruction algorithm for a given event
 
@@ -48,199 +56,182 @@ def reconstruct(event, mc_truth_event, verbose = False):
         UnreconstructableEventError: if the event cannot be reconstructed because of poor smeared values
     """
 
-    rec_ev = ReconstructedEvent()
-
     # Setting numpy precision
-    if verbose:
+    if verbose > 1:
         numpy.set_printoptions(12)
 
     pv = numpy.array([event.pv_x, event.pv_y, event.pv_z])
     sv = numpy.array([event.sv_x, event.sv_y, event.sv_z])
     tv_tauplus = numpy.array([event.tv_tauplus_x, event.tv_tauplus_y, event.tv_tauplus_z])
     tv_tauminus = numpy.array([event.tv_tauminus_x, event.tv_tauminus_y, event.tv_tauminus_z])
-    if verbose:
-        print('Primary vertex: {}'.format(pv))
-        print('Secondary vertex: {}'.format(sv))
-        print('Tertiary vertex (tau+): {}'.format(tv_tauplus))
-        print('Tertiary vertex (tau-): {}'.format(tv_tauminus))
 
     p_pi1_tauplus = numpy.array([event.pi1_tauplus_px, event.pi1_tauplus_py, event.pi1_tauplus_pz])
     p_pi2_tauplus = numpy.array([event.pi2_tauplus_px, event.pi2_tauplus_py, event.pi2_tauplus_pz])
     p_pi3_tauplus = numpy.array([event.pi3_tauplus_px, event.pi3_tauplus_py, event.pi3_tauplus_pz])
-    if verbose:
-        print('pi1_tau+ momentum: {}'.format(p_pi1_tauplus))
-        print('pi2_tau+ momentum: {}'.format(p_pi2_tauplus))
-        print('pi3_tau+ momentum: {}'.format(p_pi3_tauplus))
 
     p_pi1_tauminus = numpy.array([event.pi1_tauminus_px, event.pi1_tauminus_py, event.pi1_tauminus_pz])
     p_pi2_tauminus = numpy.array([event.pi2_tauminus_px, event.pi2_tauminus_py, event.pi2_tauminus_pz])
     p_pi3_tauminus = numpy.array([event.pi3_tauminus_px, event.pi3_tauminus_py, event.pi3_tauminus_pz])
-    if verbose:
-        print('pi1_tau- momentum: {}'.format(p_pi1_tauminus))
-        print('pi2_tau- momentum: {}'.format(p_pi2_tauminus))
-        print('pi3_tau- momentum: {}'.format(p_pi3_tauminus))
 
     p_pi_K = numpy.array([event.pi_kstar_px, event.pi_kstar_py, event.pi_kstar_pz])
     p_K = numpy.array([event.k_px, event.k_py, event.k_pz])
-    if verbose:
-        print('pi_kstar momentum: {}'.format(p_pi_K))
-        print('k momentum: {}'.format(p_K))
 
     # here comes just the implementation of kinematic equation
-    e_tauplus = (tv_tauplus - sv) / numpy.linalg.norm(tv_tauplus - sv)
-    e_tauminus = (tv_tauminus - sv) / numpy.linalg.norm(tv_tauminus - sv)
-    e_B = (sv - pv) / numpy.linalg.norm(sv - pv)
-    if verbose:
-        print('e_tau+: {}'.format(e_tauplus))
-        print('e_tau-: {}'.format(e_tauminus))
-        print('e_B: {}'.format(e_B))
+    kin_e_tauplus = (tv_tauplus - sv) / numpy.linalg.norm(tv_tauplus - sv)
+    kin_e_tauminus = (tv_tauminus - sv) / numpy.linalg.norm(tv_tauminus - sv)
+    kin_e_B = (sv - pv) / numpy.linalg.norm(sv - pv)
 
-    p_pis_tauplus = p_pi1_tauplus + p_pi2_tauplus + p_pi3_tauplus
-    if verbose: print('p_pis_tau+: {}'.format(p_pis_tauplus))
+    kin_p_pis_tauplus = p_pi1_tauplus + p_pi2_tauplus + p_pi3_tauplus
+    kin_p_pis_tauplus_par = numpy.dot(kin_p_pis_tauplus, kin_e_tauplus)
+    kin_p_pis_tauplus_perp_sqr = numpy.linalg.norm(kin_p_pis_tauplus) ** 2 - kin_p_pis_tauplus_par ** 2
 
-    p_pis_tauplus_par = numpy.dot(p_pis_tauplus, e_tauplus)
-    if verbose: print('p_pis_tau+_par: {}'.format(p_pis_tauplus_par))
+    kin_E_pis_tauplus = numpy.sqrt(M_PI ** 2 + numpy.linalg.norm(p_pi1_tauplus) ** 2) + numpy.sqrt(M_PI ** 2 + numpy.linalg.norm(p_pi2_tauplus) ** 2) + numpy.sqrt(M_PI ** 2 + numpy.linalg.norm(p_pi3_tauplus) ** 2)
 
-    p_pis_tauplus_perp_sqr = numpy.linalg.norm(p_pis_tauplus) ** 2 - p_pis_tauplus_par ** 2
-    if verbose: print('p_pis_tau+_perp^2: {}'.format(p_pis_tauplus_perp_sqr))
+    kin_C_tauplus_sqr = (M_TAU ** 2 - kin_E_pis_tauplus ** 2 - kin_p_pis_tauplus_perp_sqr + kin_p_pis_tauplus_par ** 2) / 2
 
-    E_pis_tauplus = numpy.sqrt(m_pi ** 2 + numpy.linalg.norm(p_pi1_tauplus) ** 2) + numpy.sqrt(m_pi ** 2 + numpy.linalg.norm(p_pi2_tauplus) ** 2) + numpy.sqrt(m_pi ** 2 + numpy.linalg.norm(p_pi3_tauplus) ** 2)
-    if verbose: print('E_pis_tau+: {:.12f}'.format(E_pis_tauplus))
-
-    C_tauplus_sqr = (m_tau ** 2 - E_pis_tauplus ** 2 - p_pis_tauplus_perp_sqr + p_pis_tauplus_par ** 2) / 2
-    if verbose: print('C_tau+^2: {:.12f}'.format(C_tauplus_sqr))
-
-    alpha_tauplus = C_tauplus_sqr * E_pis_tauplus / (E_pis_tauplus ** 2 - p_pis_tauplus_par ** 2)
-    if verbose: print('alpha_tau+: {:.12f}'.format(alpha_tauplus))
+    kin_alpha_tauplus = kin_C_tauplus_sqr * kin_E_pis_tauplus / (kin_E_pis_tauplus ** 2 - kin_p_pis_tauplus_par ** 2)
 
     # checking if the expression under the square root is not negative
-    if (p_pis_tauplus_perp_sqr * p_pis_tauplus_par ** 2 + C_tauplus_sqr ** 2 - E_pis_tauplus ** 2 * p_pis_tauplus_perp_sqr) >= 0:
-        beta_tauplus = p_pis_tauplus_par * numpy.sqrt(p_pis_tauplus_perp_sqr * p_pis_tauplus_par ** 2 + C_tauplus_sqr ** 2 - E_pis_tauplus ** 2 * p_pis_tauplus_perp_sqr) / (E_pis_tauplus ** 2 - p_pis_tauplus_par ** 2)
-        if verbose: print('beta_tau+: {:.12f}'.format(beta_tauplus))
+    if (kin_p_pis_tauplus_perp_sqr * kin_p_pis_tauplus_par ** 2 + kin_C_tauplus_sqr ** 2 - kin_E_pis_tauplus ** 2 * kin_p_pis_tauplus_perp_sqr) >= 0:
+        kin_beta_tauplus = kin_p_pis_tauplus_par * numpy.sqrt(kin_p_pis_tauplus_perp_sqr * kin_p_pis_tauplus_par ** 2 + kin_C_tauplus_sqr ** 2 - kin_E_pis_tauplus ** 2 * kin_p_pis_tauplus_perp_sqr) / (kin_E_pis_tauplus ** 2 - kin_p_pis_tauplus_par ** 2)
 
-        p_nu_tauplus_1 = alpha_tauplus + beta_tauplus
-        p_nu_tauplus_2 = alpha_tauplus - beta_tauplus
+        kin_p_nu_tauplus_1 = kin_alpha_tauplus + kin_beta_tauplus
+        kin_p_nu_tauplus_2 = kin_alpha_tauplus - kin_beta_tauplus
 
-        p_tauplus_1 = numpy.sqrt(E_pis_tauplus ** 2 + p_nu_tauplus_1 ** 2 + 2 * E_pis_tauplus * p_nu_tauplus_1 - m_tau ** 2)
-        p_tauplus_2 = numpy.sqrt(E_pis_tauplus ** 2 + p_nu_tauplus_2 ** 2 + 2 * E_pis_tauplus * p_nu_tauplus_2 - m_tau ** 2)
-        if verbose:
-            print('p_tau+_1: {:.12f}'.format(p_tauplus_1))
-            print('p_tau+_2: {:.12f}'.format(p_tauplus_2))
+        kin_p_tauplus_1 = numpy.sqrt(kin_E_pis_tauplus ** 2 + kin_p_nu_tauplus_1 ** 2 + 2 * kin_E_pis_tauplus * kin_p_nu_tauplus_1 - M_TAU ** 2)
+        kin_p_tauplus_2 = numpy.sqrt(kin_E_pis_tauplus ** 2 + kin_p_nu_tauplus_2 ** 2 + 2 * kin_E_pis_tauplus * kin_p_nu_tauplus_2 - M_TAU ** 2)
 
-        p_pis_tauminus = p_pi1_tauminus + p_pi2_tauminus + p_pi3_tauminus
-        if verbose: print('p_pis_tau-: {}'.format(p_pis_tauminus))
+        kin_p_pis_tauminus = p_pi1_tauminus + p_pi2_tauminus + p_pi3_tauminus
+        kin_p_pis_tauminus_par = numpy.dot(kin_p_pis_tauminus, kin_e_tauminus)
+        kin_p_pis_tauminus_perp_sqr = numpy.linalg.norm(kin_p_pis_tauminus) ** 2 - kin_p_pis_tauminus_par ** 2
 
-        p_pis_tauminus_par = numpy.dot(p_pis_tauminus, e_tauminus)
-        if verbose: print('p_pis_tau-_par: {}'.format(p_pis_tauminus_par))
+        kin_E_pis_tauminus = numpy.sqrt(M_PI ** 2 + numpy.linalg.norm(p_pi1_tauminus) ** 2) + numpy.sqrt(M_PI ** 2 + numpy.linalg.norm(p_pi2_tauminus) ** 2) + numpy.sqrt(M_PI ** 2 + numpy.linalg.norm(p_pi3_tauminus) ** 2)
 
-        p_pis_tauminus_perp_sqr = numpy.linalg.norm(p_pis_tauminus) ** 2 - p_pis_tauminus_par ** 2
-        if verbose: print('p_pis_tau-_perp^2: {}'.format(p_pis_tauminus_perp_sqr))
+        kin_C_tauminus_sqr = (M_TAU ** 2 - kin_E_pis_tauminus ** 2 - kin_p_pis_tauminus_perp_sqr + kin_p_pis_tauminus_par ** 2) / 2
 
-        E_pis_tauminus = numpy.sqrt(m_pi ** 2 + numpy.linalg.norm(p_pi1_tauminus) ** 2) + numpy.sqrt(m_pi ** 2 + numpy.linalg.norm(p_pi2_tauminus) ** 2) + numpy.sqrt(m_pi ** 2 + numpy.linalg.norm(p_pi3_tauminus) ** 2)
-        if verbose: print('E_pis_tau-: {:.12f}'.format(E_pis_tauminus))
-
-        C_tauminus_sqr = (m_tau ** 2 - E_pis_tauminus ** 2 - p_pis_tauminus_perp_sqr + p_pis_tauminus_par ** 2) / 2
-        if verbose: print 'C_tau-^2: {:.12f}'.format(C_tauminus_sqr)
-
-        alpha_tauminus = C_tauminus_sqr * E_pis_tauminus / (E_pis_tauminus ** 2 - p_pis_tauminus_par ** 2)
-        if verbose: print('alpha_tau-: {:.12f}'.format(alpha_tauminus))
+        kin_alpha_tauminus = kin_C_tauminus_sqr * kin_E_pis_tauminus / (kin_E_pis_tauminus ** 2 - kin_p_pis_tauminus_par ** 2)
 
         # checking if the expression under the square root is not negative
-        if (p_pis_tauminus_perp_sqr * p_pis_tauminus_par ** 2 + C_tauminus_sqr ** 2 - E_pis_tauminus ** 2 * p_pis_tauminus_perp_sqr) >= 0:
-            beta_tauminus = p_pis_tauminus_par * numpy.sqrt(p_pis_tauminus_perp_sqr * p_pis_tauminus_par ** 2 + C_tauminus_sqr ** 2 - E_pis_tauminus ** 2 * p_pis_tauminus_perp_sqr) / (E_pis_tauminus ** 2 - p_pis_tauminus_par ** 2)
-            if verbose: print('beta_tau-: {:.12f}'.format(beta_tauminus))
+        if (kin_p_pis_tauminus_perp_sqr * kin_p_pis_tauminus_par ** 2 + kin_C_tauminus_sqr ** 2 - kin_E_pis_tauminus ** 2 * kin_p_pis_tauminus_perp_sqr) >= 0:
+            kin_beta_tauminus = kin_p_pis_tauminus_par * numpy.sqrt(kin_p_pis_tauminus_perp_sqr * kin_p_pis_tauminus_par ** 2 + kin_C_tauminus_sqr ** 2 - kin_E_pis_tauminus ** 2 * kin_p_pis_tauminus_perp_sqr) / (kin_E_pis_tauminus ** 2 - kin_p_pis_tauminus_par ** 2)
 
-            p_nu_tauminus_1 = alpha_tauminus + beta_tauminus
-            p_nu_tauminus_2 = alpha_tauminus - beta_tauminus
+            kin_p_nu_tauminus_1 = kin_alpha_tauminus + kin_beta_tauminus
+            kin_p_nu_tauminus_2 = kin_alpha_tauminus - kin_beta_tauminus
 
-            p_tauminus_1 = numpy.sqrt(E_pis_tauminus ** 2 + p_nu_tauminus_1 ** 2 + 2 * E_pis_tauminus * p_nu_tauminus_1 - m_tau ** 2)
-            p_tauminus_2 = numpy.sqrt(E_pis_tauminus ** 2 + p_nu_tauminus_2 ** 2 + 2 * E_pis_tauminus * p_nu_tauminus_2 - m_tau ** 2)
-            if verbose:
-                print('p_tauminus_1: {:.12f}'.format(p_tauminus_1))
-                print('p_tauminus_2: {:.12f}'.format(p_tauminus_2))
+            kin_p_tauminus_1 = numpy.sqrt(kin_E_pis_tauminus ** 2 + kin_p_nu_tauminus_1 ** 2 + 2 * kin_E_pis_tauminus * kin_p_nu_tauminus_1 - M_TAU ** 2)
+            kin_p_tauminus_2 = numpy.sqrt(kin_E_pis_tauminus ** 2 + kin_p_nu_tauminus_2 ** 2 + 2 * kin_E_pis_tauminus * kin_p_nu_tauminus_2 - M_TAU ** 2)
 
-            A = - (numpy.dot(e_tauplus, e_tauminus) - numpy.dot(e_B, e_tauplus) * numpy.dot(e_B, e_tauminus)) / (1 - numpy.dot(e_B, e_tauminus) ** 2)
+            kin_A = - (numpy.dot(kin_e_tauplus, kin_e_tauminus) - numpy.dot(kin_e_B, kin_e_tauplus) * numpy.dot(kin_e_B, kin_e_tauminus)) / (1 - numpy.dot(kin_e_B, kin_e_tauminus) ** 2)
 
-            p_piK_perp = p_pi_K + p_K - numpy.dot((p_pi_K + p_K), e_B) * e_B
-            p_piK_par = numpy.dot((p_pi_K + p_K), e_B)
+            kin_p_piK_perp = p_pi_K + p_K - numpy.dot((p_pi_K + p_K), kin_e_B) * kin_e_B
+            kin_p_piK_par = numpy.dot((p_pi_K + p_K), kin_e_B)
 
-            B = - numpy.dot(p_piK_perp, (e_tauminus + numpy.dot(e_tauminus, e_B) * e_B)) / (1 - numpy.dot(e_B, e_tauminus) ** 2)
+            kin_B = - numpy.dot(kin_p_piK_perp, (kin_e_tauminus + numpy.dot(kin_e_tauminus, kin_e_B) * kin_e_B)) / (1 - numpy.dot(kin_e_B, kin_e_tauminus) ** 2)
 
-            p_tauminus_1_alt = A * p_tauplus_1 + B
-            p_tauminus_2_alt = A * p_tauplus_2 + B
-            if verbose:
-                print('p_tauminus_1_alt: {:.12f}'.format(p_tauminus_1_alt))
-                print('p_tauminus_2_alt: {:.12f}'.format(p_tauminus_2_alt))
-
+            kin_p_tauminus_1_alt = kin_A * kin_p_tauplus_1 + kin_B
+            kin_p_tauminus_2_alt = kin_A * kin_p_tauplus_2 + kin_B
 
             # resolving ambiguity
-            if isclose(abs(p_tauplus_1 - numpy.sqrt(mc_truth_event.tauplus_px ** 2 + mc_truth_event.tauplus_py ** 2 + mc_truth_event.tauplus_pz ** 2)), min(abs(p_tauplus_1 - numpy.sqrt(mc_truth_event.tauplus_px ** 2 + mc_truth_event.tauplus_py ** 2 + mc_truth_event.tauplus_pz ** 2)), abs(p_tauplus_2 - numpy.sqrt(mc_truth_event.tauplus_px ** 2 + mc_truth_event.tauplus_py ** 2 + mc_truth_event.tauplus_pz ** 2)))):
-                p_tauplus = p_tauplus_1
+            if isclose(abs(kin_p_tauplus_1 - numpy.linalg.norm([mc_truth_event.tauplus_px, mc_truth_event.tauplus_py, mc_truth_event.tauplus_pz])), min(abs(kin_p_tauplus_1 - numpy.linalg.norm([mc_truth_event.tauplus_px, mc_truth_event.tauplus_py, mc_truth_event.tauplus_pz])), abs(kin_p_tauplus_2 - numpy.linalg.norm([mc_truth_event.tauplus_px, mc_truth_event.tauplus_py, mc_truth_event.tauplus_pz])))):
+                kin_p_tauplus = kin_p_tauplus_1
             else:
-                p_tauplus = p_tauplus_2
+                kin_p_tauplus = kin_p_tauplus_2
 
-            if isclose(abs(p_tauminus_1 - numpy.sqrt(mc_truth_event.tauminus_px ** 2 + mc_truth_event.tauminus_py ** 2 + mc_truth_event.tauminus_pz ** 2)), min(abs(p_tauminus_1 - numpy.sqrt(mc_truth_event.tauminus_px ** 2 + mc_truth_event.tauminus_py ** 2 + mc_truth_event.tauminus_pz ** 2)), abs(p_tauminus_2 - numpy.sqrt(mc_truth_event.tauminus_px ** 2 + mc_truth_event.tauminus_py ** 2 + mc_truth_event.tauminus_pz ** 2)))):
-                p_tauminus = p_tauminus_1
+            if isclose(abs(kin_p_tauminus_1 - numpy.linalg.norm([mc_truth_event.tauminus_px, mc_truth_event.tauminus_py, mc_truth_event.tauminus_pz])), min(abs(kin_p_tauminus_1 - numpy.linalg.norm([mc_truth_event.tauminus_px, mc_truth_event.tauminus_py, mc_truth_event.tauminus_pz])), abs(kin_p_tauminus_2 - numpy.linalg.norm([mc_truth_event.tauminus_px, mc_truth_event.tauminus_py, mc_truth_event.tauminus_pz])))):
+                kin_p_tauminus = kin_p_tauminus_1
             else:
-                p_tauminus = p_tauminus_2
+                kin_p_tauminus = kin_p_tauminus_2
 
-            if verbose:
-                print('p_tauplus: {:.12f}'.format(p_tauplus))
-                print('p_tauminus: {:.12f}'.format(p_tauminus))
+            # resolving ambiguity (old way)
+            # min_diff = min(abs(kin_p_tauminus_1 - kin_p_tauminus_1_alt), abs(kin_p_tauminus_1 - kin_p_tauminus_2_alt), abs(kin_p_tauminus_2 - kin_p_tauminus_1_alt), abs(kin_p_tauminus_2 - kin_p_tauminus_2_alt))
+            # if min_diff == abs(kin_p_tauminus_1 - kin_p_tauminus_1_alt):
+            #     kin_p_tauplus = kin_p_tauplus_1
+            #     kin_p_tauminus = kin_p_tauminus_1
+            # elif min_diff == abs(kin_p_tauminus_1 - kin_p_tauminus_2_alt):
+            #     kin_p_tauplus = kin_p_tauplus_2
+            #     kin_p_tauminus = kin_p_tauminus_1
+            # elif min_diff == abs(kin_p_tauminus_2 - kin_p_tauminus_1_alt):
+            #     kin_p_tauplus = kin_p_tauplus_1
+            #     kin_p_tauminus = kin_p_tauminus_2
+            # elif min_diff == abs(kin_p_tauminus_2 - kin_p_tauminus_2_alt):
+            #     kin_p_tauplus = kin_p_tauplus_2
+            #     kin_p_tauminus = kin_p_tauminus_2
 
-            p_B = p_tauplus * numpy.dot(e_tauplus, e_B) + p_tauminus * numpy.dot(e_tauminus, e_B) + p_piK_par
-            p_B_11 = p_tauplus_1 * numpy.dot(e_tauplus, e_B) + p_tauminus_1 * numpy.dot(e_tauminus, e_B) + p_piK_par
-            p_B_12 = p_tauplus_1 * numpy.dot(e_tauplus, e_B) + p_tauminus_2 * numpy.dot(e_tauminus, e_B) + p_piK_par
-            p_B_21 = p_tauplus_2 * numpy.dot(e_tauplus, e_B) + p_tauminus_1 * numpy.dot(e_tauminus, e_B) + p_piK_par
-            p_B_22 = p_tauplus_2 * numpy.dot(e_tauplus, e_B) + p_tauminus_2 * numpy.dot(e_tauminus, e_B) + p_piK_par
-            rec_ev.p_b = Momentum.fromlist(p_B * e_B)
-            rec_ev.p_b_11 = Momentum.fromlist(p_B_11 * e_B)
-            rec_ev.p_b_12 = Momentum.fromlist(p_B_12 * e_B)
-            rec_ev.p_b_21 = Momentum.fromlist(p_B_21 * e_B)
-            rec_ev.p_b_22 = Momentum.fromlist(p_B_22 * e_B)
-            if verbose: print('B momentum: {:.12f}'.format(p_B))
+            kin_p_B_11 = kin_p_tauplus_1 * numpy.dot(kin_e_tauplus, kin_e_B) + kin_p_tauminus_1 * numpy.dot(kin_e_tauminus, kin_e_B) + kin_p_piK_par
+            kin_p_B_12 = kin_p_tauplus_1 * numpy.dot(kin_e_tauplus, kin_e_B) + kin_p_tauminus_2 * numpy.dot(kin_e_tauminus, kin_e_B) + kin_p_piK_par
+            kin_p_B_21 = kin_p_tauplus_2 * numpy.dot(kin_e_tauplus, kin_e_B) + kin_p_tauminus_1 * numpy.dot(kin_e_tauminus, kin_e_B) + kin_p_piK_par
+            kin_p_B_22 = kin_p_tauplus_2 * numpy.dot(kin_e_tauplus, kin_e_B) + kin_p_tauminus_2 * numpy.dot(kin_e_tauminus, kin_e_B) + kin_p_piK_par
+            kin_p_B = kin_p_tauplus * numpy.dot(kin_e_tauplus, kin_e_B) + kin_p_tauminus * numpy.dot(kin_e_tauminus, kin_e_B) + kin_p_piK_par
 
-            rec_ev.p_tauplus = Momentum.fromlist(p_tauplus * e_tauplus)
-            rec_ev.p_tauplus_1 = Momentum.fromlist(p_tauplus_1 * e_tauplus)
-            rec_ev.p_tauplus_2 = Momentum.fromlist(p_tauplus_2 * e_tauplus)
-            rec_ev.p_nu_tauplus = Momentum.fromlist(p_tauplus * e_tauplus - p_pis_tauplus)
-            rec_ev.p_nu_tauplus_1 = Momentum.fromlist(p_tauplus_1 * e_tauplus - p_pis_tauplus)
-            rec_ev.p_nu_tauplus_2 = Momentum.fromlist(p_tauplus_2 * e_tauplus - p_pis_tauplus)
-            if ((rec_ev.p_nu_tauplus.px - mc_truth_event.nu_tauplus_px) / mc_truth_event.nu_tauplus_px > -1.1 and (rec_ev.p_nu_tauplus.px - mc_truth_event.nu_tauplus_px) / mc_truth_event.nu_tauplus_px < -0.9) or ((rec_ev.p_nu_tauplus.px - mc_truth_event.nu_tauplus_px) / mc_truth_event.nu_tauplus_px > 0.9 and (rec_ev.p_nu_tauplus.px - mc_truth_event.nu_tauplus_px) / mc_truth_event.nu_tauplus_px < 1.1):
-                print rec_ev.p_nu_tauplus_1.px, rec_ev.p_nu_tauplus_2.px, rec_ev.p_nu_tauplus.px, mc_truth_event.nu_tauplus_px, (rec_ev.p_nu_tauplus.px - mc_truth_event.nu_tauplus_px) / mc_truth_event.nu_tauplus_px
-            rec_ev.p_tauminus = Momentum.fromlist(p_tauminus * e_tauminus)
-            rec_ev.p_tauminus_1 = Momentum.fromlist(p_tauminus_1 * e_tauminus)
-            rec_ev.p_tauminus_2 = Momentum.fromlist(p_tauminus_2 * e_tauminus)
-            rec_ev.p_nu_tauminus = Momentum.fromlist(p_tauminus * e_tauminus - p_pis_tauminus)
-            rec_ev.p_nu_tauminus_1 = Momentum.fromlist(p_tauminus_1 * e_tauminus - p_pis_tauminus)
-            rec_ev.p_nu_tauminus_2 = Momentum.fromlist(p_tauminus_2 * e_tauminus - p_pis_tauminus)
+            kin_E_piK = numpy.sqrt(M_PI ** 2 + numpy.linalg.norm(p_pi_K) ** 2) + numpy.sqrt(M_K ** 2 + numpy.linalg.norm(p_K) ** 2)
+            kin_E_tauplus_1 = numpy.sqrt(M_TAU ** 2 + kin_p_tauplus_1 ** 2)
+            kin_E_tauplus_2 = numpy.sqrt(M_TAU ** 2 + kin_p_tauplus_2 ** 2)
+            kin_E_tauminus_1 = numpy.sqrt(M_TAU ** 2 + kin_p_tauminus_1 ** 2)
+            kin_E_tauminus_2 = numpy.sqrt(M_TAU ** 2 + kin_p_tauminus_2 ** 2)
+            kin_E_tauplus = numpy.sqrt(M_TAU ** 2 + kin_p_tauplus ** 2)
+            kin_E_tauminus = numpy.sqrt(M_TAU ** 2 + kin_p_tauminus ** 2)
 
-            E_piK = numpy.sqrt(m_pi ** 2 + numpy.linalg.norm(p_pi_K) ** 2) + numpy.sqrt(m_K ** 2 + numpy.linalg.norm(p_K) ** 2)
-            E_tauplus = numpy.sqrt(m_tau ** 2 + p_tauplus ** 2)
-            E_tauplus_1 = numpy.sqrt(m_tau ** 2 + p_tauplus_1 ** 2)
-            E_tauplus_2 = numpy.sqrt(m_tau ** 2 + p_tauplus_2 ** 2)
-            E_tauminus = numpy.sqrt(m_tau ** 2 + p_tauminus ** 2)
-            E_tauminus_1 = numpy.sqrt(m_tau ** 2 + p_tauminus_1 ** 2)
-            E_tauminus_2 = numpy.sqrt(m_tau ** 2 + p_tauminus_2 ** 2)
+            kin_m_B_11 = numpy.sqrt(kin_E_tauplus_1 ** 2 + kin_E_tauminus_1 ** 2 + kin_E_piK ** 2 + 2 * (kin_E_tauplus_1 * kin_E_tauminus_1 + kin_E_tauplus_1 * kin_E_piK + kin_E_tauminus_1 * kin_E_piK) - kin_p_B_11 ** 2)
+            kin_m_B_12 = numpy.sqrt(kin_E_tauplus_1 ** 2 + kin_E_tauminus_2 ** 2 + kin_E_piK ** 2 + 2 * (kin_E_tauplus_1 * kin_E_tauminus_2 + kin_E_tauplus_1 * kin_E_piK + kin_E_tauminus_2 * kin_E_piK) - kin_p_B_12 ** 2)
+            kin_m_B_21 = numpy.sqrt(kin_E_tauplus_2 ** 2 + kin_E_tauminus_1 ** 2 + kin_E_piK ** 2 + 2 * (kin_E_tauplus_2 * kin_E_tauminus_1 + kin_E_tauplus_2 * kin_E_piK + kin_E_tauminus_1 * kin_E_piK) - kin_p_B_21 ** 2)
+            kin_m_B_22 = numpy.sqrt(kin_E_tauplus_2 ** 2 + kin_E_tauminus_2 ** 2 + kin_E_piK ** 2 + 2 * (kin_E_tauplus_2 * kin_E_tauminus_2 + kin_E_tauplus_2 * kin_E_piK + kin_E_tauminus_2 * kin_E_piK) - kin_p_B_22 ** 2)
+            kin_m_B = numpy.sqrt(kin_E_tauplus ** 2 + kin_E_tauminus ** 2 + kin_E_piK ** 2 + 2 * (kin_E_tauplus * kin_E_tauminus + kin_E_tauplus * kin_E_piK + kin_E_tauminus * kin_E_piK) - kin_p_B ** 2)
 
-            m_B = numpy.sqrt(E_tauplus ** 2 + E_tauminus ** 2 + E_piK ** 2 + 2 * (E_tauplus * E_tauminus + E_tauplus * E_piK + E_tauminus * E_piK) - p_B ** 2)
-            rec_ev.m_b = m_B
-            m_B_11 = numpy.sqrt(E_tauplus_1 ** 2 + E_tauminus_1 ** 2 + E_piK ** 2 + 2 * (E_tauplus_1 * E_tauminus_1 + E_tauplus_1 * E_piK + E_tauminus_1 * E_piK) - p_B_11 ** 2)
-            rec_ev.m_b_11 = m_B_11
-            m_B_12 = numpy.sqrt(E_tauplus_1 ** 2 + E_tauminus_2 ** 2 + E_piK ** 2 + 2 * (E_tauplus_1 * E_tauminus_2 + E_tauplus_1 * E_piK + E_tauminus_2 * E_piK) - p_B_12 ** 2)
-            rec_ev.m_b_12 = m_B_12
-            m_B_21 = numpy.sqrt(E_tauplus_2 ** 2 + E_tauminus_1 ** 2 + E_piK ** 2 + 2 * (E_tauplus_2 * E_tauminus_1 + E_tauplus_2 * E_piK + E_tauminus_1 * E_piK) - p_B_21 ** 2)
-            rec_ev.m_b_21 = m_B_21
-            m_B_22 = numpy.sqrt(E_tauplus_2 ** 2 + E_tauminus_2 ** 2 + E_piK ** 2 + 2 * (E_tauplus_2 * E_tauminus_2 + E_tauplus_2 * E_piK + E_tauminus_2 * E_piK) - p_B_22 ** 2)
-            rec_ev.m_b_22 = m_B_22
-            if verbose: print('B mass: {:.12f}'.format(m_B))
+            # Printing comprehensive information if needed
+            if verbose > 1:
+                print('Event under the hood:')
 
-            return rec_ev
+                print('Primary vertex: {}'.format(pv))
+                print('Secondary vertex: {}'.format(sv))
+                print('Tertiary vertex (tau+): {}'.format(tv_tauplus))
+                print('Tertiary vertex (tau-): {}'.format(tv_tauminus))
+                print('pi1_tau+ momentum: {}'.format(p_pi1_tauplus))
+                print('pi2_tau+ momentum: {}'.format(p_pi2_tauplus))
+                print('pi3_tau+ momentum: {}'.format(p_pi3_tauplus))
+                print('pi1_tau- momentum: {}'.format(p_pi1_tauminus))
+                print('pi2_tau- momentum: {}'.format(p_pi2_tauminus))
+                print('pi3_tau- momentum: {}'.format(p_pi3_tauminus))
+                print('pi_Kstar momentum: {}'.format(p_pi_K))
+                print('K momentum: {}'.format(p_K))
+
+                print('e_tau+: {}'.format(kin_e_tauplus))
+                print('e_tau-: {}'.format(kin_e_tauminus))
+                print('e_B: {}'.format(kin_e_B))
+                print('p_pis_tau+: {}'.format(kin_p_pis_tauplus))
+                print('p_pis_tau+_par: {:.12f}'.format(kin_p_pis_tauplus_par))
+                print('p_pis_tau+_perp^2: {:.12f}'.format(kin_p_pis_tauplus_perp_sqr))
+                print('E_pis_tau+: {:.12f}'.format(kin_E_pis_tauplus))
+                print('C_tau+^2: {:.12f}'.format(kin_C_tauplus_sqr))
+                print('alpha_tau+: {:.12f}'.format(kin_alpha_tauplus))
+                print('beta_tau+: {:.12f}'.format(kin_beta_tauplus))
+                print('p_nu_tau+_1: {:.12f}'.format(kin_p_nu_tauplus_1))
+                print('p_nu_tau+_2: {:.12f}'.format(kin_p_nu_tauplus_2))
+                print('p_tau+_1: {:.12f}'.format(kin_p_tauplus_1))
+                print('p_tau+_2: {:.12f}'.format(kin_p_tauplus_2))
+                print('p_pis_tau-: {}'.format(kin_p_pis_tauminus))
+                print('p_pis_tau-_par: {:.12f}'.format(kin_p_pis_tauminus_par))
+                print('p_pis_tau-_perp^2: {:.12f}'.format(kin_p_pis_tauminus_perp_sqr))
+                print('E_pis_tau-: {:.12f}'.format(kin_E_pis_tauminus))
+                print 'C_tau-^2: {:.12f}'.format(kin_C_tauminus_sqr)
+                print('alpha_tau-: {:.12f}'.format(kin_alpha_tauminus))
+                print('beta_tau-: {:.12f}'.format(kin_beta_tauminus))
+                print('p_nu_tau-_1: {:.12f}'.format(kin_p_nu_tauminus_1))
+                print('p_nu_tau-_2: {:.12f}'.format(kin_p_nu_tauminus_2))
+                print('p_tau-_1: {:.12f}'.format(kin_p_tauminus_1))
+                print('p_tau-_2: {:.12f}'.format(kin_p_tauminus_2))
+                print('p_tau-_1_alt: {:.12f}'.format(kin_p_tauminus_1_alt))
+                print('p_tau-_2_alt: {:.12f}'.format(kin_p_tauminus_2_alt))
+                print('p_tau+: {:.12f}'.format(kin_p_tauplus))
+                print('p_tau-: {:.12f}'.format(kin_p_tauminus))
+                print('B momentum: {:.12f}'.format(kin_p_B))
+                print('B mass: {:.12f}'.format(kin_m_B))
+
+            return ReconstructedEvent(kin_m_B, Momentum.fromlist(kin_p_B * kin_e_B), Momentum.fromlist(kin_p_tauplus * kin_e_tauplus), Momentum.fromlist(kin_p_tauminus * kin_e_tauminus), Momentum.fromlist(kin_p_tauplus * kin_e_tauplus - kin_p_pis_tauplus), Momentum.fromlist(kin_p_tauminus * kin_e_tauminus - kin_p_pis_tauminus))
 
         else:
-            raise UnreconstructableEventError()
+            raise UnreconstructableEventError("Event cannot be reconstructed because of ill-formed tau- vertex")
     else:
-        raise UnreconstructableEventError()
+        raise UnreconstructableEventError("Event cannot be reconstructed because of ill-formed tau+ vertex")
 
 def show_plot(var, data, units, n_bins = 100, fit = False, model = None, extended = False, components_to_plot = RooArgList(), draw_legend = False):
     """

@@ -12,11 +12,19 @@ import sys
 import argparse
 import time
 import math
+import os
 
 import ROOT
-ROOT.PyConfig.IgnoreCommandLineOptions = True # to prevent TApplication from capturing command line options and breaking argparse. It must be placed right after module import
+ROOT.PyConfig.IgnoreCommandLineOptions = True # To prevent TApplication from capturing command line options and breaking argparse. This line has to be the very first line of access of the ROOT module. If any other variables are touched before it, TApplication will be created, which takes the CLI options
+from ROOT import TFile
 
-from ROOT import TFile, RooRealVar, RooArgSet, RooDataSet
+# This awkward construction serves to suppress the output at RooFit modules import
+devnull = open(os.devnull, 'w')
+old_stdout_fileno = os.dup(sys.stdout.fileno())
+os.dup2(devnull.fileno(), 1)
+from ROOT import RooRealVar, RooArgSet, RooDataSet
+devnull.close()
+os.dup2(old_stdout_fileno, 1)
 
 from utility.common import isclose, reconstruct, show_plot
 from utility.UnreconstructableEventError import UnreconstructableEventError
@@ -62,7 +70,6 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
     # Event counters
     processed_events = 0 # Number of processed events
     reconstructable_events = 0 # Events with valid tau+ and tau- decay vertex
-
     # Variables for RooFit
     b_mass = RooRealVar('mB', 'm_{B}', x_min, x_max)
     b_mass_data = RooDataSet('mB', 'm_{B} data', RooArgSet(b_mass)) # Storage for reconstructed B mass values
@@ -98,8 +105,8 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
         error_p_nu_tauminus_z_data = RooDataSet('error_p_nu_tauminus_z_data', '#epsilon_{p_{#nu#tau^{-}z}} data', RooArgSet(error_p_nu_tauminus_z))
 
     # Loop through the events
-    # for counter, (event, mc_event) in enumerate(zip(event_tree, mc_event_tree)): # this finest construction doesn't work for some reason
-    for counter in xrange(event_tree.GetEntries()): # so we have to use the old one
+    # for counter, (event, mc_event) in enumerate(zip(event_tree, mc_event_tree)): # This finest construction doesn't work for some reason
+    for counter in xrange(event_tree.GetEntries()): # So we have to use the old one
         if counter < max_events:
             event_tree.GetEntry(counter)
 
@@ -107,7 +114,7 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
             mc_event_tree.GetEntry(counter)
 
             processed_events += 1
-            if (counter + 1) % 100 == 0: # print status message every 100 events
+            if (counter + 1) % 100 == 0 and verbose > 0: # Print status message every 100 events
                 print('Processing event {} ({:.1f} events / s)'.format(counter + 1, 100. / (time.time() - last_timestamp)))
                 last_timestamp = time.time()
 
@@ -165,10 +172,11 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
     end_time = time.time()
 
 
-    # printing some useful statistics
-    print('{} events have been processed'.format(processed_events))
-    print('Elapsed time: {:.1f} s ({:.1f} events / s)'.format(end_time - start_time, float(processed_events) / (end_time - start_time)))
-    print('Reconstruction efficiency: {} / {} = {:.3f}'.format(reconstructable_events, processed_events, float(reconstructable_events) / processed_events))
+    # Printing some useful statistics
+    if verbose > 0:
+        print('{} events have been processed'.format(processed_events))
+        print('Elapsed time: {:.1f} s ({:.1f} events / s)'.format(end_time - start_time, float(processed_events) / (end_time - start_time)))
+        print('Reconstruction efficiency: {} / {} = {:.3f}'.format(reconstructable_events, processed_events, float(reconstructable_events) / processed_events))
 
     if fit:
         if background:
@@ -233,7 +241,7 @@ def main(argv):
     parser.add_argument('-q', '--q-square', action = 'store_true', help = 'plot q^2 distribution')
     parser.add_argument('-r', '--momentum-resolution', action = 'store_true', help = 'plot tau and neutrino momentum resolution distribution')
     parser.add_argument('-m', '--mctree', type = str, default = 'MCTruth', help = 'name of the tree with Monte-Carlo truth events')
-    parser.add_argument('-v', '--verbose', action = 'store_true', help = 'run with increased verbosity')
+    parser.add_argument('-v', '--verbose', type = int, default = 1, help = 'verbosity level')
 
     args = parser.parse_args()
     max_events = args.nevents if args.nevents else sys.maxint

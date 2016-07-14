@@ -26,7 +26,7 @@ class ReconstructedEvent(object):
         q_square (float): calculates the q^2 of the event
     """
 
-    def __init__(self, m_b = None, p_b = None, p_tauplus = None, p_nu_tauplus = None, p_tauminus = None, p_nu_tauminus = None):
+    def __init__(self, m_b = None, p_b = None, p_tauplus = None, p_tauminus = None, p_nu_tauplus = None, p_nu_tauminus = None):
         """
             Constructor
 
@@ -34,8 +34,8 @@ class ReconstructedEvent(object):
             m_b (optional, [float]): reconstructed B0 mass. Defaults to None
             p_b (optional, [heppy_fcc.utility.Momentum]): reconstructed B0 momentum. Defaults to None
             p_tauplus (optional, [heppy_fcc.utility.Momentum]): reconstructed tau+ momentum. Defaults to None
-            p_nu_tauplus (optional, [heppy_fcc.utility.Momentum]): reconstructed momentum of the nu from tau+ decay. Defaults to None
             p_tauminus (optional, [heppy_fcc.utility.Momentum]): reconstructed tau- momentum. Defaults to None
+            p_nu_tauplus (optional, [heppy_fcc.utility.Momentum]): reconstructed momentum of the nu from tau+ decay. Defaults to None
             p_nu_tauminus (optional, [heppy_fcc.utility.Momentum]): reconstructed momentum of the nu from tau- decay. Defaults to None
         """
 
@@ -48,22 +48,22 @@ class ReconstructedEvent(object):
         self.p_tauminus = p_tauminus
         self.p_nu_tauminus = p_nu_tauminus
 
-        self.m_b_11 = 0.
-        self.m_b_12 = 0.
-        self.m_b_21 = 0.
-        self.m_b_22 = 0.
-        self.p_b_11 = 0.
-        self.p_b_12 = 0.
-        self.p_b_21 = 0.
-        self.p_b_22 = 0.
-        self.p_tauplus_1 = 0.
-        self.p_tauplus_2 = 0.
-        self.p_tauminus_1 = 0.
-        self.p_tauminus_2 = 0.
-        self.p_nu_tauplus_1 = 0.
-        self.p_nu_tauplus_2 = 0.
-        self.p_nu_tauminus_1 = 0.
-        self.p_nu_tauminus_2 = 0.
+        # self.m_b_11 = 0.
+        # self.m_b_12 = 0.
+        # self.m_b_21 = 0.
+        # self.m_b_22 = 0.
+        # self.p_b_11 = 0.
+        # self.p_b_12 = 0.
+        # self.p_b_21 = 0.
+        # self.p_b_22 = 0.
+        # self.p_tauplus_1 = 0.
+        # self.p_tauplus_2 = 0.
+        # self.p_tauminus_1 = 0.
+        # self.p_tauminus_2 = 0.
+        # self.p_nu_tauplus_1 = 0.
+        # self.p_nu_tauplus_2 = 0.
+        # self.p_nu_tauminus_1 = 0.
+        # self.p_nu_tauminus_2 = 0.
 
     def q_square(self):
         """
