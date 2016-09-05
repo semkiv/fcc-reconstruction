@@ -74,10 +74,10 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
     b_mass = RooRealVar('mB', 'm_{B}', x_min, x_max)
     b_mass_data = RooDataSet('mB', 'm_{B} data', RooArgSet(b_mass)) # Storage for reconstructed B mass values
 
-    # if plot_q_square:
-    #     q_square = RooRealVar('q2', 'q^{2}', 12.5, 22.5)
-    #     q_square_data = RooDataSet('q2_data', 'q^{2} data', RooArgSet(q_square)) # q^2 values container
-    #
+    if plot_q_square:
+        q_square = RooRealVar('q2', 'q^{2}', 12.5, 22.5)
+        q_square_data = RooDataSet('q2_data', 'q^{2} data', RooArgSet(q_square)) # q^2 values container
+
     if plot_momentum_resolution:
         error_p_tauplus_x = RooRealVar('error_p_tauplus_x', '#epsilon_{p_{#tau^{+}x}}', -2., 2.)
         error_p_tauplus_x_data = RooDataSet('error_p_tauplus_x_data', '#epsilon_{p_{#tau^{+}x}} data', RooArgSet(error_p_tauplus_x))
@@ -106,6 +106,10 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
 
     # Loop through the events
     # for counter, (event, mc_event) in enumerate(zip(event_tree, mc_event_tree)): # This finest construction doesn't work for some reason
+    # tauplus_ok_counter = 0
+    # tauminus_ok_counter = 0
+    # tau_ok_counter =
+    # ok_counter = 0
     for counter in xrange(event_tree.GetEntries()): # So we have to use the old one
         if counter < max_events:
             event_tree.GetEntry(counter)
@@ -133,10 +137,19 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
                 # b_mass.setVal(rec_ev.m_b_22)
                 # b_mass_data.add(RooArgSet(b_mass))
 
-                # if plot_q_square:
-                #     q_square.setVal(rec_ev.q_square())
-                #     q_square_data.add(RooArgSet(q_square))
+                # if rec_ev.tauplus_ok:
+                #     tauplus_ok_counter += 1
                 #
+                # if rec_ev.tauminus_ok:
+                #     tauminus_ok_counter += 1
+                #
+                # if rec_ev.tauplus_ok and rec_ev.tauminus_ok:
+                #     tau_ok_counter += 1
+
+                if plot_q_square:
+                    q_square.setVal(rec_ev.q_square())
+                    q_square_data.add(RooArgSet(q_square))
+
                 if plot_momentum_resolution:
                     error_p_tauplus_x.setVal((rec_ev.p_tauplus.px - mc_event_tree.tauplus_px) / mc_event_tree.tauplus_px)
                     error_p_tauplus_x_data.add(RooArgSet(error_p_tauplus_x))
@@ -178,6 +191,10 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
         print('Elapsed time: {:.1f} s ({:.1f} events / s)'.format(end_time - start_time, float(processed_events) / (end_time - start_time)))
         print('Reconstruction efficiency: {} / {} = {:.3f}'.format(reconstructable_events, processed_events, float(reconstructable_events) / processed_events))
 
+        # print('Correct tau+: {} ({:.1f} %)'.format(tauplus_ok_counter, float(tauplus_ok_counter) * 100 / reconstructable_events))
+        # print('Correct tau-: {} ({:.1f} %)'.format(tauminus_ok_counter, float(tauminus_ok_counter) * 100 / reconstructable_events))
+        # print('Correct tau+ and tau-: {} ({:.1f} %)'.format(tau_ok_counter, float(tau_ok_counter) * 100 / reconstructable_events))
+
     if fit:
         if background:
             model = BackgroundModel(name = 'background_model',
@@ -188,8 +205,7 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
                                     width_gauss = RooRealVar('width_gauss', '#sigma_{Gauss}', 0.2, 0.02, 1.),
                                     alpha = RooRealVar('alpha_cb', '#alpha_{CB}', -1., -10., -0.1),
                                     n = RooRealVar('n_cb', 'n_{CB}', 1., 0., 10.),
-                                    gauss_fraction = RooRealVar('background_model_gauss_fraction', 'Fraction of Gaussian in Background Model', 0.3, 0.01, 1.)
-                                    )
+                                    gauss_fraction = RooRealVar('background_model_gauss_fraction', 'Fraction of Gaussian in Background Model', 0.3, 0.01, 1.))
         else:
             model = SignalModel(name = 'signal_model',
                                 title = 'Signal Model',
@@ -200,17 +216,16 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
                                 alpha = RooRealVar('alpha', '#alpha', -1., -10., -0.1),
                                 n = RooRealVar('n', 'n', 2., 0.1, 10.),
                                 narrow_gauss_fraction = RooRealVar('signal_model_narrow_gauss_fraction', 'Fraction of Narrow Gaussian in Signal Model', 0.3, 0.01, 1.),
-                                cb_fraction = RooRealVar('signal_model_cb_fraction', 'Fraction of Crystal Ball Shape in Signal Model', 0.3, 0.01, 1.)
-                                )
+                                cb_fraction = RooRealVar('signal_model_cb_fraction', 'Fraction of Crystal Ball Shape in Signal Model', 0.3, 0.01, 1.))
 
         show_plot(b_mass, b_mass_data, 'GeV/#it{c}^{2}', n_bins, fit, model.pdf, extended = False, components_to_plot = model.components, draw_legend = draw_legend)
 
     else:
         show_plot(b_mass, b_mass_data, 'GeV/#it{c}^{2}', n_bins)
 
-    # if plot_q_square:
-    #     show_plot(q_square, q_square_data, 'GeV^{2}/#it{c}^{2}', n_bins)
-    #
+    if plot_q_square:
+        show_plot(q_square, q_square_data, 'GeV^{2}/#it{c}^{2}', n_bins)
+
     if plot_momentum_resolution:
         show_plot(error_p_tauplus_x, error_p_tauplus_x_data, None, n_bins)
         show_plot(error_p_tauplus_y, error_p_tauplus_y_data, None, n_bins)
