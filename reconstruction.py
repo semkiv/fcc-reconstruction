@@ -72,7 +72,7 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
     reconstructable_events = 0 # Events with valid tau+ and tau- decay vertex
     # Variables for RooFit
     b_mass = RooRealVar('mB', 'm_{B}', x_min, x_max)
-    b_mass_data = RooDataSet('mB', 'm_{B} data', RooArgSet(b_mass)) # Storage for reconstructed B mass values
+    b_mass_data = RooDataSet('mB_data', 'm_{B} data', RooArgSet(b_mass)) # Storage for reconstructed B mass values
 
     if plot_q_square:
         q_square = RooRealVar('q2', 'q^{2}', 12.5, 22.5)
@@ -105,11 +105,6 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
         error_p_nu_tauminus_z_data = RooDataSet('error_p_nu_tauminus_z_data', '#epsilon_{p_{#nu#tau^{-}z}} data', RooArgSet(error_p_nu_tauminus_z))
 
     # Loop through the events
-    # for counter, (event, mc_event) in enumerate(zip(event_tree, mc_event_tree)): # This finest construction doesn't work for some reason
-    # tauplus_ok_counter = 0
-    # tauminus_ok_counter = 0
-    # tau_ok_counter =
-    # ok_counter = 0
     for counter in xrange(event_tree.GetEntries()): # So we have to use the old one
         if counter < max_events:
             event_tree.GetEntry(counter)
@@ -123,28 +118,13 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
                 last_timestamp = time.time()
 
             try:
-                rec_ev = reconstruct(event_tree, mc_event_tree, verbose)
+                rec_ev = reconstruct(event_tree, verbose
+                # , mc_event_tree
+                )
                 reconstructable_events += 1
 
                 b_mass.setVal(rec_ev.m_b)
                 b_mass_data.add(RooArgSet(b_mass))
-                # b_mass.setVal(rec_ev.m_b_11)
-                # b_mass_data.add(RooArgSet(b_mass))
-                # b_mass.setVal(rec_ev.m_b_12)
-                # b_mass_data.add(RooArgSet(b_mass))
-                # b_mass.setVal(rec_ev.m_b_21)
-                # b_mass_data.add(RooArgSet(b_mass))
-                # b_mass.setVal(rec_ev.m_b_22)
-                # b_mass_data.add(RooArgSet(b_mass))
-
-                # if rec_ev.tauplus_ok:
-                #     tauplus_ok_counter += 1
-                #
-                # if rec_ev.tauminus_ok:
-                #     tauminus_ok_counter += 1
-                #
-                # if rec_ev.tauplus_ok and rec_ev.tauminus_ok:
-                #     tau_ok_counter += 1
 
                 if plot_q_square:
                     q_square.setVal(rec_ev.q_square())
@@ -190,10 +170,6 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
         print('{} events have been processed'.format(processed_events))
         print('Elapsed time: {:.1f} s ({:.1f} events / s)'.format(end_time - start_time, float(processed_events) / (end_time - start_time)))
         print('Reconstruction efficiency: {} / {} = {:.3f}'.format(reconstructable_events, processed_events, float(reconstructable_events) / processed_events))
-
-        # print('Correct tau+: {} ({:.1f} %)'.format(tauplus_ok_counter, float(tauplus_ok_counter) * 100 / reconstructable_events))
-        # print('Correct tau-: {} ({:.1f} %)'.format(tauminus_ok_counter, float(tauminus_ok_counter) * 100 / reconstructable_events))
-        # print('Correct tau+ and tau-: {} ({:.1f} %)'.format(tau_ok_counter, float(tau_ok_counter) * 100 / reconstructable_events))
 
     if fit:
         if background:
