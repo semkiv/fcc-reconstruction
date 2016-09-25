@@ -38,13 +38,15 @@ XMAX = 6.5 # Right bound of the histogram
 PEAK_MIN = 4.7 # Minimum value of the peak
 PEAK_MAX = 5.5 # Maximum value of the peak
 
-def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, background, peak_x_min, peak_x_max, draw_legend, plot_q_square, plot_momentum_resolution, mc_tree_name, verbose):
+def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max, fit, background, peak_x_min, peak_x_max, draw_legend, plot_q_square, plot_momentum_resolution, verbose):
     """
         A function that forms the main logic of the script
 
         Args:
         file_name (str): the name of the file to process
         tree_name (str): the name of the tree to process
+        mc_tree_name (str): the name of the MC tree (used for momentum resolution)
+        max_events (int): the maximum number of events that will be processed
         n_bins (int): the number of bins to be used in the histogram
         x_min (float): the left bound of the histogram
         x_max (float): the right bound of the histogram
@@ -55,7 +57,6 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
         draw_legend (bool): the flag that determines whether the histogram legend will be drawn
         plot_q_square (bool): the flag that determines whether the q^2 distribution will be plotted
         plot_momentum_resolution (bool): the flag that determines whether the tau and neutrino momentum resolution distributions will be plotted
-        max_events (int): the maximum number of events that will be processed
         verbose (bool): the flag that switches inreased verbosity
     """
 
@@ -109,8 +110,8 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
         if counter < max_events:
             event_tree.GetEntry(counter)
 
-            # if plot_momentum_resolution:
-            mc_event_tree.GetEntry(counter)
+            if plot_momentum_resolution:
+                mc_event_tree.GetEntry(counter)
 
             processed_events += 1
             if (counter + 1) % 100 == 0 and verbose > 0: # Print status message every 100 events
@@ -118,9 +119,7 @@ def process(file_name, tree_name, max_events, n_bins, x_min, x_max, fit, backgro
                 last_timestamp = time.time()
 
             try:
-                rec_ev = reconstruct(event_tree, verbose
-                # , mc_event_tree
-                )
+                rec_ev = reconstruct(event_tree, verbose)
                 reconstructable_events += 1
 
                 b_mass.setVal(rec_ev.m_b)
@@ -225,19 +224,19 @@ def main(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input-file', required = True, help = 'name of the file to process')
     parser.add_argument('-t', '--tree', type = str, default = 'Events', help = 'name of the event tree')
+    parser.add_argument('-m', '--mctree', type = str, default = 'MCTruth', help = 'name of the tree with Monte-Carlo truth events')
     parser.add_argument('-n', '--nevents', type = int, help = 'maximum number of events to process')
     parser.add_argument('-f', '--fit', action = 'store_true', help = 'fit the histogram')
     parser.add_argument('-b', '--background', action = 'store_true', help = 'use fit model for background events')
     parser.add_argument('-l', '--with-legend', action = 'store_true', help = 'draw legend')
     parser.add_argument('-q', '--q-square', action = 'store_true', help = 'plot q^2 distribution')
     parser.add_argument('-r', '--momentum-resolution', action = 'store_true', help = 'plot tau and neutrino momentum resolution distribution')
-    parser.add_argument('-m', '--mctree', type = str, default = 'MCTruth', help = 'name of the tree with Monte-Carlo truth events')
     parser.add_argument('-v', '--verbose', type = int, default = 1, help = 'verbosity level')
 
     args = parser.parse_args()
     max_events = args.nevents if args.nevents else sys.maxint
 
-    process(args.input_file, args.tree, max_events, NBINS, XMIN, XMAX, args.fit, args.background, PEAK_MIN, PEAK_MAX, args.with_legend, args.q_square, args.momentum_resolution, args.mctree, args.verbose)
+    process(args.input_file, args.tree, args.mctree, max_events, NBINS, XMIN, XMAX, args.fit, args.background, PEAK_MIN, PEAK_MAX, args.with_legend, args.q_square, args.momentum_resolution, args.verbose)
 
 if __name__ == '__main__':
     main(sys.argv)

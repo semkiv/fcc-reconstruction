@@ -28,23 +28,20 @@ os.dup2(old_stdout_fileno, 1)
 from UnreconstructableEventError import UnreconstructableEventError
 from ReconstructedEvent import ReconstructedEvent
 from heppy_fcc.utility.Momentum import Momentum
-# from heppy_fcc.utility.Vertex import Vertex
 
 # Masses of the particles
 M_PI = 0.13957018
 M_K = 0.493677
 M_TAU = 1.77684
 
-# Nice looking plots
+# Nicely looking plots
 gROOT.ProcessLine('.x ' + os.environ.get('FCC') + 'lhcbstyle.C')
 gStyle.SetOptStat(0)
 
 def isclose(a, b, rel_tol = 1e-09, abs_tol = 0.0):
     return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
-def reconstruct(event, verbose
-# , mc_truth_event
-):
+def reconstruct(event, verbose):
     """
         A function that implements the reconstruction algorithm for a given event
 
@@ -152,201 +149,6 @@ def reconstruct(event, verbose
             kin_E_tauminus = numpy.sqrt(M_TAU ** 2 + kin_p_tauminus ** 2)
             kin_m_B = numpy.sqrt(kin_E_tauplus ** 2 + kin_E_tauminus ** 2 + kin_E_piK ** 2 + 2 * (kin_E_tauplus * kin_E_tauminus + kin_E_tauplus * kin_E_piK + kin_E_tauminus * kin_E_piK) - kin_p_B ** 2)
 
-            # vtx_pv = Vertex.fromlist(pv)
-            # vtx_sv = Vertex.fromlist(sv)
-            # vtx_tv_tauplus = Vertex.fromlist(tv_tauplus)
-            # vtx_tv_tauminus = Vertex.fromlist(tv_tauminus)
-            # vec_p_B = Momentum.fromlist(kin_p_B * kin_e_B)
-            # vec_p_tauplus = Momentum.fromlist(kin_p_tauplus * kin_e_tauplus)
-            # vec_p_tauminus = Momentum.fromlist(kin_p_tauminus * kin_e_tauminus)
-            # vec_p_Kstar = Momentum.fromlist(p_pi_K + p_K)
-            # vec_p_a1_tauplus = Momentum.fromlist(kin_p_pis_tauplus)
-            # vec_p_a1_tauminus = Momentum.fromlist(kin_p_pis_tauminus)
-            # vec_p_nu_tauplus = Momentum.fromlist(kin_p_tauplus * kin_e_tauplus - kin_p_pis_tauplus)
-            # vec_p_nu_tauminus = Momentum.fromlist(kin_p_tauminus * kin_e_tauminus - kin_p_pis_tauminus)
-            # mc_vtx_pv = Vertex.fromlist([mc_truth_event.pv_x, mc_truth_event.pv_y, mc_truth_event.pv_z])
-            # mc_vtx_sv = Vertex.fromlist([mc_truth_event.sv_x, mc_truth_event.sv_y, mc_truth_event.sv_z])
-            # mc_vtx_tv_tauplus = Vertex.fromlist([mc_truth_event.tv_tauplus_x, mc_truth_event.tv_tauplus_y, mc_truth_event.tv_tauplus_z])
-            # mc_vtx_tv_tauminus = Vertex.fromlist([mc_truth_event.tv_tauminus_x, mc_truth_event.tv_tauminus_y, mc_truth_event.tv_tauminus_z])
-            # mc_vec_p_B = Momentum.fromlist([mc_truth_event.b_px, mc_truth_event.b_py, mc_truth_event.b_pz])
-            # mc_vec_p_tauplus = Momentum.fromlist([mc_truth_event.tauplus_px, mc_truth_event.tauplus_py, mc_truth_event.tauplus_pz])
-            # mc_vec_p_tauminus = Momentum.fromlist([mc_truth_event.tauminus_px, mc_truth_event.tauminus_py, mc_truth_event.tauminus_pz])
-            # mc_vec_p_Kstar = Momentum.fromlist([mc_truth_event.kstar_px, mc_truth_event.kstar_py, mc_truth_event.kstar_pz])
-            # mc_vec_p_a1_tauplus = Momentum.fromlist([mc_truth_event.pi1_tauplus_px + mc_truth_event.pi2_tauplus_px + mc_truth_event.pi3_tauplus_px, mc_truth_event.pi1_tauplus_py + mc_truth_event.pi2_tauplus_py + mc_truth_event.pi3_tauplus_py, mc_truth_event.pi1_tauplus_pz + mc_truth_event.pi2_tauplus_pz + mc_truth_event.pi3_tauplus_pz])
-            # mc_vec_p_a1_tauminus = Momentum.fromlist([mc_truth_event.pi1_tauminus_px + mc_truth_event.pi2_tauminus_px + mc_truth_event.pi3_tauminus_px, mc_truth_event.pi1_tauminus_py + mc_truth_event.pi2_tauminus_py + mc_truth_event.pi3_tauminus_py, mc_truth_event.pi1_tauminus_pz + mc_truth_event.pi2_tauminus_pz + mc_truth_event.pi3_tauminus_pz])
-            # mc_vec_p_nu_tauplus = Momentum.fromlist([mc_truth_event.nu_tauplus_px, mc_truth_event.nu_tauplus_py, mc_truth_event.nu_tauplus_pz])
-            # mc_vec_p_nu_tauminus = Momentum.fromlist([mc_truth_event.nu_tauminus_px, mc_truth_event.nu_tauminus_py, mc_truth_event.nu_tauminus_pz])
-            # error_p_nu_tauplus_px = (vec_p_nu_tauplus.px - mc_truth_event.nu_tauplus_px) / mc_truth_event.nu_tauplus_px
-            # error_p_nu_tauplus_py = (vec_p_nu_tauplus.py - mc_truth_event.nu_tauplus_py) / mc_truth_event.nu_tauplus_py
-            # error_p_nu_tauplus_pz = (vec_p_nu_tauplus.pz - mc_truth_event.nu_tauplus_pz) / mc_truth_event.nu_tauplus_pz
-            # error_p_nu_tauminus_px = (vec_p_nu_tauminus.px - mc_truth_event.nu_tauminus_px) / mc_truth_event.nu_tauminus_px
-            # error_p_nu_tauminus_py = (vec_p_nu_tauminus.py - mc_truth_event.nu_tauminus_py) / mc_truth_event.nu_tauminus_py
-            # error_p_nu_tauminus_pz = (vec_p_nu_tauminus.pz - mc_truth_event.nu_tauminus_pz) / mc_truth_event.nu_tauminus_pz
-            #
-            # if(error_p_nu_tauplus_px > -1.2 and error_p_nu_tauplus_px < -0.8):
-            #     with open('dump_p_nu_tauplus_x.txt', 'a') as f:
-            #         f.write('{} {} {}\n'.format(vtx_pv.x, vtx_pv.y, vtx_pv.z))
-            #         f.write('{} {} {}\n'.format(vtx_sv.x, vtx_sv.y, vtx_sv.z))
-            #         f.write('{} {} {}\n'.format(vtx_tv_tauplus.x, vtx_tv_tauplus.y, vtx_tv_tauplus.z))
-            #         f.write('{} {} {}\n'.format(vtx_tv_tauminus.x, vtx_tv_tauminus.y, vtx_tv_tauminus.z))
-            #         f.write('{} {} {}\n'.format(vec_p_B.px, vec_p_B.py, vec_p_B.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_tauplus.px, vec_p_tauplus.py, vec_p_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_a1_tauplus.px, vec_p_a1_tauplus.py, vec_p_a1_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_nu_tauplus.px, vec_p_nu_tauplus.py, vec_p_nu_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_tauminus.px, vec_p_tauminus.py, vec_p_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_a1_tauminus.px, vec_p_a1_tauminus.py, vec_p_a1_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_nu_tauminus.px, vec_p_nu_tauminus.py, vec_p_nu_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_Kstar.px, vec_p_Kstar.py, vec_p_Kstar.pz))
-            #         f.write('{} {} {}\n'.format(mc_vtx_pv.x, mc_vtx_pv.y, mc_vtx_pv.z))
-            #         f.write('{} {} {}\n'.format(mc_vtx_sv.x, mc_vtx_sv.y, mc_vtx_sv.z))
-            #         f.write('{} {} {}\n'.format(mc_vtx_tv_tauplus.x, mc_vtx_tv_tauplus.y, mc_vtx_tv_tauplus.z))
-            #         f.write('{} {} {}\n'.format(mc_vtx_tv_tauminus.x, mc_vtx_tv_tauminus.y, mc_vtx_tv_tauminus.z))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_B.px, mc_vec_p_B.py, mc_vec_p_B.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_tauplus.px, mc_vec_p_tauplus.py, mc_vec_p_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_a1_tauplus.px, mc_vec_p_a1_tauplus.py, mc_vec_p_a1_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_nu_tauplus.px, mc_vec_p_nu_tauplus.py, mc_vec_p_nu_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_tauminus.px, mc_vec_p_tauminus.py, mc_vec_p_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_a1_tauminus.px, mc_vec_p_a1_tauminus.py, mc_vec_p_a1_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_nu_tauminus.px, mc_vec_p_nu_tauminus.py, mc_vec_p_nu_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_Kstar.px, mc_vec_p_Kstar.py, mc_vec_p_Kstar.pz))
-            #         f.write('\n')
-            # if(error_p_nu_tauplus_py > -1.2 and error_p_nu_tauplus_py < -0.8):
-            #     with open('dump_p_nu_tauplus_y.txt', 'a') as f:
-            #         f.write('{} {} {}\n'.format(vtx_pv.x, vtx_pv.y, vtx_pv.z))
-            #         f.write('{} {} {}\n'.format(vtx_sv.x, vtx_sv.y, vtx_sv.z))
-            #         f.write('{} {} {}\n'.format(vtx_tv_tauplus.x, vtx_tv_tauplus.y, vtx_tv_tauplus.z))
-            #         f.write('{} {} {}\n'.format(vtx_tv_tauminus.x, vtx_tv_tauminus.y, vtx_tv_tauminus.z))
-            #         f.write('{} {} {}\n'.format(vec_p_B.px, vec_p_B.py, vec_p_B.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_tauplus.px, vec_p_tauplus.py, vec_p_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_a1_tauplus.px, vec_p_a1_tauplus.py, vec_p_a1_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_nu_tauplus.px, vec_p_nu_tauplus.py, vec_p_nu_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_tauminus.px, vec_p_tauminus.py, vec_p_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_a1_tauminus.px, vec_p_a1_tauminus.py, vec_p_a1_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_nu_tauminus.px, vec_p_nu_tauminus.py, vec_p_nu_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_Kstar.px, vec_p_Kstar.py, vec_p_Kstar.pz))
-            #         f.write('{} {} {}\n'.format(mc_vtx_pv.x, mc_vtx_pv.y, mc_vtx_pv.z))
-            #         f.write('{} {} {}\n'.format(mc_vtx_sv.x, mc_vtx_sv.y, mc_vtx_sv.z))
-            #         f.write('{} {} {}\n'.format(mc_vtx_tv_tauplus.x, mc_vtx_tv_tauplus.y, mc_vtx_tv_tauplus.z))
-            #         f.write('{} {} {}\n'.format(mc_vtx_tv_tauminus.x, mc_vtx_tv_tauminus.y, mc_vtx_tv_tauminus.z))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_B.px, mc_vec_p_B.py, mc_vec_p_B.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_tauplus.px, mc_vec_p_tauplus.py, mc_vec_p_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_a1_tauplus.px, mc_vec_p_a1_tauplus.py, mc_vec_p_a1_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_nu_tauplus.px, mc_vec_p_nu_tauplus.py, mc_vec_p_nu_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_tauminus.px, mc_vec_p_tauminus.py, mc_vec_p_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_a1_tauminus.px, mc_vec_p_a1_tauminus.py, mc_vec_p_a1_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_nu_tauminus.px, mc_vec_p_nu_tauminus.py, mc_vec_p_nu_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_Kstar.px, mc_vec_p_Kstar.py, mc_vec_p_Kstar.pz))
-            #         f.write('\n')
-            # if(error_p_nu_tauplus_pz > -1.2 and error_p_nu_tauplus_pz < -0.8):
-            #     with open('dump_p_nu_tauplus_z.txt', 'a') as f:
-            #         f.write('{} {} {}\n'.format(vtx_pv.x, vtx_pv.y, vtx_pv.z))
-            #         f.write('{} {} {}\n'.format(vtx_sv.x, vtx_sv.y, vtx_sv.z))
-            #         f.write('{} {} {}\n'.format(vtx_tv_tauplus.x, vtx_tv_tauplus.y, vtx_tv_tauplus.z))
-            #         f.write('{} {} {}\n'.format(vtx_tv_tauminus.x, vtx_tv_tauminus.y, vtx_tv_tauminus.z))
-            #         f.write('{} {} {}\n'.format(vec_p_B.px, vec_p_B.py, vec_p_B.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_tauplus.px, vec_p_tauplus.py, vec_p_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_a1_tauplus.px, vec_p_a1_tauplus.py, vec_p_a1_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_nu_tauplus.px, vec_p_nu_tauplus.py, vec_p_nu_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_tauminus.px, vec_p_tauminus.py, vec_p_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_a1_tauminus.px, vec_p_a1_tauminus.py, vec_p_a1_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_nu_tauminus.px, vec_p_nu_tauminus.py, vec_p_nu_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_Kstar.px, vec_p_Kstar.py, vec_p_Kstar.pz))
-            #         f.write('{} {} {}\n'.format(mc_vtx_pv.x, mc_vtx_pv.y, mc_vtx_pv.z))
-            #         f.write('{} {} {}\n'.format(mc_vtx_sv.x, mc_vtx_sv.y, mc_vtx_sv.z))
-            #         f.write('{} {} {}\n'.format(mc_vtx_tv_tauplus.x, mc_vtx_tv_tauplus.y, mc_vtx_tv_tauplus.z))
-            #         f.write('{} {} {}\n'.format(mc_vtx_tv_tauminus.x, mc_vtx_tv_tauminus.y, mc_vtx_tv_tauminus.z))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_B.px, mc_vec_p_B.py, mc_vec_p_B.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_tauplus.px, mc_vec_p_tauplus.py, mc_vec_p_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_a1_tauplus.px, mc_vec_p_a1_tauplus.py, mc_vec_p_a1_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_nu_tauplus.px, mc_vec_p_nu_tauplus.py, mc_vec_p_nu_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_tauminus.px, mc_vec_p_tauminus.py, mc_vec_p_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_a1_tauminus.px, mc_vec_p_a1_tauminus.py, mc_vec_p_a1_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_nu_tauminus.px, mc_vec_p_nu_tauminus.py, mc_vec_p_nu_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_Kstar.px, mc_vec_p_Kstar.py, mc_vec_p_Kstar.pz))
-            #         f.write('\n')
-            #
-            # if(error_p_nu_tauminus_px > -1.2 and error_p_nu_tauminus_px < -0.8):
-            #     with open('dump_p_nu_tauminus_x.txt', 'a') as f:
-            #         f.write('{} {} {}\n'.format(vtx_pv.x, vtx_pv.y, vtx_pv.z))
-            #         f.write('{} {} {}\n'.format(vtx_sv.x, vtx_sv.y, vtx_sv.z))
-            #         f.write('{} {} {}\n'.format(vtx_tv_tauplus.x, vtx_tv_tauplus.y, vtx_tv_tauplus.z))
-            #         f.write('{} {} {}\n'.format(vtx_tv_tauminus.x, vtx_tv_tauminus.y, vtx_tv_tauminus.z))
-            #         f.write('{} {} {}\n'.format(vec_p_B.px, vec_p_B.py, vec_p_B.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_tauplus.px, vec_p_tauplus.py, vec_p_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_a1_tauplus.px, vec_p_a1_tauplus.py, vec_p_a1_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_nu_tauplus.px, vec_p_nu_tauplus.py, vec_p_nu_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_tauminus.px, vec_p_tauminus.py, vec_p_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_a1_tauminus.px, vec_p_a1_tauminus.py, vec_p_a1_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_nu_tauminus.px, vec_p_nu_tauminus.py, vec_p_nu_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_Kstar.px, vec_p_Kstar.py, vec_p_Kstar.pz))
-            #         f.write('{} {} {}\n'.format(mc_vtx_pv.x, mc_vtx_pv.y, mc_vtx_pv.z))
-            #         f.write('{} {} {}\n'.format(mc_vtx_sv.x, mc_vtx_sv.y, mc_vtx_sv.z))
-            #         f.write('{} {} {}\n'.format(mc_vtx_tv_tauplus.x, mc_vtx_tv_tauplus.y, mc_vtx_tv_tauplus.z))
-            #         f.write('{} {} {}\n'.format(mc_vtx_tv_tauminus.x, mc_vtx_tv_tauminus.y, mc_vtx_tv_tauminus.z))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_B.px, mc_vec_p_B.py, mc_vec_p_B.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_tauplus.px, mc_vec_p_tauplus.py, mc_vec_p_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_a1_tauplus.px, mc_vec_p_a1_tauplus.py, mc_vec_p_a1_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_nu_tauplus.px, mc_vec_p_nu_tauplus.py, mc_vec_p_nu_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_tauminus.px, mc_vec_p_tauminus.py, mc_vec_p_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_a1_tauminus.px, mc_vec_p_a1_tauminus.py, mc_vec_p_a1_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_nu_tauminus.px, mc_vec_p_nu_tauminus.py, mc_vec_p_nu_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_Kstar.px, mc_vec_p_Kstar.py, mc_vec_p_Kstar.pz))
-            #         f.write('\n')
-            # if(error_p_nu_tauminus_py > -1.2 and error_p_nu_tauminus_py < -0.8):
-            #     with open('dump_p_nu_tauminus_y.txt', 'a') as f:
-            #         f.write('{} {} {}\n'.format(vtx_pv.x, vtx_pv.y, vtx_pv.z))
-            #         f.write('{} {} {}\n'.format(vtx_sv.x, vtx_sv.y, vtx_sv.z))
-            #         f.write('{} {} {}\n'.format(vtx_tv_tauplus.x, vtx_tv_tauplus.y, vtx_tv_tauplus.z))
-            #         f.write('{} {} {}\n'.format(vtx_tv_tauminus.x, vtx_tv_tauminus.y, vtx_tv_tauminus.z))
-            #         f.write('{} {} {}\n'.format(vec_p_B.px, vec_p_B.py, vec_p_B.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_tauplus.px, vec_p_tauplus.py, vec_p_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_a1_tauplus.px, vec_p_a1_tauplus.py, vec_p_a1_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_nu_tauplus.px, vec_p_nu_tauplus.py, vec_p_nu_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_tauminus.px, vec_p_tauminus.py, vec_p_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_a1_tauminus.px, vec_p_a1_tauminus.py, vec_p_a1_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_nu_tauminus.px, vec_p_nu_tauminus.py, vec_p_nu_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_Kstar.px, vec_p_Kstar.py, vec_p_Kstar.pz))
-            #         f.write('{} {} {}\n'.format(mc_vtx_pv.x, mc_vtx_pv.y, mc_vtx_pv.z))
-            #         f.write('{} {} {}\n'.format(mc_vtx_sv.x, mc_vtx_sv.y, mc_vtx_sv.z))
-            #         f.write('{} {} {}\n'.format(mc_vtx_tv_tauplus.x, mc_vtx_tv_tauplus.y, mc_vtx_tv_tauplus.z))
-            #         f.write('{} {} {}\n'.format(mc_vtx_tv_tauminus.x, mc_vtx_tv_tauminus.y, mc_vtx_tv_tauminus.z))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_B.px, mc_vec_p_B.py, mc_vec_p_B.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_tauplus.px, mc_vec_p_tauplus.py, mc_vec_p_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_a1_tauplus.px, mc_vec_p_a1_tauplus.py, mc_vec_p_a1_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_nu_tauplus.px, mc_vec_p_nu_tauplus.py, mc_vec_p_nu_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_tauminus.px, mc_vec_p_tauminus.py, mc_vec_p_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_a1_tauminus.px, mc_vec_p_a1_tauminus.py, mc_vec_p_a1_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_nu_tauminus.px, mc_vec_p_nu_tauminus.py, mc_vec_p_nu_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_Kstar.px, mc_vec_p_Kstar.py, mc_vec_p_Kstar.pz))
-            #         f.write('\n')
-            # if(error_p_nu_tauminus_pz > -1.2 and error_p_nu_tauminus_pz < -0.8):
-            #     with open('dump_p_nu_tauminus_z.txt', 'a') as f:
-            #         f.write('{} {} {}\n'.format(vtx_pv.x, vtx_pv.y, vtx_pv.z))
-            #         f.write('{} {} {}\n'.format(vtx_sv.x, vtx_sv.y, vtx_sv.z))
-            #         f.write('{} {} {}\n'.format(vtx_tv_tauplus.x, vtx_tv_tauplus.y, vtx_tv_tauplus.z))
-            #         f.write('{} {} {}\n'.format(vtx_tv_tauminus.x, vtx_tv_tauminus.y, vtx_tv_tauminus.z))
-            #         f.write('{} {} {}\n'.format(vec_p_B.px, vec_p_B.py, vec_p_B.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_tauplus.px, vec_p_tauplus.py, vec_p_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_a1_tauplus.px, vec_p_a1_tauplus.py, vec_p_a1_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_nu_tauplus.px, vec_p_nu_tauplus.py, vec_p_nu_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_tauminus.px, vec_p_tauminus.py, vec_p_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_a1_tauminus.px, vec_p_a1_tauminus.py, vec_p_a1_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_nu_tauminus.px, vec_p_nu_tauminus.py, vec_p_nu_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(vec_p_Kstar.px, vec_p_Kstar.py, vec_p_Kstar.pz))
-            #         f.write('{} {} {}\n'.format(mc_vtx_pv.x, mc_vtx_pv.y, mc_vtx_pv.z))
-            #         f.write('{} {} {}\n'.format(mc_vtx_sv.x, mc_vtx_sv.y, mc_vtx_sv.z))
-            #         f.write('{} {} {}\n'.format(mc_vtx_tv_tauplus.x, mc_vtx_tv_tauplus.y, mc_vtx_tv_tauplus.z))
-            #         f.write('{} {} {}\n'.format(mc_vtx_tv_tauminus.x, mc_vtx_tv_tauminus.y, mc_vtx_tv_tauminus.z))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_B.px, mc_vec_p_B.py, mc_vec_p_B.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_tauplus.px, mc_vec_p_tauplus.py, mc_vec_p_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_a1_tauplus.px, mc_vec_p_a1_tauplus.py, mc_vec_p_a1_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_nu_tauplus.px, mc_vec_p_nu_tauplus.py, mc_vec_p_nu_tauplus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_tauminus.px, mc_vec_p_tauminus.py, mc_vec_p_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_a1_tauminus.px, mc_vec_p_a1_tauminus.py, mc_vec_p_a1_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_nu_tauminus.px, mc_vec_p_nu_tauminus.py, mc_vec_p_nu_tauminus.pz))
-            #         f.write('{} {} {}\n'.format(mc_vec_p_Kstar.px, mc_vec_p_Kstar.py, mc_vec_p_Kstar.pz))
-            #         f.write('\n')
-
             # Printing comprehensive information if needed
             if verbose > 1:
                 # Setting numpy precision
@@ -394,6 +196,163 @@ def reconstruct(event, verbose
                 print('p_tau-_2: {:.12f}'.format(kin_p_tauminus_2))
                 print('p_tau-_1_alt: {:.12f}'.format(kin_p_tauminus_1_alt))
                 print('p_tau-_2_alt: {:.12f}'.format(kin_p_tauminus_2_alt))
+                print('p_tau+: {:.12f}'.format(kin_p_tauplus))
+                print('p_tau-: {:.12f}'.format(kin_p_tauminus))
+                print('B momentum: {:.12f}'.format(kin_p_B))
+                print('B mass: {:.12f}'.format(kin_m_B))
+
+            return ReconstructedEvent(kin_m_B, Momentum.fromlist(kin_p_B * kin_e_B), Momentum.fromlist(kin_p_tauplus * kin_e_tauplus), Momentum.fromlist(kin_p_tauminus * kin_e_tauminus), Momentum.fromlist(kin_p_tauplus * kin_e_tauplus - kin_p_pis_tauplus), Momentum.fromlist(kin_p_tauminus * kin_e_tauminus - kin_p_pis_tauminus))
+
+        else:
+            raise UnreconstructableEventError("Event cannot be reconstructed because of ill-formed tau- vertex")
+    else:
+        raise UnreconstructableEventError("Event cannot be reconstructed because of ill-formed tau+ vertex")
+
+def reconstruct_mc_truth(event, mc_truth_event, verbose):
+    """
+        A function that implements the reconstruction algorithm for a given event using MC truth information
+
+        Args:
+        event (ROOT.TTree): the event to reconstruct
+        mc_truth_event (ROOT.TTree): the MC truth event
+        verbose (optional, [bool]): the flag that determines whether the function will be run with increased verbosity. Defaults to False
+
+        Returns:
+        ReconstructedEvent: reconstructed event information
+
+        Raises:
+        UnreconstructableEventError: if the event cannot be reconstructed because of poor smeared values
+    """
+
+    pv = numpy.array([event.pv_x, event.pv_y, event.pv_z])
+    sv = numpy.array([event.sv_x, event.sv_y, event.sv_z])
+    tv_tauplus = numpy.array([event.tv_tauplus_x, event.tv_tauplus_y, event.tv_tauplus_z])
+    tv_tauminus = numpy.array([event.tv_tauminus_x, event.tv_tauminus_y, event.tv_tauminus_z])
+
+    p_pi1_tauplus = numpy.array([event.pi1_tauplus_px, event.pi1_tauplus_py, event.pi1_tauplus_pz])
+    p_pi2_tauplus = numpy.array([event.pi2_tauplus_px, event.pi2_tauplus_py, event.pi2_tauplus_pz])
+    p_pi3_tauplus = numpy.array([event.pi3_tauplus_px, event.pi3_tauplus_py, event.pi3_tauplus_pz])
+
+    p_pi1_tauminus = numpy.array([event.pi1_tauminus_px, event.pi1_tauminus_py, event.pi1_tauminus_pz])
+    p_pi2_tauminus = numpy.array([event.pi2_tauminus_px, event.pi2_tauminus_py, event.pi2_tauminus_pz])
+    p_pi3_tauminus = numpy.array([event.pi3_tauminus_px, event.pi3_tauminus_py, event.pi3_tauminus_pz])
+
+    p_pi_K = numpy.array([event.pi_kstar_px, event.pi_kstar_py, event.pi_kstar_pz])
+    p_K = numpy.array([event.k_px, event.k_py, event.k_pz])
+
+    # here comes just the implementation of kinematic equation
+    kin_e_tauplus = (tv_tauplus - sv) / numpy.linalg.norm(tv_tauplus - sv)
+    kin_e_tauminus = (tv_tauminus - sv) / numpy.linalg.norm(tv_tauminus - sv)
+    kin_e_B = (sv - pv) / numpy.linalg.norm(sv - pv)
+
+    kin_p_pis_tauplus = p_pi1_tauplus + p_pi2_tauplus + p_pi3_tauplus
+    kin_p_pis_tauplus_par = numpy.dot(kin_p_pis_tauplus, kin_e_tauplus)
+    kin_p_pis_tauplus_perp_sqr = numpy.linalg.norm(kin_p_pis_tauplus) ** 2 - kin_p_pis_tauplus_par ** 2
+
+    kin_E_pis_tauplus = numpy.sqrt(M_PI ** 2 + numpy.linalg.norm(p_pi1_tauplus) ** 2) + numpy.sqrt(M_PI ** 2 + numpy.linalg.norm(p_pi2_tauplus) ** 2) + numpy.sqrt(M_PI ** 2 + numpy.linalg.norm(p_pi3_tauplus) ** 2)
+
+    kin_C_tauplus_sqr = (M_TAU ** 2 - kin_E_pis_tauplus ** 2 - kin_p_pis_tauplus_perp_sqr + kin_p_pis_tauplus_par ** 2) / 2
+
+    kin_alpha_tauplus = kin_C_tauplus_sqr * kin_E_pis_tauplus / (kin_E_pis_tauplus ** 2 - kin_p_pis_tauplus_par ** 2)
+
+    # checking if the expression under the square root is not negative
+    if (kin_p_pis_tauplus_perp_sqr * kin_p_pis_tauplus_par ** 2 + kin_C_tauplus_sqr ** 2 - kin_E_pis_tauplus ** 2 * kin_p_pis_tauplus_perp_sqr) >= 0:
+        kin_beta_tauplus = kin_p_pis_tauplus_par * numpy.sqrt(kin_p_pis_tauplus_perp_sqr * kin_p_pis_tauplus_par ** 2 + kin_C_tauplus_sqr ** 2 - kin_E_pis_tauplus ** 2 * kin_p_pis_tauplus_perp_sqr) / (kin_E_pis_tauplus ** 2 - kin_p_pis_tauplus_par ** 2)
+
+        kin_p_nu_tauplus_1 = kin_alpha_tauplus + kin_beta_tauplus
+        kin_p_nu_tauplus_2 = kin_alpha_tauplus - kin_beta_tauplus
+
+        kin_p_tauplus_1 = numpy.sqrt(kin_E_pis_tauplus ** 2 + kin_p_nu_tauplus_1 ** 2 + 2 * kin_E_pis_tauplus * kin_p_nu_tauplus_1 - M_TAU ** 2)
+        kin_p_tauplus_2 = numpy.sqrt(kin_E_pis_tauplus ** 2 + kin_p_nu_tauplus_2 ** 2 + 2 * kin_E_pis_tauplus * kin_p_nu_tauplus_2 - M_TAU ** 2)
+
+        # resolving ambiguity
+        kin_p_tauplus_mc_truth = numpy.sqrt(mc_truth_event.tauplus_px ** 2 + mc_truth_event.tauplus_py ** 2 + mc_truth_event.tauplus_pz ** 2)
+        diff_tauplus_1 = abs(kin_p_tauplus_1 - kin_p_tauplus_mc_truth)
+        diff_tauplus_2 = abs(kin_p_tauplus_2 - kin_p_tauplus_mc_truth)
+        min_diff_tauplus = min(diff_tauplus_1, diff_tauplus_2)
+        kin_p_tauplus = kin_p_tauplus_1 if isclose(min_diff_tauplus, diff_tauplus_1) else kin_p_tauplus_2
+
+        kin_p_pis_tauminus = p_pi1_tauminus + p_pi2_tauminus + p_pi3_tauminus
+        kin_p_pis_tauminus_par = numpy.dot(kin_p_pis_tauminus, kin_e_tauminus)
+        kin_p_pis_tauminus_perp_sqr = numpy.linalg.norm(kin_p_pis_tauminus) ** 2 - kin_p_pis_tauminus_par ** 2
+
+        kin_E_pis_tauminus = numpy.sqrt(M_PI ** 2 + numpy.linalg.norm(p_pi1_tauminus) ** 2) + numpy.sqrt(M_PI ** 2 + numpy.linalg.norm(p_pi2_tauminus) ** 2) + numpy.sqrt(M_PI ** 2 + numpy.linalg.norm(p_pi3_tauminus) ** 2)
+
+        kin_C_tauminus_sqr = (M_TAU ** 2 - kin_E_pis_tauminus ** 2 - kin_p_pis_tauminus_perp_sqr + kin_p_pis_tauminus_par ** 2) / 2
+
+        kin_alpha_tauminus = kin_C_tauminus_sqr * kin_E_pis_tauminus / (kin_E_pis_tauminus ** 2 - kin_p_pis_tauminus_par ** 2)
+
+        # checking if the expression under the square root is not negative
+        if (kin_p_pis_tauminus_perp_sqr * kin_p_pis_tauminus_par ** 2 + kin_C_tauminus_sqr ** 2 - kin_E_pis_tauminus ** 2 * kin_p_pis_tauminus_perp_sqr) >= 0:
+            kin_beta_tauminus = kin_p_pis_tauminus_par * numpy.sqrt(kin_p_pis_tauminus_perp_sqr * kin_p_pis_tauminus_par ** 2 + kin_C_tauminus_sqr ** 2 - kin_E_pis_tauminus ** 2 * kin_p_pis_tauminus_perp_sqr) / (kin_E_pis_tauminus ** 2 - kin_p_pis_tauminus_par ** 2)
+
+            kin_p_nu_tauminus_1 = kin_alpha_tauminus + kin_beta_tauminus
+            kin_p_nu_tauminus_2 = kin_alpha_tauminus - kin_beta_tauminus
+
+            kin_p_tauminus_1 = numpy.sqrt(kin_E_pis_tauminus ** 2 + kin_p_nu_tauminus_1 ** 2 + 2 * kin_E_pis_tauminus * kin_p_nu_tauminus_1 - M_TAU ** 2)
+            kin_p_tauminus_2 = numpy.sqrt(kin_E_pis_tauminus ** 2 + kin_p_nu_tauminus_2 ** 2 + 2 * kin_E_pis_tauminus * kin_p_nu_tauminus_2 - M_TAU ** 2)
+
+            # resolving ambiguity
+            kin_p_tauminus_mc_truth = numpy.sqrt(mc_truth_event.tauminus_px ** 2 + mc_truth_event.tauminus_py ** 2 + mc_truth_event.tauminus_pz ** 2)
+            diff_tauminus_1 = abs(kin_p_tauminus_1 - kin_p_tauminus_mc_truth)
+            diff_tauminus_2 = abs(kin_p_tauminus_2 - kin_p_tauminus_mc_truth)
+            min_diff_tauminus = min(diff_tauminus_1, diff_tauminus_2)
+            kin_p_tauminus = kin_p_tauminus_1 if isclose(min_diff_tauminus, diff_tauminus_1) else kin_p_tauminus_2
+
+            kin_p_piK_perp = p_pi_K + p_K - numpy.dot((p_pi_K + p_K), kin_e_B) * kin_e_B
+            kin_p_piK_par = numpy.dot((p_pi_K + p_K), kin_e_B)
+            kin_p_B = kin_p_tauplus * numpy.dot(kin_e_tauplus, kin_e_B) + kin_p_tauminus * numpy.dot(kin_e_tauminus, kin_e_B) + kin_p_piK_par
+
+            kin_E_piK = numpy.sqrt(M_PI ** 2 + numpy.linalg.norm(p_pi_K) ** 2) + numpy.sqrt(M_K ** 2 + numpy.linalg.norm(p_K) ** 2)
+            kin_E_tauplus = numpy.sqrt(M_TAU ** 2 + kin_p_tauplus ** 2)
+            kin_E_tauminus = numpy.sqrt(M_TAU ** 2 + kin_p_tauminus ** 2)
+            kin_m_B = numpy.sqrt(kin_E_tauplus ** 2 + kin_E_tauminus ** 2 + kin_E_piK ** 2 + 2 * (kin_E_tauplus * kin_E_tauminus + kin_E_tauplus * kin_E_piK + kin_E_tauminus * kin_E_piK) - kin_p_B ** 2)
+
+            # Printing comprehensive information if needed
+            if verbose > 1:
+                # Setting numpy precision
+                numpy.set_printoptions(12)
+
+                print('Event under the hood:')
+
+                print('Primary vertex: {}'.format(pv))
+                print('Secondary vertex: {}'.format(sv))
+                print('Tertiary vertex (tau+): {}'.format(tv_tauplus))
+                print('Tertiary vertex (tau-): {}'.format(tv_tauminus))
+                print('pi1_tau+ momentum: {}'.format(p_pi1_tauplus))
+                print('pi2_tau+ momentum: {}'.format(p_pi2_tauplus))
+                print('pi3_tau+ momentum: {}'.format(p_pi3_tauplus))
+                print('pi1_tau- momentum: {}'.format(p_pi1_tauminus))
+                print('pi2_tau- momentum: {}'.format(p_pi2_tauminus))
+                print('pi3_tau- momentum: {}'.format(p_pi3_tauminus))
+                print('pi_Kstar momentum: {}'.format(p_pi_K))
+                print('K momentum: {}'.format(p_K))
+
+                print('e_tau+: {}'.format(kin_e_tauplus))
+                print('e_tau-: {}'.format(kin_e_tauminus))
+                print('e_B: {}'.format(kin_e_B))
+                print('p_pis_tau+: {}'.format(kin_p_pis_tauplus))
+                print('p_pis_tau+_par: {:.12f}'.format(kin_p_pis_tauplus_par))
+                print('p_pis_tau+_perp^2: {:.12f}'.format(kin_p_pis_tauplus_perp_sqr))
+                print('E_pis_tau+: {:.12f}'.format(kin_E_pis_tauplus))
+                print('C_tau+^2: {:.12f}'.format(kin_C_tauplus_sqr))
+                print('alpha_tau+: {:.12f}'.format(kin_alpha_tauplus))
+                print('beta_tau+: {:.12f}'.format(kin_beta_tauplus))
+                print('p_nu_tau+_1: {:.12f}'.format(kin_p_nu_tauplus_1))
+                print('p_nu_tau+_2: {:.12f}'.format(kin_p_nu_tauplus_2))
+                print('p_tau+_1: {:.12f}'.format(kin_p_tauplus_1))
+                print('p_tau+_2: {:.12f}'.format(kin_p_tauplus_2))
+                print('p_pis_tau-: {}'.format(kin_p_pis_tauminus))
+                print('p_pis_tau-_par: {:.12f}'.format(kin_p_pis_tauminus_par))
+                print('p_pis_tau-_perp^2: {:.12f}'.format(kin_p_pis_tauminus_perp_sqr))
+                print('E_pis_tau-: {:.12f}'.format(kin_E_pis_tauminus))
+                print 'C_tau-^2: {:.12f}'.format(kin_C_tauminus_sqr)
+                print('alpha_tau-: {:.12f}'.format(kin_alpha_tauminus))
+                print('beta_tau-: {:.12f}'.format(kin_beta_tauminus))
+                print('p_nu_tau-_1: {:.12f}'.format(kin_p_nu_tauminus_1))
+                print('p_nu_tau-_2: {:.12f}'.format(kin_p_nu_tauminus_2))
+                print('p_tau-_1: {:.12f}'.format(kin_p_tauminus_1))
+                print('p_tau-_2: {:.12f}'.format(kin_p_tauminus_2))
                 print('p_tau+: {:.12f}'.format(kin_p_tauplus))
                 print('p_tau-: {:.12f}'.format(kin_p_tauminus))
                 print('B momentum: {:.12f}'.format(kin_p_B))
