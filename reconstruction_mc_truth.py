@@ -113,7 +113,6 @@ def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max
     model.fitTo(b_mass_data, RooFit.Extended(False))
     show_plot(b_mass, b_mass_data, 'GeV/#it{c}^{2}', n_bins, fit_model = model, components_to_plot = None, draw_legend = draw_legend)
 
-
 def main(argv):
     """The main function. Parses the command line arguments passed to the script and then runs the process function"""
 

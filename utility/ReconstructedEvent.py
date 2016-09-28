@@ -57,3 +57,27 @@ class ReconstructedEvent(object):
         """
 
         return 2 * (M_TAU ** 2 - numpy.dot(self.p_tauplus.raw(), self.p_tauminus.raw()) + numpy.sqrt((M_TAU ** 2 + numpy.dot(self.p_tauplus.raw(), self.p_tauplus.raw())) * (M_TAU ** 2 + numpy.dot(self.p_tauminus.raw(), self.p_tauminus.raw()))))
+
+class AllSolutions(object):
+    """
+        A utility class to store all 4 solutions
+        
+        Attributes:
+        correct_solution (ReconstructedEvent): the correct solution
+        wrong_solutions (list): 3 wrong solutions
+    """
+
+    def __init__(self, correct_solution = None, wrong_solutions = []):
+        """
+            Constructor
+
+            Args:
+            correct_solution (optional, [ReconstructedEvent]): the correct solution. Defaults to None
+            wrong_solutions (optional, [list]): 3 wrong solutions. Defaults to [] (empty list)
+        """
+
+        super(AllSolutions, self).__init__()
+
+        self.correct_solution = correct_solution
+        self.wrong_solutions = wrong_solutions
+
