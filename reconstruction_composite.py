@@ -8,6 +8,7 @@
     Run python reconstruction_composite.py --help for more details
 """
 
+import os
 import sys
 import argparse
 import time
@@ -15,7 +16,15 @@ import time
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True # to prevent TApplication from capturing command line options and breaking argparse. It must be placed right after module import
 
-from ROOT import TFile, RooRealVar, RooArgList, RooArgSet, RooDataSet, RooAddPdf, RooCBShape, RooGaussian
+from ROOT import TFile
+
+# This awkward construction serves to suppress the output at RooFit modules import
+devnull = open(os.devnull, 'w')
+old_stdout_fileno = os.dup(sys.stdout.fileno())
+os.dup2(devnull.fileno(), 1)
+from ROOT import RooFit, RooRealVar, RooArgList, RooArgSet, RooDataSet, RooAddPdf, RooCBShape, RooGaussian
+devnull.close()
+os.dup2(old_stdout_fileno, 1)
 
 from utility.common import reconstruct, show_plot
 from utility.UnreconstructableEventError import UnreconstructableEventError
@@ -197,7 +206,8 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
         # composite model
         model = RooAddPdf('model', 'Model to fit', RooArgList(signal_model.pdf, bs_ds2taunu_model.pdf, bs_ds2taunu_ds2pipipipi_model.pdf, bd_ds2taunu_model.pdf), RooArgList(signal_yield, bs_ds2taunu_yield, bs_ds2pipipipi_yield, bd_ds2taunu_yield))
 
-        show_plot(b_mass, b_mass_data, 'GeV/#it{c}^{2}', n_bins, fit, model, extended = True, components_to_plot = RooArgList(signal_model.pdf, bs_ds2taunu_model.pdf, bs_ds2taunu_ds2pipipipi_model.pdf, bd_ds2taunu_model.pdf), draw_legend = draw_legend)
+        model.fitTo(b_mass_data, RooFit.Extended(True))
+        show_plot(b_mass, b_mass_data, 'GeV/#it{c}^{2}', n_bins, model, components_to_plot = RooArgList(signal_model, bs_ds2taunu_model, bs_ds2taunu_ds2pipipipi_model, bd_ds2taunu_model), draw_legend = draw_legend)
 
     else:
         show_plot(b_mass, b_mass_data, 'GeV/#it{c}^{2}', n_bins)

@@ -21,7 +21,7 @@ from ROOT import gROOT, gStyle, TCanvas, TPaveText, TPad, TLine, TLegend
 devnull = open(os.devnull, 'w')
 old_stdout_fileno = os.dup(sys.stdout.fileno())
 os.dup2(devnull.fileno(), 1)
-from ROOT import RooFit, RooRealVar, RooArgList, RooGaussian, RooAddPdf
+from ROOT import RooFit
 devnull.close()
 os.dup2(old_stdout_fileno, 1)
 
@@ -365,7 +365,7 @@ def reconstruct_mc_truth(event, mc_truth_event, verbose):
     else:
         raise UnreconstructableEventError("Event cannot be reconstructed because of ill-formed tau+ vertex")
 
-def show_plot(var, data, units, n_bins = 100, fit = False, model = None, extended = False, components_to_plot = RooArgList(), draw_legend = False):
+def show_plot(var, data, units, n_bins = 100, fit_model = None, components_to_plot = None, draw_legend = False):
     """
         A function that visualizes the results of the reconstruction by showing plots
 
@@ -374,18 +374,16 @@ def show_plot(var, data, units, n_bins = 100, fit = False, model = None, extende
         data (ROOT.RooDataSet): the data to be fitted
         units (str or None): X-axis units
         n_bins (optional, [int]): the number of bins in the histogram. Defaults to 100
-        fit (optional, [bool]): the flag that determines if the data will be fitted. Defaults to False
-        model (optional, required if fit is True, [ROOT.RooAddPdf]): the model to be used for fitting. Defaults to None
-        extended (optional, [bool]): determines whether RooFit extended fit will be used. Defaults to False
-        components_to_plot (optional, [ROOT.RooArgList]): the components of the model to plot. Defaults to ROOT.RooArgList()
+        fit_model (optional, [ROOT.RooAddPdf]): the model the data has been fitted to. Defaults to None
+        components_to_plot (optional, [ROOT.RooArgList]): the components of the model to plot. Defaults to None
         draw_legend (optional, [bool]): the flag that determines whether the fit legend will be drawn. Defaults to False
     """
 
     # creating canvas the plots to be drawn in
-    canvas = TCanvas(var.GetName() + '_canvas', var.GetTitle() + ' distribution', 640, 640 if fit else 480) # creating bigger canvas if we're going to fit the data (and thus to plot pulls hist)
+    canvas = TCanvas(var.GetName() + '_canvas', var.GetTitle() + ' distribution', 640, 640 if fit_model else 480) # creating bigger canvas if we're going to plot fits (and thus to plot pulls hist)
 
     # creating the pad for the reconstructed B mass distribution histogram
-    upper_pad = TPad('upper_pad', 'Upper Pad', 0., 0.25 if  fit else 0., 1., 1.) # creating a pad that will occupy the top 75% of the canvas (the count starts from the bottom) if we're gooing to fit the data (and thus to plot pulls hist) and the whole canvas otherwise
+    upper_pad = TPad('upper_pad', 'Upper Pad', 0., 0.25 if  fit_model else 0., 1., 1.) # creating a pad that will occupy the top 75% of the canvas (the count starts from the bottom) if we're gooing to plot fits the data (and thus to plot pulls hist) and the whole canvas otherwise
     upper_pad.Draw()
 
     # adding label "FCC-ee"
@@ -397,23 +395,20 @@ def show_plot(var, data, units, n_bins = 100, fit = False, model = None, extende
     plot_frame.GetYaxis().SetTitle('Events / ({:g} {})'.format(float(var.getMax() - var.getMin()) / n_bins, units) if units else 'Events / {:g}'.format(float(var.getMax() - var.getMin()) / n_bins))
     data.plotOn(plot_frame)
 
-    if fit:
-        model.fitTo(data, RooFit.Extended(extended))
-
+    if fit_model:
         if draw_legend:
             legend = TLegend(0.175, 0.65, 0.4, 0.9)
 
         color_index = 2
-        for index in xrange(0, components_to_plot.getSize()):
-            component = components_to_plot[index]
-            model.plotOn(plot_frame, RooFit.Components(component.GetName()), RooFit.LineColor(color_index), RooFit.LineStyle(ROOT.kDashed), RooFit.Name(component.GetName() + '_curve'))
-            if draw_legend:
-                legend.AddEntry(plot_frame.findObject(component.GetName() + '_curve'), component.GetTitle(), 'l')
-            color_index += 2 if color_index == 3 or color_index == 9 else 1 # skip the blue color (4) used for composite model and the white color (10)
+        if components_to_plot:
+            for index in xrange(0, components_to_plot.getSize()):
+                component = components_to_plot[index]
+                fit_model.plotOn(plot_frame, RooFit.Components(component.GetName()), RooFit.LineColor(color_index), RooFit.LineStyle(ROOT.kDashed), RooFit.Name(component.GetName() + '_curve'))
+                if draw_legend:
+                    legend.AddEntry(plot_frame.findObject(component.GetName() + '_curve'), component.GetTitle(), 'l')
+                color_index += 2 if color_index == 3 or color_index == 9 else 1 # skip the blue color (4) used for composite model and the white color (10)
 
-        model.plotOn(plot_frame)
-        params = model.getVariables()
-        params.Print('v')
+        fit_model.plotOn(plot_frame)
 
         # prepairing pulls histogram
         pulls_hist = plot_frame.pullHist()
@@ -440,7 +435,7 @@ def show_plot(var, data, units, n_bins = 100, fit = False, model = None, extende
     upper_pad.cd()
     plot_frame.Draw()
 
-    if fit and draw_legend:
+    if fit_model and draw_legend:
         legend.Draw()
 
     label.Draw()

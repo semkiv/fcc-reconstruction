@@ -8,20 +8,19 @@
 
 from ROOT import RooGaussian, RooCBShape, RooRealVar, RooArgList, RooAddPdf
 
-class SignalModel(object):
+class SignalModel(RooAddPdf):
     """
         A class that represents a signal model
 
         The model is a 'narrow' Gaussian, a Crystal Ball shape and a 'wide' Gaussian. All three share the same mean value. A 'narrow' Gaussian and a Crystal Ball shape share also the width
 
         Note:
-        Please do not modify it's fields
+        Please do not modify its fields
 
         Attributes:
         name (str): the name of the model
         title (str): the title of the model
         components (ROOT.RooArgList): a RooArgList containing components of the model
-        pdf (RooAddPdf): the PDF of the model
     """
 
     def __init__(self, name, title, x, mean, width, width_wide, alpha, n, narrow_gauss_fraction, cb_fraction):
@@ -40,8 +39,6 @@ class SignalModel(object):
             narrow_gauss_fraction (ROOT.RooRealVar): the fraction of the 'narrow Gaussian in the model'
             cb_fraction (ROOT.RooRealVar): the fraction of the Crystal Ball shape in the model
         """
-
-        super(SignalModel, self).__init__()
 
         # Storing variables is necessary because RooArgList elements dangle if they go out of scope (because the RooArgList stores pointers) including when temporaries are used
         self.name = name
@@ -64,4 +61,4 @@ class SignalModel(object):
         self.components = RooArgList(self.narrow_gauss, self.cb, self.wide_gauss)
         self.fractions = RooArgList(self.narrow_gauss_fraction, self.cb_fraction)
 
-        self.pdf = RooAddPdf(self.name, self.title, self.components, self.fractions)
+        super(SignalModel, self).__init__(self.name, self.title, self.components, self.fractions)

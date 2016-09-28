@@ -22,7 +22,7 @@ from ROOT import TFile
 devnull = open(os.devnull, 'w')
 old_stdout_fileno = os.dup(sys.stdout.fileno())
 os.dup2(devnull.fileno(), 1)
-from ROOT import RooRealVar, RooArgSet, RooDataSet
+from ROOT import RooFit, RooRealVar, RooArgSet, RooDataSet
 devnull.close()
 os.dup2(old_stdout_fileno, 1)
 
@@ -110,7 +110,8 @@ def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max
                         narrow_gauss_fraction = RooRealVar('signal_model_narrow_gauss_fraction', 'Fraction of Narrow Gaussian in Signal Model', 0.3, 0.01, 1.),
                         cb_fraction = RooRealVar('signal_model_cb_fraction', 'Fraction of Crystal Ball Shape in Signal Model', 0.3, 0.01, 1.))
 
-    show_plot(b_mass, b_mass_data, 'GeV/#it{c}^{2}', n_bins, fit = True, model = model.pdf, extended = False, components_to_plot = model.components, draw_legend = draw_legend)
+    model.fitTo(b_mass_data, RooFit.Extended(False))
+    show_plot(b_mass, b_mass_data, 'GeV/#it{c}^{2}', n_bins, fit_model = model, components_to_plot = None, draw_legend = draw_legend)
 
 
 def main(argv):
