@@ -6,7 +6,9 @@
     M_PI - the mass of a pi meson
     M_K - the mass of a K meson
     M_TAU - the mass of a tau lepton
+    isclose - a function that tests two floats for (almost) equality
     reconstruct - a function that reconstructs the event
+    reconstruct_mc_truth - a function that reconstructs the event using MC truth information
     show_plot - a function that visualizes reconstruction results by making plots
 """
 
@@ -26,7 +28,7 @@ devnull.close()
 os.dup2(old_stdout_fileno, 1)
 
 from UnreconstructableEventError import UnreconstructableEventError
-from ReconstructedEvent import ReconstructedEvent
+from ReconstructedEvent import ReconstructedEvent, AllSolutions
 from heppy_fcc.utility.Momentum import Momentum
 
 # Masses of the particles
@@ -34,11 +36,23 @@ M_PI = 0.13957018
 M_K = 0.493677
 M_TAU = 1.77684
 
-# Nicely looking plots
+# Nice looking plots
 gROOT.ProcessLine('.x ' + os.environ.get('FCC') + 'lhcbstyle.C')
 gStyle.SetOptStat(0)
 
 def isclose(a, b, rel_tol = 1e-09, abs_tol = 0.0):
+    """
+        A function that test two floats for (almost) equality. Unlike numpy.isclose() this function is symetric and takes larger of two number when considering relative error
+
+        Args:
+        a (float): one of the floats
+        b (float): another float
+        rel_tol (optional, [float]): relative tolerance. Defaults to 1e-9
+        abs_tol (optional, [float]): absolute tolerance. Defaults to 0.0
+
+        Returns:
+        bool: True if two numbers are considered equal within given tolerance, False otherwise
+    """
     return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
 def reconstruct(event, verbose):
@@ -47,7 +61,7 @@ def reconstruct(event, verbose):
 
         Args:
         event (ROOT.TTree): the event to reconstruct
-        verbose (optional, [bool]): the flag that determines whether the function will be run with increased verbosity. Defaults to False
+        verbose (optional, [int]): verbosity level
 
         Returns:
         ReconstructedEvent: reconstructed event information
@@ -72,7 +86,7 @@ def reconstruct(event, verbose):
     p_pi_K = numpy.array([event.pi_kstar_px, event.pi_kstar_py, event.pi_kstar_pz])
     p_K = numpy.array([event.k_px, event.k_py, event.k_pz])
 
-    # here comes just the implementation of kinematic equation
+    # Here comes just the implementation of kinematic equation
     kin_e_tauplus = (tv_tauplus - sv) / numpy.linalg.norm(tv_tauplus - sv)
     kin_e_tauminus = (tv_tauminus - sv) / numpy.linalg.norm(tv_tauminus - sv)
     kin_e_B = (sv - pv) / numpy.linalg.norm(sv - pv)
@@ -87,7 +101,7 @@ def reconstruct(event, verbose):
 
     kin_alpha_tauplus = kin_C_tauplus_sqr * kin_E_pis_tauplus / (kin_E_pis_tauplus ** 2 - kin_p_pis_tauplus_par ** 2)
 
-    # checking if the expression under the square root is not negative
+    # Checking if the expression under the square root is not negative
     if (kin_p_pis_tauplus_perp_sqr * kin_p_pis_tauplus_par ** 2 + kin_C_tauplus_sqr ** 2 - kin_E_pis_tauplus ** 2 * kin_p_pis_tauplus_perp_sqr) >= 0:
         kin_beta_tauplus = kin_p_pis_tauplus_par * numpy.sqrt(kin_p_pis_tauplus_perp_sqr * kin_p_pis_tauplus_par ** 2 + kin_C_tauplus_sqr ** 2 - kin_E_pis_tauplus ** 2 * kin_p_pis_tauplus_perp_sqr) / (kin_E_pis_tauplus ** 2 - kin_p_pis_tauplus_par ** 2)
 
@@ -107,7 +121,7 @@ def reconstruct(event, verbose):
 
         kin_alpha_tauminus = kin_C_tauminus_sqr * kin_E_pis_tauminus / (kin_E_pis_tauminus ** 2 - kin_p_pis_tauminus_par ** 2)
 
-        # checking if the expression under the square root is not negative
+        # Checking if the expression under the square root is not negative
         if (kin_p_pis_tauminus_perp_sqr * kin_p_pis_tauminus_par ** 2 + kin_C_tauminus_sqr ** 2 - kin_E_pis_tauminus ** 2 * kin_p_pis_tauminus_perp_sqr) >= 0:
             kin_beta_tauminus = kin_p_pis_tauminus_par * numpy.sqrt(kin_p_pis_tauminus_perp_sqr * kin_p_pis_tauminus_par ** 2 + kin_C_tauminus_sqr ** 2 - kin_E_pis_tauminus ** 2 * kin_p_pis_tauminus_perp_sqr) / (kin_E_pis_tauminus ** 2 - kin_p_pis_tauminus_par ** 2)
 
@@ -149,7 +163,7 @@ def reconstruct(event, verbose):
             kin_E_tauminus = numpy.sqrt(M_TAU ** 2 + kin_p_tauminus ** 2)
             kin_m_B = numpy.sqrt(kin_E_tauplus ** 2 + kin_E_tauminus ** 2 + kin_E_piK ** 2 + 2 * (kin_E_tauplus * kin_E_tauminus + kin_E_tauplus * kin_E_piK + kin_E_tauminus * kin_E_piK) - kin_p_B ** 2)
 
-            # Printing comprehensive information if needed
+            # Printing debug information if needed
             if verbose > 1:
                 # Setting numpy precision
                 numpy.set_printoptions(12)
@@ -215,7 +229,7 @@ def reconstruct_mc_truth(event, mc_truth_event, verbose):
         Args:
         event (ROOT.TTree): the event to reconstruct
         mc_truth_event (ROOT.TTree): the MC truth event
-        verbose (optional, [bool]): the flag that determines whether the function will be run with increased verbosity. Defaults to False
+        verbose (optional, [int]): verbosity level
 
         Returns:
         ReconstructedEvent: reconstructed event information
@@ -240,7 +254,7 @@ def reconstruct_mc_truth(event, mc_truth_event, verbose):
     p_pi_K = numpy.array([event.pi_kstar_px, event.pi_kstar_py, event.pi_kstar_pz])
     p_K = numpy.array([event.k_px, event.k_py, event.k_pz])
 
-    # here comes just the implementation of kinematic equation
+    # Here comes just the implementation of kinematic equation
     kin_e_tauplus = (tv_tauplus - sv) / numpy.linalg.norm(tv_tauplus - sv)
     kin_e_tauminus = (tv_tauminus - sv) / numpy.linalg.norm(tv_tauminus - sv)
     kin_e_B = (sv - pv) / numpy.linalg.norm(sv - pv)
@@ -255,7 +269,7 @@ def reconstruct_mc_truth(event, mc_truth_event, verbose):
 
     kin_alpha_tauplus = kin_C_tauplus_sqr * kin_E_pis_tauplus / (kin_E_pis_tauplus ** 2 - kin_p_pis_tauplus_par ** 2)
 
-    # checking if the expression under the square root is not negative
+    # Checking if the expression under the square root is not negative
     if (kin_p_pis_tauplus_perp_sqr * kin_p_pis_tauplus_par ** 2 + kin_C_tauplus_sqr ** 2 - kin_E_pis_tauplus ** 2 * kin_p_pis_tauplus_perp_sqr) >= 0:
         kin_beta_tauplus = kin_p_pis_tauplus_par * numpy.sqrt(kin_p_pis_tauplus_perp_sqr * kin_p_pis_tauplus_par ** 2 + kin_C_tauplus_sqr ** 2 - kin_E_pis_tauplus ** 2 * kin_p_pis_tauplus_perp_sqr) / (kin_E_pis_tauplus ** 2 - kin_p_pis_tauplus_par ** 2)
 
@@ -264,13 +278,6 @@ def reconstruct_mc_truth(event, mc_truth_event, verbose):
 
         kin_p_tauplus_1 = numpy.sqrt(kin_E_pis_tauplus ** 2 + kin_p_nu_tauplus_1 ** 2 + 2 * kin_E_pis_tauplus * kin_p_nu_tauplus_1 - M_TAU ** 2)
         kin_p_tauplus_2 = numpy.sqrt(kin_E_pis_tauplus ** 2 + kin_p_nu_tauplus_2 ** 2 + 2 * kin_E_pis_tauplus * kin_p_nu_tauplus_2 - M_TAU ** 2)
-
-        # resolving ambiguity
-        kin_p_tauplus_mc_truth = numpy.sqrt(mc_truth_event.tauplus_px ** 2 + mc_truth_event.tauplus_py ** 2 + mc_truth_event.tauplus_pz ** 2)
-        diff_tauplus_1 = abs(kin_p_tauplus_1 - kin_p_tauplus_mc_truth)
-        diff_tauplus_2 = abs(kin_p_tauplus_2 - kin_p_tauplus_mc_truth)
-        min_diff_tauplus = min(diff_tauplus_1, diff_tauplus_2)
-        kin_p_tauplus = kin_p_tauplus_1 if isclose(min_diff_tauplus, diff_tauplus_1) else kin_p_tauplus_2
 
         kin_p_pis_tauminus = p_pi1_tauminus + p_pi2_tauminus + p_pi3_tauminus
         kin_p_pis_tauminus_par = numpy.dot(kin_p_pis_tauminus, kin_e_tauminus)
@@ -282,7 +289,7 @@ def reconstruct_mc_truth(event, mc_truth_event, verbose):
 
         kin_alpha_tauminus = kin_C_tauminus_sqr * kin_E_pis_tauminus / (kin_E_pis_tauminus ** 2 - kin_p_pis_tauminus_par ** 2)
 
-        # checking if the expression under the square root is not negative
+        # Checking if the expression under the square root is not negative
         if (kin_p_pis_tauminus_perp_sqr * kin_p_pis_tauminus_par ** 2 + kin_C_tauminus_sqr ** 2 - kin_E_pis_tauminus ** 2 * kin_p_pis_tauminus_perp_sqr) >= 0:
             kin_beta_tauminus = kin_p_pis_tauminus_par * numpy.sqrt(kin_p_pis_tauminus_perp_sqr * kin_p_pis_tauminus_par ** 2 + kin_C_tauminus_sqr ** 2 - kin_E_pis_tauminus ** 2 * kin_p_pis_tauminus_perp_sqr) / (kin_E_pis_tauminus ** 2 - kin_p_pis_tauminus_par ** 2)
 
@@ -292,23 +299,36 @@ def reconstruct_mc_truth(event, mc_truth_event, verbose):
             kin_p_tauminus_1 = numpy.sqrt(kin_E_pis_tauminus ** 2 + kin_p_nu_tauminus_1 ** 2 + 2 * kin_E_pis_tauminus * kin_p_nu_tauminus_1 - M_TAU ** 2)
             kin_p_tauminus_2 = numpy.sqrt(kin_E_pis_tauminus ** 2 + kin_p_nu_tauminus_2 ** 2 + 2 * kin_E_pis_tauminus * kin_p_nu_tauminus_2 - M_TAU ** 2)
 
-            # resolving ambiguity
-            kin_p_tauminus_mc_truth = numpy.sqrt(mc_truth_event.tauminus_px ** 2 + mc_truth_event.tauminus_py ** 2 + mc_truth_event.tauminus_pz ** 2)
-            diff_tauminus_1 = abs(kin_p_tauminus_1 - kin_p_tauminus_mc_truth)
-            diff_tauminus_2 = abs(kin_p_tauminus_2 - kin_p_tauminus_mc_truth)
+            # Determining the closest to MC truth values
+            p_tauplus_mc_truth = numpy.sqrt(mc_truth_event.tauplus_px ** 2 + mc_truth_event.tauplus_py ** 2 + mc_truth_event.tauplus_pz ** 2)
+            diff_tauplus_1 = abs(kin_p_tauplus_1 - p_tauplus_mc_truth)
+            diff_tauplus_2 = abs(kin_p_tauplus_2 - p_tauplus_mc_truth)
+            min_diff_tauplus = min(diff_tauplus_1, diff_tauplus_2)
+            p_tauplus_closest_to_mc_truth = kin_p_tauplus_1 if isclose(min_diff_tauplus, diff_tauplus_1) else kin_p_tauplus_2
+            p_tauminus_mc_truth = numpy.sqrt(mc_truth_event.tauminus_px ** 2 + mc_truth_event.tauminus_py ** 2 + mc_truth_event.tauminus_pz ** 2)
+            diff_tauminus_1 = abs(kin_p_tauminus_1 - p_tauminus_mc_truth)
+            diff_tauminus_2 = abs(kin_p_tauminus_2 - p_tauminus_mc_truth)
             min_diff_tauminus = min(diff_tauminus_1, diff_tauminus_2)
-            kin_p_tauminus = kin_p_tauminus_1 if isclose(min_diff_tauminus, diff_tauminus_1) else kin_p_tauminus_2
+            p_tauminus_closest_to_mc_truth = kin_p_tauminus_1 if isclose(min_diff_tauminus, diff_tauminus_1) else kin_p_tauminus_2
 
             kin_p_piK_perp = p_pi_K + p_K - numpy.dot((p_pi_K + p_K), kin_e_B) * kin_e_B
             kin_p_piK_par = numpy.dot((p_pi_K + p_K), kin_e_B)
-            kin_p_B = kin_p_tauplus * numpy.dot(kin_e_tauplus, kin_e_B) + kin_p_tauminus * numpy.dot(kin_e_tauminus, kin_e_B) + kin_p_piK_par
-
             kin_E_piK = numpy.sqrt(M_PI ** 2 + numpy.linalg.norm(p_pi_K) ** 2) + numpy.sqrt(M_K ** 2 + numpy.linalg.norm(p_K) ** 2)
-            kin_E_tauplus = numpy.sqrt(M_TAU ** 2 + kin_p_tauplus ** 2)
-            kin_E_tauminus = numpy.sqrt(M_TAU ** 2 + kin_p_tauminus ** 2)
-            kin_m_B = numpy.sqrt(kin_E_tauplus ** 2 + kin_E_tauminus ** 2 + kin_E_piK ** 2 + 2 * (kin_E_tauplus * kin_E_tauminus + kin_E_tauplus * kin_E_piK + kin_E_tauminus * kin_E_piK) - kin_p_B ** 2)
 
-            # Printing comprehensive information if needed
+            ret = AllSolutions()
+            for p_tauplus in kin_p_tauplus_1, kin_p_tauplus_2:
+                for p_tauminus in kin_p_tauminus_1, kin_p_tauminus_2:
+                    kin_p_B = p_tauplus * numpy.dot(kin_e_tauplus, kin_e_B) + p_tauminus * numpy.dot(kin_e_tauminus, kin_e_B) + kin_p_piK_par
+                    kin_E_tauplus = numpy.sqrt(M_TAU ** 2 + p_tauplus ** 2)
+                    kin_E_tauminus = numpy.sqrt(M_TAU ** 2 + p_tauminus ** 2)
+                    kin_m_B = numpy.sqrt(kin_E_tauplus ** 2 + kin_E_tauminus ** 2 + kin_E_piK ** 2 + 2 * (kin_E_tauplus * kin_E_tauminus + kin_E_tauplus * kin_E_piK + kin_E_tauminus * kin_E_piK) - kin_p_B ** 2)
+                    if isclose(p_tauplus, p_tauplus_closest_to_mc_truth) and isclose(p_tauminus, p_tauminus_closest_to_mc_truth):
+                        ret.correct_solution = ReconstructedEvent(kin_m_B, Momentum.fromlist(kin_p_B * kin_e_B), Momentum.fromlist(p_tauplus * kin_e_tauplus), Momentum.fromlist(p_tauminus * kin_e_tauminus), Momentum.fromlist(p_tauplus * kin_e_tauplus - kin_p_pis_tauplus), Momentum.fromlist(p_tauminus * kin_e_tauminus - kin_p_pis_tauminus))
+                    else:
+                        ret.wrong_solutions.append(ReconstructedEvent(kin_m_B, Momentum.fromlist(kin_p_B * kin_e_B), Momentum.fromlist(p_tauplus * kin_e_tauplus), Momentum.fromlist(p_tauminus * kin_e_tauminus), Momentum.fromlist(p_tauplus * kin_e_tauplus - kin_p_pis_tauplus), Momentum.fromlist(p_tauminus * kin_e_tauminus - kin_p_pis_tauminus)))
+
+
+            # Printing debug information if needed
             if verbose > 1:
                 # Setting numpy precision
                 numpy.set_printoptions(12)
@@ -353,12 +373,12 @@ def reconstruct_mc_truth(event, mc_truth_event, verbose):
                 print('p_nu_tau-_2: {:.12f}'.format(kin_p_nu_tauminus_2))
                 print('p_tau-_1: {:.12f}'.format(kin_p_tauminus_1))
                 print('p_tau-_2: {:.12f}'.format(kin_p_tauminus_2))
-                print('p_tau+: {:.12f}'.format(kin_p_tauplus))
-                print('p_tau-: {:.12f}'.format(kin_p_tauminus))
+                print('p_tau+: {:.12f}'.format(p_tauplus_closest_to_mc_truth))
+                print('p_tau-: {:.12f}'.format(p_tauminus_closest_to_mc_truth))
                 print('B momentum: {:.12f}'.format(kin_p_B))
                 print('B mass: {:.12f}'.format(kin_m_B))
 
-            return ReconstructedEvent(kin_m_B, Momentum.fromlist(kin_p_B * kin_e_B), Momentum.fromlist(kin_p_tauplus * kin_e_tauplus), Momentum.fromlist(kin_p_tauminus * kin_e_tauminus), Momentum.fromlist(kin_p_tauplus * kin_e_tauplus - kin_p_pis_tauplus), Momentum.fromlist(kin_p_tauminus * kin_e_tauminus - kin_p_pis_tauminus))
+            return ret
 
         else:
             raise UnreconstructableEventError("Event cannot be reconstructed because of ill-formed tau- vertex")
@@ -379,15 +399,15 @@ def show_plot(var, data, units, n_bins = 100, fit_model = None, components_to_pl
         draw_legend (optional, [bool]): the flag that determines whether the fit legend will be drawn. Defaults to False
     """
 
-    # creating canvas the plots to be drawn in
+    # Creating canvas the plots to be drawn in
     canvas = TCanvas(var.GetName() + '_canvas', var.GetTitle() + ' distribution', 640, 640 if fit_model else 480) # creating bigger canvas if we're going to plot fits (and thus to plot pulls hist)
 
-    # creating the pad for the reconstructed B mass distribution histogram
+    # Creating the pad for the reconstructed B mass distribution histogram
     upper_pad = TPad('upper_pad', 'Upper Pad', 0., 0.25 if  fit_model else 0., 1., 1.) # creating a pad that will occupy the top 75% of the canvas (the count starts from the bottom) if we're gooing to plot fits the data (and thus to plot pulls hist) and the whole canvas otherwise
     upper_pad.Draw()
 
-    # adding label "FCC-ee"
-    label = TPaveText(0.75, 0.8, .9, .9, 'NDC') # placing a label; the "NDC" option sets the units to mother container's fraction
+    # Adding label "FCC-ee"
+    label = TPaveText(0.75, 0.8, 0.9, 0.9, 'NDC') # placing a label; the "NDC" option sets the units to mother container's fraction
     label.AddText('FCC-#it{ee}')
 
     plot_frame = var.frame(RooFit.Name(var.GetName() + '_frame'), RooFit.Title(var.GetTitle() + ' frame'), RooFit.Bins(n_bins))
@@ -410,19 +430,19 @@ def show_plot(var, data, units, n_bins = 100, fit_model = None, components_to_pl
 
         fit_model.plotOn(plot_frame)
 
-        # prepairing pulls histogram
+        # Prepairing pulls histogram
         pulls_hist = plot_frame.pullHist()
         pulls_hist.GetXaxis().SetTitle('')
         pulls_hist.GetYaxis().SetTitle('')
         pulls_hist.GetXaxis().SetRangeUser(var.getMin(), var.getMax())
         pulls_hist.GetYaxis().SetRangeUser(-5., 5.)
 
-        # creating the pad the pulls histogram to be drawn in
+        # Creating the pad the pulls histogram to be drawn in
         lower_pad = TPad('lower_pad', 'Lower Pad', 0., 0., 1., 0.25)
         lower_pad.Draw()
         lower_pad.cd()
 
-        # drawing pulls histogram
+        # Drawing pulls histogram
         pulls_hist.Draw('ap')
 
         upper_line = TLine(var.getMin(), 2, var.getMax(), 2)

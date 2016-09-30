@@ -67,17 +67,17 @@ class AllSolutions(object):
         wrong_solutions (list): 3 wrong solutions
     """
 
-    def __init__(self, correct_solution = None, wrong_solutions = []):
+    def __init__(self, correct_solution = None, wrong_solutions = None):
         """
             Constructor
 
             Args:
             correct_solution (optional, [ReconstructedEvent]): the correct solution. Defaults to None
-            wrong_solutions (optional, [list]): 3 wrong solutions. Defaults to [] (empty list)
+            wrong_solutions (optional, [list]): 3 wrong solutions. Defaults to None
         """
 
         super(AllSolutions, self).__init__()
 
         self.correct_solution = correct_solution
-        self.wrong_solutions = wrong_solutions
+        self.wrong_solutions = wrong_solutions if wrong_solutions else []
 
