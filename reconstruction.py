@@ -72,11 +72,11 @@ def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max
     processed_events = 0 # Number of processed events
     reconstructable_events = 0 # Events with valid tau+ and tau- decay vertex
     # Variables for RooFit
-    b_mass = RooRealVar('mB', 'm_{B}', x_min, x_max)
+    b_mass = RooRealVar('mB', 'm_{B}', x_min, x_max, 'GeV/#it{c}^{2}')
     b_mass_data = RooDataSet('mB_data', 'm_{B} data', RooArgSet(b_mass)) # Storage for reconstructed B mass values
 
     if plot_q_square:
-        q_square = RooRealVar('q2', 'q^{2}', 12.5, 22.5)
+        q_square = RooRealVar('q2', 'q^{2}', 12.5, 22.5, 'GeV^{2}/#it{c}^{2}')
         q_square_data = RooDataSet('q2_data', 'q^{2} data', RooArgSet(q_square)) # q^2 values container
 
     if plot_momentum_resolution:
@@ -194,30 +194,30 @@ def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max
                                 cb_fraction = RooRealVar('signal_model_cb_fraction', 'Fraction of Crystal Ball Shape in Signal Model', 0.3, 0.01, 1.))
 
         model.fitTo(b_mass_data, RooFit.Extended(False))
-        show_plot(b_mass, b_mass_data, 'GeV/#it{c}^{2}', n_bins, model, components_to_plot = model.components, draw_legend = draw_legend)
+        show_plot(b_mass, b_mass_data, n_bins, model, components_to_plot = model.components, draw_legend = draw_legend)
 
     else:
-        show_plot(b_mass, b_mass_data, 'GeV/#it{c}^{2}', n_bins)
+        show_plot(b_mass, b_mass_data, n_bins)
 
     if plot_q_square:
-        show_plot(q_square, q_square_data, 'GeV^{2}/#it{c}^{2}', n_bins)
+        show_plot(q_square, q_square_data, n_bins)
 
     if plot_momentum_resolution:
-        show_plot(error_p_tauplus_x, error_p_tauplus_x_data, None, n_bins)
-        show_plot(error_p_tauplus_y, error_p_tauplus_y_data, None, n_bins)
-        show_plot(error_p_tauplus_z, error_p_tauplus_z_data, None, n_bins)
+        show_plot(error_p_tauplus_x, error_p_tauplus_x_data, n_bins)
+        show_plot(error_p_tauplus_y, error_p_tauplus_y_data, n_bins)
+        show_plot(error_p_tauplus_z, error_p_tauplus_z_data, n_bins)
 
-        show_plot(error_p_tauminus_x, error_p_tauminus_x_data, None, n_bins)
-        show_plot(error_p_tauminus_y, error_p_tauminus_y_data, None, n_bins)
-        show_plot(error_p_tauminus_z, error_p_tauminus_z_data, None, n_bins)
+        show_plot(error_p_tauminus_x, error_p_tauminus_x_data, n_bins)
+        show_plot(error_p_tauminus_y, error_p_tauminus_y_data, n_bins)
+        show_plot(error_p_tauminus_z, error_p_tauminus_z_data, n_bins)
 
-        show_plot(error_p_nu_tauplus_x, error_p_nu_tauplus_x_data, None, n_bins)
-        show_plot(error_p_nu_tauplus_y, error_p_nu_tauplus_y_data, None, n_bins)
-        show_plot(error_p_nu_tauplus_z, error_p_nu_tauplus_z_data, None, n_bins)
+        show_plot(error_p_nu_tauplus_x, error_p_nu_tauplus_x_data, n_bins)
+        show_plot(error_p_nu_tauplus_y, error_p_nu_tauplus_y_data, n_bins)
+        show_plot(error_p_nu_tauplus_z, error_p_nu_tauplus_z_data, n_bins)
 
-        show_plot(error_p_nu_tauminus_x, error_p_nu_tauminus_x_data, None, n_bins)
-        show_plot(error_p_nu_tauminus_y, error_p_nu_tauminus_y_data, None, n_bins)
-        show_plot(error_p_nu_tauminus_z, error_p_nu_tauminus_z_data, None, n_bins)
+        show_plot(error_p_nu_tauminus_x, error_p_nu_tauminus_x_data, n_bins)
+        show_plot(error_p_nu_tauminus_y, error_p_nu_tauminus_y_data, n_bins)
+        show_plot(error_p_nu_tauminus_z, error_p_nu_tauminus_z_data, n_bins)
 
 def main(argv):
     """The main function. Parses the command line arguments passed to the script and then runs the process function"""

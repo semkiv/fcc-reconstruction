@@ -385,17 +385,15 @@ def reconstruct_mc_truth(event, mc_truth_event, verbose):
     else:
         raise UnreconstructableEventError("Event cannot be reconstructed because of ill-formed tau+ vertex")
 
-def show_plot(var, data, units, n_bins = 100, fit_model = None, components_to_plot = None, draw_legend = False):
+def show_plot(var, data, n_bins = 100, fit_model = None, components_to_plot = None, draw_legend = False):
     """
         A function that visualizes the results of the reconstruction by showing plots
-
         Args:
         var (ROOT.RooRealVar): the variable the histogram of the diatribution of which will be plotted
         data (ROOT.RooDataSet): the data to be fitted
-        units (str or None): X-axis units
         n_bins (optional, [int]): the number of bins in the histogram. Defaults to 100
-        fit_model (optional, [ROOT.RooAddPdf]): the model the data has been fitted to. Defaults to None
-        components_to_plot (optional, [ROOT.RooArgList]): the components of the model to plot. Defaults to None
+        fit_model (optional, [ROOT.RooAddPdf or None]): the model the data has been fitted to. Defaults to None
+        components_to_plot (optional, [ROOT.RooArgList or None]): the components of the model to plot. Defaults to None
         draw_legend (optional, [bool]): the flag that determines whether the fit legend will be drawn. Defaults to False
     """
 
@@ -411,8 +409,8 @@ def show_plot(var, data, units, n_bins = 100, fit_model = None, components_to_pl
     label.AddText('FCC-#it{ee}')
 
     plot_frame = var.frame(RooFit.Name(var.GetName() + '_frame'), RooFit.Title(var.GetTitle() + ' frame'), RooFit.Bins(n_bins))
-    plot_frame.GetXaxis().SetTitle((var.GetTitle() + ', {}'.format(units)) if units else var.GetTitle())
-    plot_frame.GetYaxis().SetTitle('Events / ({:g} {})'.format(float(var.getMax() - var.getMin()) / n_bins, units) if units else 'Events / {:g}'.format(float(var.getMax() - var.getMin()) / n_bins))
+    plot_frame.GetXaxis().SetTitle((var.GetTitle() + ', {}'.format(var.getUnit())) if var.getUnit() else var.GetTitle())
+    plot_frame.GetYaxis().SetTitle('Events / ({:g} {})'.format(float(var.getMax() - var.getMin()) / n_bins, var.getUnit()) if var.getUnit() else 'Events / {:g}'.format(float(var.getMax() - var.getMin()) / n_bins))
     data.plotOn(plot_frame)
 
     if fit_model:
