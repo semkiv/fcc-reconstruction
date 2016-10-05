@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
 """
-    Contains the ReconstructedEvent class definition
+    Contains the definitions of the ReconstructedEvent, AllSolutions and UnreconstructableEventError classes
 
     ReconstructedEvent - a class that stores reconstructed event information
+    AllSolutions - a class to store all 4 reconstruction results
+    UnreconstructableEventError - a class of the exceptions to be thrown in case of unreconstructable event
 """
 
 M_TAU = 1.77684
@@ -61,7 +63,7 @@ class ReconstructedEvent(object):
 class AllSolutions(object):
     """
         A utility class to store all 4 solutions
-        
+
         Attributes:
         correct_solution (ReconstructedEvent): the correct solution
         wrong_solutions (list): 3 wrong solutions
@@ -81,3 +83,14 @@ class AllSolutions(object):
         self.correct_solution = correct_solution
         self.wrong_solutions = wrong_solutions if wrong_solutions else []
 
+class UnreconstructableEventError(RuntimeError):
+    """Exception to be thrown if the event cannot be reconstructed because of poor smeared values"""
+
+    def __init__(self, error_string = 'Event cannot be reconstructed'):
+        """
+            Constructor
+
+            Args:
+            error_string (optional, [str]): error message. Defaults to 'Event cannot be reconstructed'
+        """
+        super(UnreconstructableEventError, self).__init__(error_string)

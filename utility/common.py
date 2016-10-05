@@ -10,6 +10,7 @@
     reconstruct - a function that reconstructs the event
     reconstruct_mc_truth - a function that reconstructs the event using MC truth information
     show_plot - a function that visualizes reconstruction results by making plots
+    add_to_RooDataSet - a function to easily add a value to ROOT.RooDataSet
 """
 
 import os
@@ -23,12 +24,11 @@ from ROOT import gROOT, gStyle, TCanvas, TPaveText, TPad, TLine, TLegend
 devnull = open(os.devnull, 'w')
 old_stdout_fileno = os.dup(sys.stdout.fileno())
 os.dup2(devnull.fileno(), 1)
-from ROOT import RooFit
+from ROOT import RooFit, RooDataSet, RooArgSet
 devnull.close()
 os.dup2(old_stdout_fileno, 1)
 
-from UnreconstructableEventError import UnreconstructableEventError
-from ReconstructedEvent import ReconstructedEvent, AllSolutions
+from ReconstructedEvent import ReconstructedEvent, AllSolutions, UnreconstructableEventError
 from heppy_fcc.utility.Momentum import Momentum
 
 # Masses of the particles
@@ -232,7 +232,7 @@ def reconstruct_mc_truth(event, mc_truth_event, verbose):
         verbose (optional, [int]): verbosity level
 
         Returns:
-        ReconstructedEvent: reconstructed event information
+        AllSolutions: reconstructed events information
 
         Raises:
         UnreconstructableEventError: if the event cannot be reconstructed because of poor smeared values
@@ -461,3 +461,17 @@ def show_plot(var, data, n_bins = 100, fit_model = None, components_to_plot = No
     canvas.Update()
 
     raw_input('Press ENTER to continue')
+
+def add_to_RooDataSet(var, value, dataset):
+    """
+        A function to easily add a value to ROOT.RooDataSet without clipping (values outside the range are discarded)
+
+        Args:
+        var (ROOT.RooRealVar): variable used to create the data set
+        value (float): value to add
+        data (ROOT.RooDataSet): data set to add to
+    """
+
+    if value >= var.getMin() and value <= var.getMax():
+        var.setVal(value)
+        dataset.add(RooArgSet(var))

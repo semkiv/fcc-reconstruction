@@ -26,10 +26,9 @@ from ROOT import RooFit, RooRealVar, RooArgList, RooArgSet, RooDataSet, RooAddPd
 devnull.close()
 os.dup2(old_stdout_fileno, 1)
 
-from utility.common import reconstruct, show_plot
-from utility.UnreconstructableEventError import UnreconstructableEventError
-from utility.SignalModel import SignalModel
-from utility.BackgroundModel import BackgroundModel
+from utility.common import reconstruct, show_plot, add_to_RooDataSet
+from utility.ReconstructedEvent import UnreconstructableEventError
+from utility.fit import SignalModel, BackgroundModel
 
 # few constants
 NBINS = 100 # Number of bins in the histogram
@@ -84,11 +83,8 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
                 rec_ev = reconstruct(event, verbose)
                 reconstructable_events += 1
 
-                b_mass.setVal(rec_ev.m_b)
-                b_mass_data.add(RooArgSet(b_mass))
-
-                q_square.setVal(rec_ev.q_square())
-                q_square_data.add(RooArgSet(q_square))
+                add_to_RooDataSet(b_mass, rec_ev.m_b, b_mass_data)
+                add_to_RooDataSet(q_square, rec_ev.q_square(), q_square_data)
             except UnreconstructableEventError:
                 pass
 
@@ -102,112 +98,105 @@ def process(file_name, max_events, n_bins, x_min, x_max, fit, peak_x_min, peak_x
     if fit:
         # signal model
         # ILD-like
-        signal_model = SignalModel(name = 'signal_model',
-                                   title = 'Signal Model',
-                                   x = b_mass,
-                                   mean = RooRealVar('mean_signal', '#mu_{signal}', 5.279, peak_x_min, peak_x_max),
-                                   width = RooRealVar('width_signal', '#sigma_{signal}', 0.03, 0.01, 0.1),
-                                   width_wide = RooRealVar('width_wide_gauss', '#sigma_{wide}', 0.165),
-                                   alpha = RooRealVar('alpha_signal', '#alpha_{signal}', -0.206),
-                                   n = RooRealVar('n_signal', 'n_{signal}', 2.056),
-                                   narrow_gauss_fraction = RooRealVar('narrow_gauss_fraction', 'Fraction of narrow Gaussian in signal', 0.127),
-                                   cb_fraction = RooRealVar('signal_cb_fraction', 'Fraction of CB in signal', 0.5)
-                                   )
-        # progressive
         # signal_model = SignalModel(name = 'signal_model',
         #                            title = 'Signal Model',
         #                            x = b_mass,
         #                            mean = RooRealVar('mean_signal', '#mu_{signal}', 5.279, peak_x_min, peak_x_max),
         #                            width = RooRealVar('width_signal', '#sigma_{signal}', 0.03, 0.01, 0.1),
-        #                            width_wide = RooRealVar('width_wide_gauss', '#sigma_{wide}', 0.151),
-        #                            alpha = RooRealVar('alpha_signal', '#alpha_{signal}', -0.133),
-        #                            n = RooRealVar('n_signal', 'n_{signal}', 2.891),
-        #                            narrow_gauss_fraction = RooRealVar('narrow_gauss_fraction', 'Fraction of narrow Gaussian in signal', 0.301),
-        #                            cb_fraction = RooRealVar('signal_cb_fraction', 'Fraction of CB in signal', 0.330)
-        #                            )
+        #                            width_wide = RooRealVar('width_wide_gauss', '#sigma_{wide}', 0.131),
+        #                            alpha = RooRealVar('alpha_signal', '#alpha_{signal}', -0.280),
+        #                            n = RooRealVar('n_signal', 'n_{signal}', 99.93),
+        #                            narrow_gauss_fraction = RooRealVar('narrow_gauss_fraction', 'Fraction of narrow Gaussian in signal', 0.158),
+        #                            cb_fraction = RooRealVar('signal_cb_fraction', 'Fraction of CB in signal', 0.404))
+        # progressive
+        signal_model = SignalModel(name = 'signal_model',
+                                   title = 'Signal Model',
+                                   x = b_mass,
+                                   mean = RooRealVar('mean_signal', '#mu_{signal}', 5.279, peak_x_min, peak_x_max),
+                                   width = RooRealVar('width_signal', '#sigma_{signal}', 0.03, 0.01, 0.1),
+                                   width_wide = RooRealVar('width_wide_gauss', '#sigma_{wide}', 0.110),
+                                   alpha = RooRealVar('alpha_signal', '#alpha_{signal}', -0.445),
+                                   n = RooRealVar('n_signal', 'n_{signal}', 4.85),
+                                   narrow_gauss_fraction = RooRealVar('narrow_gauss_fraction', 'Fraction of narrow Gaussian in signal', 0.323),
+                                   cb_fraction = RooRealVar('signal_cb_fraction', 'Fraction of CB in signal', 0.285))
+
+        # Wrong signal model
+        # ILD-like
+        # wrong_signal_model = BackgroundModel(name = 'wrong_signal_model',
+        #                                      title = 'Wrong signal model',
+        #                                      x = b_mass,
+        #                                      mean = RooRealVar('mean_wrong_signal', '#mu_{wrong_signal}', 5.344),
+        #                                      width_gauss = RooRealVar('width_wrong_signal', '#sigma_{wrong signal}', 0.371),
+        #                                      width_cb = RooRealVar('width_wrong_signal_cb', '#sigma_{wrong signal CB}', 0.267),
+        #                                      alpha = RooRealVar('alpha_wrong_signal', '#alpha_{wrong signal}', -0.399),
+        #                                      n = RooRealVar('n_wrong_signal', 'n_{wrong signal}', 100.),
+        #                                      gauss_fraction = RooRealVar('wrong_signal_gauss_fraction', 'Fraction of Gaussian in wrong signal background', 0.))
+        # progressive
+        wrong_signal_model = BackgroundModel(name = 'wrong_signal_model',
+                                             title = 'Wrong signal model',
+                                             x = b_mass,
+                                             mean = RooRealVar('mean_wrong_signal', '#mu_{wrong_signal}', 5.327),
+                                             width_gauss = RooRealVar('width_wrong_signal', '#sigma_{wrong signal}', 0.193),
+                                             width_cb = RooRealVar('width_wrong_signal_cb', '#sigma_{wrong signal CB}', 0.251),
+                                             alpha = RooRealVar('alpha_wrong_signal', '#alpha_{wrong signal}', -0.439),
+                                             n = RooRealVar('n_wrong_signal', 'n_{wrong signal}', 100.),
+                                             gauss_fraction = RooRealVar('wrong_signal_gauss_fraction', 'Fraction of Gaussian in wrong signal background', 0.))
 
         # Bs -> Ds Ds K* (with Ds -> tau nu) background model
         # ILD-like
-        bs_ds2taunu_model = BackgroundModel(name = 'bs_ds2taunu_model',
-                                            title = 'Bs (with Ds -> #tau #nu) background model',
-                                            x = b_mass,
-                                            mean = RooRealVar('mean_bs_ds2taunu', '#mu_{Bs (with Ds -> #tau #nu)}', 4.970),
-                                            width_gauss = RooRealVar('width_bs_ds2taunu_gauss', '#sigma_{Bs (with Ds -> #tau #nu) Gauss}', 0.196),
-                                            width_cb = RooRealVar('width_bs_ds2taunu_cb', '#sigma_{Bs (with Ds -> #tau #nu) CB}', 0.078),
-                                            alpha = RooRealVar('alpha_bs_ds2taunu', '#alpha_{Bs (with Ds -> #tau #nu)}', -0.746),
-                                            n = RooRealVar('n_bs_ds2taunu', 'n_{Bs (with Ds -> #tau #nu)}', 1.983),
-                                            gauss_fraction = RooRealVar('bs_ds2taunu_gauss_fraction', 'Fraction of Gaussian in Bs (with Ds -> #tau #nu) background', 0.243)
-                                            )
-        # progressive
         # bs_ds2taunu_model = BackgroundModel(name = 'bs_ds2taunu_model',
         #                                     title = 'Bs (with Ds -> #tau #nu) background model',
         #                                     x = b_mass,
-        #                                     mean = RooRealVar('mean_bs_ds2taunu', '#mu_{Bs (with Ds -> #tau #nu)}', 4.967),
-        #                                     width_gauss = RooRealVar('width_bs_ds2taunu_gauss', '#sigma_{Bs (with Ds -> #tau #nu) Gauss}', 0.191),
-        #                                     width_cb = RooRealVar('width_bs_ds2taunu_cb', '#sigma_{Bs (with Ds -> #tau #nu) CB}', 0.068),
-        #                                     alpha = RooRealVar('alpha_bs_ds2taunu', '#alpha_{Bs (with Ds -> #tau #nu)}', -1.073),
-        #                                     n = RooRealVar('n_bs_ds2taunu', 'n_{Bs (with Ds -> #tau #nu)}', 1.731),
-        #                                     gauss_fraction = RooRealVar('bs_ds2taunu_gauss_fraction', 'Fraction of Gaussian in Bs (with Ds -> #tau #nu) background', 0.228)
-        #                                     )
-
-        # Bs -> Ds Ds K* (with one Ds -> tau nu and other Ds -> pi pi pi pi) background model
-        # ILD-like
-        bs_ds2taunu_ds2pipipipi_model = BackgroundModel(name = 'bs_ds2taunu_ds2pipipipi_model',
-                                                        title = 'Bs (with Ds -> #tau #nu and Ds -> #pi #pi #pi #pi) background model',
-                                                        x = b_mass,
-                                                        mean = RooRealVar('mean_bs_ds2taunu_ds2pipipipi', '#mu_{Bs (with Ds -> #tau #nu and Ds -> #pi #pi #pi #pi)}', 4.990),
-                                                        width_gauss = RooRealVar('width_bs_ds2taunu_ds2pipipipi_gauss', '#sigma_{Bs (with Ds -> #tau #nu and Ds -> #pi #pi #pi #pi) Gauss}', 0.068),
-                                                        width_cb = RooRealVar('width_bs_ds2taunu_ds2pipipipi_cb', '#sigma_{Bs (with Ds -> #tau #nu and Ds -> #pi #pi #pi #pi) CB}', 0.190),
-                                                        alpha = RooRealVar('alpha_bs_ds2taunu_ds2pipipipi', '#alpha_{Bs (with Ds -> #tau #nu and Ds -> #pi #pi #pi #pi)}', -0.726),
-                                                        n = RooRealVar('n_bs_ds2taunu_ds2pipipipi', 'n_{Bs (with Ds -> #tau #nu and Ds -> #pi #pi #pi #pi)}', 3.171),
-                                                        gauss_fraction = RooRealVar('bs_ds2taunu_ds2pipipipi_gauss_fraction', 'Fraction of Gaussian in Bs (with Ds -> #tau #nu and Ds -> #pi #pi #pi #pi) background', 0.222)
-                                                        )
+        #                                     mean = RooRealVar('mean_bs_ds2taunu', '#mu_{Bs (with Ds -> #tau #nu)}', 4.970),
+        #                                     width_gauss = RooRealVar('width_bs_ds2taunu_gauss', '#sigma_{Bs (with Ds -> #tau #nu) Gauss}', 0.196),
+        #                                     width_cb = RooRealVar('width_bs_ds2taunu_cb', '#sigma_{Bs (with Ds -> #tau #nu) CB}', 0.078),
+        #                                     alpha = RooRealVar('alpha_bs_ds2taunu', '#alpha_{Bs (with Ds -> #tau #nu)}', -0.746),
+        #                                     n = RooRealVar('n_bs_ds2taunu', 'n_{Bs (with Ds -> #tau #nu)}', 1.983),
+        #                                     gauss_fraction = RooRealVar('bs_ds2taunu_gauss_fraction', 'Fraction of Gaussian in Bs (with Ds -> #tau #nu) background', 0.243))
         # progressive
-        # bs_ds2taunu_ds2pipipipi_model = BackgroundModel(name = 'bs_ds2taunu_ds2pipipipi_model',
-        #                                                 title = 'Bs (with Ds -> #tau #nu and Ds -> #pi #pi #pi #pi) background model',
-        #                                                 x = b_mass,
-        #                                                 mean = RooRealVar('mean_bs_ds2taunu_ds2pipipipi', '#mu_{Bs (with Ds -> #tau #nu and Ds -> #pi #pi #pi #pi)}', 4.979),
-        #                                                 width_gauss = RooRealVar('width_bs_ds2taunu_ds2pipipipi_gauss', '#sigma_{Bs (with Ds -> #tau #nu and Ds -> #pi #pi #pi #pi) Gauss}', 0.073),
-        #                                                 width_cb = RooRealVar('width_bs_ds2taunu_ds2pipipipi_cb', '#sigma_{Bs (with Ds -> #tau #nu and Ds -> #pi #pi #pi #pi) CB}', 0.146),
-        #                                                 alpha = RooRealVar('alpha_bs_ds2taunu_ds2pipipipi', '#alpha_{Bs (with Ds -> #tau #nu and Ds -> #pi #pi #pi #pi)}', -0.725),
-        #                                                 n = RooRealVar('n_bs_ds2taunu_ds2pipipipi', 'n_{Bs (with Ds -> #tau #nu and Ds -> #pi #pi #pi #pi)}', 3.752),
-        #                                                 gauss_fraction = RooRealVar('bs_ds2taunu_ds2pipipipi_gauss_fraction', 'Fraction of Gaussian in Bs (with Ds -> #tau #nu and Ds -> #pi #pi #pi #pi) background', 0.417)
-        #                                                 )
+        bs_ds2taunu_model = BackgroundModel(name = 'bs_ds2taunu_model',
+                                            title = 'Bs (with Ds -> #tau #nu) background model',
+                                            x = b_mass,
+                                            mean = RooRealVar('mean_bs_ds2taunu', '#mu_{Bs (with Ds -> #tau #nu)}', 4.967),
+                                            width_gauss = RooRealVar('width_bs_ds2taunu_gauss', '#sigma_{Bs (with Ds -> #tau #nu) Gauss}', 0.191),
+                                            width_cb = RooRealVar('width_bs_ds2taunu_cb', '#sigma_{Bs (with Ds -> #tau #nu) CB}', 0.068),
+                                            alpha = RooRealVar('alpha_bs_ds2taunu', '#alpha_{Bs (with Ds -> #tau #nu)}', -1.073),
+                                            n = RooRealVar('n_bs_ds2taunu', 'n_{Bs (with Ds -> #tau #nu)}', 1.731),
+                                            gauss_fraction = RooRealVar('bs_ds2taunu_gauss_fraction', 'Fraction of Gaussian in Bs (with Ds -> #tau #nu) background', 0.228))
 
         # Bd -> Ds K* tau nu (with Ds -> tau nu) background model
         # ILD-like
-        bd_ds2taunu_model = BackgroundModel(name = 'bd_ds2taunu_model',
-                                            title = 'Bd (with Ds -> #tau #nu) background model',
-                                            x = b_mass,
-                                            mean = RooRealVar('mean_bd_ds2taunu_ds2taunu', '#mu_{Bd (with Ds -> #tau #nu)}', 4.894),
-                                            width_gauss = RooRealVar('width_bd_ds2taunu_gauss', '#sigma_{Bd (with Ds -> #tau #nu) Gauss}', 0.331),
-                                            width_cb = RooRealVar('width_bd_ds2taunu_cb', '#sigma_{Bd (with Ds -> #tau #nu) CB}', 0.169),
-                                            alpha = RooRealVar('alpha_bd_ds2taunu', '#alpha_{Bd (with Ds -> #tau #nu)}', -0.904),
-                                            n = RooRealVar('n_bd_ds2taunu', 'n_{Bd (with Ds -> #tau #nu)}', 3.57),
-                                            gauss_fraction = RooRealVar('bd_ds2taunu_gauss_fraction', 'Fraction of Gaussian in Bd (with Ds -> #tau #nu) background', 0.01)
-                                            )
-        # progressive
         # bd_ds2taunu_model = BackgroundModel(name = 'bd_ds2taunu_model',
         #                                     title = 'Bd (with Ds -> #tau #nu) background model',
         #                                     x = b_mass,
-        #                                     mean = RooRealVar('mean_bd_ds2taunu_ds2taunu', '#mu_{Bd (with Ds -> #tau #nu)}', 4.891),
-        #                                     width_gauss = RooRealVar('width_bd_ds2taunu_gauss', '#sigma_{Bd (with Ds -> #tau #nu) Gauss}', 0.565),
-        #                                     width_cb = RooRealVar('width_bd_ds2taunu_cb', '#sigma_{Bd (with Ds -> #tau #nu) CB}', 0.148),
-        #                                     alpha = RooRealVar('alpha_bd_ds2taunu', '#alpha_{Bd (with Ds -> #tau #nu)}', -5.23),
-        #                                     n = RooRealVar('n_bd_ds2taunu', 'n_{Bd (with Ds -> #tau #nu)}', 1.497),
-        #                                     gauss_fraction = RooRealVar('bd_ds2taunu_gauss_fraction', 'Fraction of Gaussian in Bd (with Ds -> #tau #nu) background', 0.29)
-        #                                     )
+        #                                     mean = RooRealVar('mean_bd_ds2taunu_ds2taunu', '#mu_{Bd (with Ds -> #tau #nu)}', 4.894),
+        #                                     width_gauss = RooRealVar('width_bd_ds2taunu_gauss', '#sigma_{Bd (with Ds -> #tau #nu) Gauss}', 0.331),
+        #                                     width_cb = RooRealVar('width_bd_ds2taunu_cb', '#sigma_{Bd (with Ds -> #tau #nu) CB}', 0.169),
+        #                                     alpha = RooRealVar('alpha_bd_ds2taunu', '#alpha_{Bd (with Ds -> #tau #nu)}', -0.904),
+        #                                     n = RooRealVar('n_bd_ds2taunu', 'n_{Bd (with Ds -> #tau #nu)}', 3.57),
+        #                                     gauss_fraction = RooRealVar('bd_ds2taunu_gauss_fraction', 'Fraction of Gaussian in Bd (with Ds -> #tau #nu) background', 0.01))
+        # progressive
+        bd_ds2taunu_model = BackgroundModel(name = 'bd_ds2taunu_model',
+                                            title = 'Bd (with Ds -> #tau #nu) background model',
+                                            x = b_mass,
+                                            mean = RooRealVar('mean_bd_ds2taunu_ds2taunu', '#mu_{Bd (with Ds -> #tau #nu)}', 4.891),
+                                            width_gauss = RooRealVar('width_bd_ds2taunu_gauss', '#sigma_{Bd (with Ds -> #tau #nu) Gauss}', 0.565),
+                                            width_cb = RooRealVar('width_bd_ds2taunu_cb', '#sigma_{Bd (with Ds -> #tau #nu) CB}', 0.148),
+                                            alpha = RooRealVar('alpha_bd_ds2taunu', '#alpha_{Bd (with Ds -> #tau #nu)}', -5.23),
+                                            n = RooRealVar('n_bd_ds2taunu', 'n_{Bd (with Ds -> #tau #nu)}', 1.497),
+                                            gauss_fraction = RooRealVar('bd_ds2taunu_gauss_fraction', 'Fraction of Gaussian in Bd (with Ds -> #tau #nu) background', 0.29))
 
-        signal_yield = RooRealVar('signal_yield', 'Yield of signal', reconstructable_events / 4., 0, reconstructable_events)
-        bs_ds2taunu_yield = RooRealVar('bs_ds2taunu_yield', 'Yield of Bs (with Ds -> #tau #nu) background', reconstructable_events / 4., 0, reconstructable_events)
-        bs_ds2pipipipi_yield = RooRealVar('bs_ds2pipipipi_yield', 'Yield of Bs (with Ds -> #pi #pi #pi #pi) background', reconstructable_events / 4., 0, reconstructable_events)
-        bd_ds2taunu_yield = RooRealVar('bd_ds2taunu_yield', 'Yield of Bd (with Ds -> #tau #nu) background', reconstructable_events / 4., 0, reconstructable_events)
+        signal_yield = RooRealVar('signal_yield', 'Yield of signal', b_mass_data.numEntries() / 4., 0, b_mass_data.numEntries())
+        wrong_signal_yield = RooRealVar('wrong_signal_yield', 'Yield of wrong signal', b_mass_data.numEntries() / 4., 0, b_mass_data.numEntries())
+        bs_ds2taunu_yield = RooRealVar('bs_ds2taunu_yield', 'Yield of Bs (with Ds -> #tau #nu) background', b_mass_data.numEntries() / 4., 0, b_mass_data.numEntries())
+        bd_ds2taunu_yield = RooRealVar('bd_ds2taunu_yield', 'Yield of Bd (with Ds -> #tau #nu) background', b_mass_data.numEntries() / 4., 0, b_mass_data.numEntries())
 
         # composite model
-        model = RooAddPdf('model', 'Model to fit', RooArgList(signal_model.pdf, bs_ds2taunu_model.pdf, bs_ds2taunu_ds2pipipipi_model.pdf, bd_ds2taunu_model.pdf), RooArgList(signal_yield, bs_ds2taunu_yield, bs_ds2pipipipi_yield, bd_ds2taunu_yield))
+        model = RooAddPdf('model', 'Model to fit', RooArgList(signal_model, wrong_signal_model, bs_ds2taunu_model, bd_ds2taunu_model), RooArgList(signal_yield, wrong_signal_yield, bs_ds2taunu_yield, bd_ds2taunu_yield))
 
         model.fitTo(b_mass_data, RooFit.Extended(True))
-        show_plot(b_mass, b_mass_data, n_bins, model, components_to_plot = RooArgList(signal_model, bs_ds2taunu_model, bs_ds2taunu_ds2pipipipi_model, bd_ds2taunu_model), draw_legend = draw_legend)
+        model.getVariables().Print('v')
+        show_plot(b_mass, b_mass_data, n_bins, model, components_to_plot = RooArgList(signal_model, wrong_signal_model, bs_ds2taunu_model, bd_ds2taunu_model), draw_legend = draw_legend)
 
     else:
         show_plot(b_mass, b_mass_data, n_bins)

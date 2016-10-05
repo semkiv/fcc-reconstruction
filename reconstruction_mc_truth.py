@@ -22,14 +22,13 @@ from ROOT import TFile
 devnull = open(os.devnull, 'w')
 old_stdout_fileno = os.dup(sys.stdout.fileno())
 os.dup2(devnull.fileno(), 1)
-from ROOT import RooFit, RooRealVar, RooArgSet, RooDataSet
+from ROOT import RooFit, RooRealVar, RooArgSet, RooDataSet, RooAddPdf, RooArgList
 devnull.close()
 os.dup2(old_stdout_fileno, 1)
 
-from utility.common import isclose, reconstruct_mc_truth, show_plot
-from utility.UnreconstructableEventError import UnreconstructableEventError
-from utility.SignalModel import SignalModel
-from utility.BackgroundModel import BackgroundModel
+from utility.common import isclose, reconstruct_mc_truth, show_plot, add_to_RooDataSet
+from utility.ReconstructedEvent import UnreconstructableEventError
+from utility.fit import SignalModel, BackgroundModel
 
 # few constants
 NBINS = 100 # Number of bins in the histogram
@@ -67,14 +66,13 @@ def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max
     processed_events = 0 # Number of processed events
     reconstructable_events = 0 # Events with valid tau+ and tau- decay vertex
 
-    # Data sets
-    b_mass_correct = []
-    b_mass_wrong = []
     # Variables for RooFit
+    b_mass = RooRealVar('b_mass', 'm_{B}', x_min, x_max, 'GeV/#it{c}^{2}')
+    b_mass_data = RooDataSet('b_mass_data', 'm_{B} data', RooArgSet(b_mass))
     # b_mass_correct = RooRealVar('mB_correct', 'Correct m_{B}', x_min, x_max, 'GeV/#it{c}^{2}')
-    # b_mass_correct_data = RooDataSet('mB_correct_data', 'Correct m_{B} data', RooArgSet(b_mass_correct))
+    b_mass_correct_data = RooDataSet('mB_correct_data', 'Correct m_{B} data', RooArgSet(b_mass))
     # b_mass_wrong = RooRealVar('mB_wrong', 'Wrong m_{B}', x_min, x_max, 'GeV/#it{c}^{2}')
-    # b_mass_wrong_data = RooDataSet('mB_wrong_data', 'Wrong m_{B} data', RooArgSet(b_mass_wrong))
+    b_mass_wrong_data = RooDataSet('mB_wrong_data', 'Wrong m_{B} data', RooArgSet(b_mass))
 
     # Loop through the events
     for counter in xrange(event_tree.GetEntries()): # So we have to use the old one
@@ -91,11 +89,11 @@ def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max
                 rec_ev = reconstruct_mc_truth(event_tree, mc_event_tree, verbose)
                 reconstructable_events += 1
 
-                # Adding correct solution
-                b_mass_correct.append(rec_ev.correct_solution.m_b)
-                # Adding all wrong solutions
+                add_to_RooDataSet(b_mass, rec_ev.correct_solution.m_b, b_mass_correct_data)
+                add_to_RooDataSet(b_mass, rec_ev.correct_solution.m_b, b_mass_data)
                 for wrong_solution in rec_ev.wrong_solutions:
-                    b_mass_wrong.append(wrong_solution.m_b)
+                    add_to_RooDataSet(b_mass, wrong_solution.m_b, b_mass_wrong_data)
+                    add_to_RooDataSet(b_mass, wrong_solution.m_b, b_mass_data)
 
             except UnreconstructableEventError:
                 pass
@@ -111,28 +109,43 @@ def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max
 
     correct_solution_model = SignalModel(name = 'correct_solution_model',
                                          title = 'Correct solution model',
-                                         x = b_mass_correct,
+                                         x = b_mass,
                                          mean = RooRealVar('mean_correct', '#mu_{correct}', 5.279, peak_x_min, peak_x_max),
                                          width = RooRealVar('width_narrow_gauss_correct', '#sigma_{correct}', 0.03, 0.01, 0.1),
                                          width_wide = RooRealVar('width_wide_gauss_correct', '#sigma_{wide correct}', 0.3, 0.1, 1.),
                                          alpha = RooRealVar('alpha_correct', '#alpha_{correct}', -1., -10., -0.1),
-                                         n = RooRealVar('n_correct', 'n_{correct}', 2., 0.1, 10.),
-                                         narrow_gauss_fraction = RooRealVar('signal_model_narrow_gauss_fraction_correct', 'Fraction of Narrow Gaussian in correct solution model', 0.3, 0.01, 0.99),
-                                         cb_fraction = RooRealVar('correct_solution_model_cb_fraction', 'Fraction of Crystal Ball Shape in wrong solution model', 0.3, 0.01, 0.99))
+                                         n = RooRealVar('n_correct', 'n_{correct}', 10., 1., 100.),
+                                         narrow_gauss_fraction = RooRealVar('signal_model_narrow_gauss_fraction_correct', 'Fraction of Narrow Gaussian in correct solution model', 0.3, 0., 1.),
+                                         cb_fraction = RooRealVar('correct_solution_model_cb_fraction', 'Fraction of Crystal Ball Shape in wrong solution model', 0.3, 0., 1.))
+
     correct_solution_model.fitTo(b_mass_correct_data, RooFit.Extended(False))
-    show_plot(b_mass_correct, b_mass_correct_data, n_bins, fit_model = correct_solution_model, components_to_plot = None, draw_legend = draw_legend)
+    correct_solution_model.getVariables().Print('v')
+    show_plot(b_mass, b_mass_correct_data, n_bins, fit_model = correct_solution_model, components_to_plot = None, draw_legend = draw_legend)
 
     wrong_solution_model = BackgroundModel(name = 'wrong_solution_model',
                                            title = 'Wrong solution model',
-                                           x = b_mass_wrong,
+                                           x = b_mass,
                                            mean = RooRealVar('mean_wrong', '#mu_{wrong}', 5.279, peak_x_min, peak_x_max),
                                            width_gauss = RooRealVar('width_gauss_wrong', '#sigma_{Gauss wrong}', 0.2, 0.02, 2.),
                                            width_cb = RooRealVar('width_cb_wrong', '#sigma_{CB wrong}', 0.2, 0.02, 2.),
-                                           alpha = RooRealVar('alpha_cb_wrong', '#alpha_{CB wrong}', -0.1, -10., -0.001),
-                                           n = RooRealVar('n_cb_wrong', 'n_{CB wrong}', 4., 1.1, 100.),
-                                           gauss_fraction = RooRealVar('wrong_solution_model_gauss_fraction_wrong', 'Fraction of Gaussian in wrong solution model', 0.3, 0.01, 0.99))
+                                           alpha = RooRealVar('alpha_cb_wrong', '#alpha_{CB wrong}', -1., -10., -0.1),
+                                           n = RooRealVar('n_cb_wrong', 'n_{CB wrong}', 10., 1., 100.),
+                                           gauss_fraction = RooRealVar('wrong_solution_model_gauss_fraction_wrong', 'Fraction of Gaussian in wrong solution model', 0.5, 0., 1.))
+
     wrong_solution_model.fitTo(b_mass_wrong_data, RooFit.Extended(False))
-    show_plot(b_mass_wrong, b_mass_wrong_data, n_bins, fit_model = wrong_solution_model, components_to_plot = wrong_solution_model.components, draw_legend = draw_legend)
+    wrong_solution_model.getVariables().Print('v')
+    show_plot(b_mass, b_mass_wrong_data, n_bins, fit_model = wrong_solution_model, components_to_plot = None, draw_legend = draw_legend)
+
+    correct_solution_yield = RooRealVar('correct_solution_yield', 'Yield of correct solutions', b_mass_data.numEntries() / 4., 0, b_mass_data.numEntries())
+    wrong_solution_yield = RooRealVar('wrong_solution_yield', 'Yield of wrong solutions', 3 * b_mass_data.numEntries() / 4., 0, b_mass_data.numEntries())
+
+    correct_solution_model.fix()
+    wrong_solution_model.fix()
+    model = RooAddPdf('model', 'Model to fit', RooArgList(correct_solution_model, wrong_solution_model), RooArgList(correct_solution_yield, wrong_solution_yield))
+
+    model.fitTo(b_mass_data, RooFit.Extended(True))
+    model.getVariables().Print('v')
+    show_plot(b_mass, b_mass_data, n_bins, fit_model = model, components_to_plot = RooArgList(correct_solution_model, wrong_solution_model), draw_legend = draw_legend)
 
 def main(argv):
     """The main function. Parses the command line arguments passed to the script and then runs the process function"""

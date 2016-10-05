@@ -26,10 +26,9 @@ from ROOT import RooFit, RooRealVar, RooArgSet, RooDataSet
 devnull.close()
 os.dup2(old_stdout_fileno, 1)
 
-from utility.common import isclose, reconstruct, show_plot
-from utility.UnreconstructableEventError import UnreconstructableEventError
-from utility.SignalModel import SignalModel
-from utility.BackgroundModel import BackgroundModel
+from utility.common import isclose, reconstruct, show_plot, add_to_RooDataSet
+from utility.ReconstructedEvent import UnreconstructableEventError
+from utility.fit import SignalModel, BackgroundModel
 
 # few constants
 NBINS = 100 # Number of bins in the histogram
@@ -122,41 +121,27 @@ def process(file_name, tree_name, mc_tree_name, max_events, n_bins, x_min, x_max
                 rec_ev = reconstruct(event_tree, verbose)
                 reconstructable_events += 1
 
-                b_mass.setVal(rec_ev.m_b)
-                b_mass_data.add(RooArgSet(b_mass))
+                add_to_RooDataSet(b_mass, rec_ev.m_b, b_mass_data)
 
                 if plot_q_square:
-                    q_square.setVal(rec_ev.q_square())
-                    q_square_data.add(RooArgSet(q_square))
+                    add_to_RooDataSet(q_square, rec_ev.q_square(), q_square_data)
 
                 if plot_momentum_resolution:
-                    error_p_tauplus_x.setVal((rec_ev.p_tauplus.px - mc_event_tree.tauplus_px) / mc_event_tree.tauplus_px)
-                    error_p_tauplus_x_data.add(RooArgSet(error_p_tauplus_x))
-                    error_p_tauplus_y.setVal((rec_ev.p_tauplus.py - mc_event_tree.tauplus_py) / mc_event_tree.tauplus_py)
-                    error_p_tauplus_y_data.add(RooArgSet(error_p_tauplus_y))
-                    error_p_tauplus_z.setVal((rec_ev.p_tauplus.pz - mc_event_tree.tauplus_pz) / mc_event_tree.tauplus_pz)
-                    error_p_tauplus_z_data.add(RooArgSet(error_p_tauplus_z))
+                    add_to_RooDataSet(error_p_tauplus_x, (rec_ev.p_tauplus.px - mc_event_tree.tauplus_px) / mc_event_tree.tauplus_px, error_p_tauplus_x_data)
+                    add_to_RooDataSet(error_p_tauplus_y, (rec_ev.p_tauplus.py - mc_event_tree.tauplus_py) / mc_event_tree.tauplus_py, error_p_tauplus_y_data)
+                    add_to_RooDataSet(error_p_tauplus_z, (rec_ev.p_tauplus.pz - mc_event_tree.tauplus_pz) / mc_event_tree.tauplus_pz, error_p_tauplus_z_data)
 
-                    error_p_tauminus_x.setVal((rec_ev.p_tauminus.px - mc_event_tree.tauminus_px) / mc_event_tree.tauminus_px)
-                    error_p_tauminus_x_data.add(RooArgSet(error_p_tauminus_x))
-                    error_p_tauminus_y.setVal((rec_ev.p_tauminus.py - mc_event_tree.tauminus_py) / mc_event_tree.tauminus_py)
-                    error_p_tauminus_y_data.add(RooArgSet(error_p_tauminus_y))
-                    error_p_tauminus_z.setVal((rec_ev.p_tauminus.pz - mc_event_tree.tauminus_pz) / mc_event_tree.tauminus_pz)
-                    error_p_tauminus_z_data.add(RooArgSet(error_p_tauminus_z))
+                    add_to_RooDataSet(error_p_tauminus_x, (rec_ev.p_tauminus.px - mc_event_tree.tauminus_px) / mc_event_tree.tauminus_px, error_p_tauminus_x_data)
+                    add_to_RooDataSet(error_p_tauminus_y, (rec_ev.p_tauminus.py - mc_event_tree.tauminus_py) / mc_event_tree.tauminus_py, error_p_tauminus_y_data)
+                    add_to_RooDataSet(error_p_tauminus_z, (rec_ev.p_tauminus.pz - mc_event_tree.tauminus_pz) / mc_event_tree.tauminus_pz, error_p_tauminus_z_data)
 
-                    error_p_nu_tauplus_x.setVal((rec_ev.p_nu_tauplus.px - mc_event_tree.nu_tauplus_px) / mc_event_tree.nu_tauplus_px)
-                    error_p_nu_tauplus_x_data.add(RooArgSet(error_p_nu_tauplus_x))
-                    error_p_nu_tauplus_y.setVal((rec_ev.p_nu_tauplus.py - mc_event_tree.nu_tauplus_py) / mc_event_tree.nu_tauplus_py)
-                    error_p_nu_tauplus_y_data.add(RooArgSet(error_p_nu_tauplus_y))
-                    error_p_nu_tauplus_z.setVal((rec_ev.p_nu_tauplus.pz - mc_event_tree.nu_tauplus_pz) / mc_event_tree.nu_tauplus_pz)
-                    error_p_nu_tauplus_z_data.add(RooArgSet(error_p_nu_tauplus_z))
+                    add_to_RooDataSet(error_p_nu_tauplus_x, (rec_ev.p_nu_tauplus.px - mc_event_tree.nu_tauplus_px) / mc_event_tree.nu_tauplus_px, error_p_nu_tauplus_x_data)
+                    add_to_RooDataSet(error_p_nu_tauplus_y, (rec_ev.p_nu_tauplus.py - mc_event_tree.nu_tauplus_py) / mc_event_tree.nu_tauplus_py, error_p_nu_tauplus_y_data)
+                    add_to_RooDataSet(error_p_nu_tauplus_z, (rec_ev.p_nu_tauplus.pz - mc_event_tree.nu_tauplus_pz) / mc_event_tree.nu_tauplus_pz, error_p_nu_tauplus_z_data)
 
-                    error_p_nu_tauminus_x.setVal((rec_ev.p_nu_tauminus.px - mc_event_tree.nu_tauminus_px) / mc_event_tree.nu_tauminus_px)
-                    error_p_nu_tauminus_x_data.add(RooArgSet(error_p_nu_tauminus_x))
-                    error_p_nu_tauminus_y.setVal((rec_ev.p_nu_tauminus.py - mc_event_tree.nu_tauminus_py) / mc_event_tree.nu_tauminus_py)
-                    error_p_nu_tauminus_y_data.add(RooArgSet(error_p_nu_tauminus_y))
-                    error_p_nu_tauminus_z.setVal((rec_ev.p_nu_tauminus.pz - mc_event_tree.nu_tauminus_pz) / mc_event_tree.nu_tauminus_pz)
-                    error_p_nu_tauminus_z_data.add(RooArgSet(error_p_nu_tauminus_z))
+                    add_to_RooDataSet(error_p_nu_tauminus_x, (rec_ev.p_nu_tauminus.px - mc_event_tree.nu_tauminus_px) / mc_event_tree.nu_tauminus_px, error_p_nu_tauminus_x_data)
+                    add_to_RooDataSet(error_p_nu_tauminus_y, (rec_ev.p_nu_tauminus.py - mc_event_tree.nu_tauminus_py) / mc_event_tree.nu_tauminus_py, error_p_nu_tauminus_y_data)
+                    add_to_RooDataSet(error_p_nu_tauminus_z, (rec_ev.p_nu_tauminus.pz - mc_event_tree.nu_tauminus_pz) / mc_event_tree.nu_tauminus_pz, error_p_nu_tauminus_z_data)
 
             except UnreconstructableEventError:
                 pass
