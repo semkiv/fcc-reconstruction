@@ -142,3 +142,62 @@ class BackgroundModel(RooAddPdf):
         self.alpha.setConstant(True)
         self.n.setConstant(True)
         self.gauss_fraction.setConstant(True)
+
+class ResolutionModel(RooAddPdf):
+    """
+        A class that represents a model used to fit momentum resolution. Derived from ROOT.RooAddPdf
+
+        The model is a 'narrow' Gaussian and a 'wide' Gaussian sharing the same mean value.
+
+        Note:
+        Please do not manually modify its attributes
+
+        Attributes:
+        name (str): the name of the model
+        title (str): the title of the model
+        components (ROOT.RooArgList): a RooArgList containing components of the model
+
+        Methods:
+        fix: fixes all model parameters
+    """
+
+    def __init__(self, name, title, x, mean, width, width_wide, narrow_gauss_fraction):
+        """
+            Constructor
+
+            Args:
+            name (str): the name of the PDF
+            title (str): the title of the PDF
+            x (ROOT.RooRealVar): the PDF variable
+            mean (ROOT.RooRealVar): the mean value
+            width (ROOT.RooRealVar): the width shared by the 'narrow' Gaussian and the Crystal Ball shape
+            width_wide (ROOT.RooRealVar): the width of the 'wide' Gaussian
+            narrow_gauss_fraction (ROOT.RooRealVar): the fraction of the 'narrow Gaussian in the model'
+        """
+
+        # Storing variables is necessary because RooArgList elements dangle if they go out of scope (because the RooArgList stores pointers) including when temporaries are used
+        self.name = name
+        self.title = title
+        self.x = x
+        self.mean = mean
+        self.width = width
+        self.width_wide = width_wide
+        self.narrow_gauss_fraction = narrow_gauss_fraction
+
+        self.narrow_gauss = RooGaussian(self.name + '_narrow_gauss', self.title + ' Narrow Gaussian', self.x, self.mean, self.width)
+        self.wide_gauss = RooGaussian(self.name + '_wide_gauss', self.title + ' Wide Gaussian', self.x, self.mean, self.width_wide)
+
+        self.components = RooArgList(self.narrow_gauss, self.wide_gauss)
+        self.fractions = RooArgList(self.narrow_gauss_fraction)
+
+        super(ResolutionModel, self).__init__(self.name, self.title, self.components, self.fractions)
+
+    def fix(self):
+        """
+            Fixes all model parameters
+        """
+
+        self.mean.setConstant(True)
+        self.width.setConstant(True)
+        self.width_wide.setConstant(True)
+        self.narrow_gauss_fraction.setConstant(True)

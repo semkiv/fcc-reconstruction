@@ -215,7 +215,7 @@ def reconstruct(event, verbose):
                 print('B momentum: {:.12f}'.format(kin_p_B))
                 print('B mass: {:.12f}'.format(kin_m_B))
 
-            return ReconstructedEvent(kin_m_B, Momentum.fromlist(kin_p_B * kin_e_B), Momentum.fromlist(kin_p_tauplus * kin_e_tauplus), Momentum.fromlist(kin_p_tauminus * kin_e_tauminus), Momentum.fromlist(kin_p_tauplus * kin_e_tauplus - kin_p_pis_tauplus), Momentum.fromlist(kin_p_tauminus * kin_e_tauminus - kin_p_pis_tauminus))
+            return ReconstructedEvent(kin_m_B, Momentum.fromlist(kin_p_B * kin_e_B), Momentum.fromlist(kin_p_tauplus * kin_e_tauplus), Momentum.fromlist(kin_p_tauminus * kin_e_tauminus), Momentum.fromlist(kin_p_tauplus * kin_e_tauplus - kin_p_pis_tauplus), Momentum.fromlist(kin_p_tauminus * kin_e_tauminus - kin_p_pis_tauminus), kin_p_tauplus_1, kin_p_tauplus_2, kin_p_tauminus_1, kin_p_tauminus_2)
 
         else:
             raise UnreconstructableEventError("Event cannot be reconstructed because of ill-formed tau- vertex")

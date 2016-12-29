@@ -28,7 +28,7 @@ class ReconstructedEvent(object):
         q_square (float): calculates the q^2 of the event
     """
 
-    def __init__(self, m_b = None, p_b = None, p_tauplus = None, p_tauminus = None, p_nu_tauplus = None, p_nu_tauminus = None):
+    def __init__(self, m_b = None, p_b = None, p_tauplus = None, p_tauminus = None, p_nu_tauplus = None, p_nu_tauminus = None, p_tauplus_1 = None, p_tauplus_2 = None, p_tauminus_1 = None, p_tauminus_2 = None):
         """
             Constructor
 
@@ -49,6 +49,10 @@ class ReconstructedEvent(object):
         self.p_nu_tauplus = p_nu_tauplus
         self.p_tauminus = p_tauminus
         self.p_nu_tauminus = p_nu_tauminus
+        self.p_tauplus_1 = p_tauplus_1
+        self.p_tauplus_2 = p_tauplus_2
+        self.p_tauminus_1 = p_tauminus_1
+        self.p_tauminus_2 = p_tauminus_2
 
     def q_square(self):
         """
