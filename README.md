@@ -1,4 +1,7 @@
 # fcc-reconstruction
+
+**DISCONTINUED**, but feel free to fork it.
+
 Reconstruction related scripts for _B<sup>0</sup><sub>d</sub> &rarr; K<sup>*0</sup> &tau;<sup>+</sup> &tau;<sup>-</sup>_ studies.
 ## merger.py
 Script that merges multiple ROOT files containing data suitable for reconstruction algorithm into one file
